@@ -16,6 +16,11 @@ public class RMWStoreOpt extends RMWStore implements RegReaderData {
     }
 
     @Override
+    public boolean isCondExec(){
+        return true;
+    }
+
+    @Override
     public BoolExpr encodeCF(Context ctx) {
         if(loadEvent != null){
             return ctx.mkAnd(

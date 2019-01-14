@@ -10,6 +10,7 @@ import dartagnan.program.event.utils.RegWriter;
 import dartagnan.program.memory.Location;
 import dartagnan.program.memory.Memory;
 import dartagnan.program.utils.EventRepository;
+import dartagnan.wmm.utils.GroupSplitter;
 
 import java.util.*;
 
@@ -21,6 +22,7 @@ public class Program extends Thread {
 	private List<Thread> threads;
 	private final ImmutableSet<Location> locations;
 	private Memory memory;
+	private GroupSplitter splitter;
 
     public Program(Memory memory, ImmutableSet<Location> locations){
         this("", memory, locations);
@@ -63,6 +65,13 @@ public class Program extends Thread {
 
     public ImmutableSet<Location> getLocations(){
         return locations;
+    }
+
+    public GroupSplitter getGroupSplitter(){
+        if(splitter == null){
+            splitter = new GroupSplitter(this);
+        }
+        return splitter;
     }
 
 	@Override

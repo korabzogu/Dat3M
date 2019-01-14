@@ -39,6 +39,10 @@ public abstract class Event extends Thread implements Comparable<Event> {
 		return "E" + eid;
 	}
 
+	public boolean isCondExec(){
+		return false;
+	}
+
 	public BoolExpr executes(Context ctx) {
 		return ctx.mkBoolConst("ex(" + repr() + ")");
 	}
