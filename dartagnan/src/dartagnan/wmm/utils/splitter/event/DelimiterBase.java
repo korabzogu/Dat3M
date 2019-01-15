@@ -1,11 +1,11 @@
-package dartagnan.wmm.utils.splitter;
+package dartagnan.wmm.utils.splitter.event;
 
-class DelimBase implements Comparable<DelimBase> {
+class DelimiterBase implements Comparable<DelimiterBase> {
 
     final String filter;
-    final DelimType type;
+    final DelimiterType type;
 
-    DelimBase(String filter, DelimType type){
+    DelimiterBase(String filter, DelimiterType type){
         this.filter = filter;
         this.type = type;
     }
@@ -16,7 +16,7 @@ class DelimBase implements Comparable<DelimBase> {
     }
 
     @Override
-    public int compareTo(DelimBase o){
+    public int compareTo(DelimiterBase o){
         int diff = filter.compareTo(o.filter);
         if(diff == 0){
             diff = type.toString().compareTo(o.type.toString());
@@ -37,7 +37,7 @@ class DelimBase implements Comparable<DelimBase> {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        DelimBase tO = (DelimBase) o;
+        DelimiterBase tO = (DelimiterBase) o;
         return filter.equals(tO.filter) && type.equals(tO.type);
     }
 }

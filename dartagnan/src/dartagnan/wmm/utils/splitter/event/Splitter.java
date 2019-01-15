@@ -1,4 +1,4 @@
-package dartagnan.wmm.utils.splitter;
+package dartagnan.wmm.utils.splitter.event;
 
 import com.google.common.collect.ImmutableSortedMap;
 import dartagnan.program.Program;
@@ -9,11 +9,11 @@ import dartagnan.program.utils.EventRepository;
 
 import java.util.*;
 
-public class GroupSplitter {
+public class Splitter {
 
     private Map<String, ImmutableSortedMap<Event, Integer>> cache;
 
-    public GroupSplitter(Program program){
+    public Splitter(Program program){
         cache = new HashMap<>();
         cache.put(mkId(EventRepository.ALL, null), buildBaseMap(program));
     }
@@ -22,8 +22,8 @@ public class GroupSplitter {
         return get(mask, null);
     }
 
-    public ImmutableSortedMap<Event, Integer> get(int mask, Delim delim){
-        String requestedId = mkId(mask, delim);
+    public ImmutableSortedMap<Event, Integer> get(int mask, Delimiter delimiter){
+        String requestedId = mkId(mask, delimiter);
 
         if(!cache.containsKey(requestedId)){
             String filteredId = mkId(mask, null);
@@ -32,21 +32,15 @@ public class GroupSplitter {
             }
             ImmutableSortedMap<Event, Integer> map = cache.get(filteredId);
 
-            if(delim != null && !delim.children.isEmpty()){
+            if(delimiter != null && !delimiter.children.isEmpty()){
                 SortedMap<Event, Integer> result = new TreeMap<>(map);
-                for(DelimBase d : delim.children){
+                for(DelimiterBase d : delimiter.children){
                     split(result, d.filter, d.type);
                 }
                 cache.put(requestedId, ImmutableSortedMap.copyOf(result));
             }
         }
         return cache.get(requestedId);
-    }
-
-    public static void print(ImmutableSortedMap<Event, Integer> map){
-        for (Map.Entry<Event, Integer> entry : map.entrySet()) {
-            System.out.println(entry.getKey().getEId() + " -> " + entry.getValue());
-        }
     }
 
     private ImmutableSortedMap<Event, Integer> buildBaseMap(Program program){
@@ -89,59 +83,47 @@ public class GroupSplitter {
 
     private ImmutableSortedMap<Event, Integer> filtered(int mask){
         ImmutableSortedMap.Builder<Event, Integer> builder = ImmutableSortedMap.naturalOrder();
-        int oldId = -1, newId = -1;
+        Map<Integer, Integer> oldToNewMap = new HashMap<>();
         for(Map.Entry<Event, Integer> entry : cache.get(mkId(EventRepository.ALL, null)).entrySet()){
             Event e = entry.getKey();
             if(EventRepository.is(e, mask)){
                 int origMapping = entry.getValue();
-                if(oldId == -1 || oldId != origMapping){
-                    oldId = origMapping;
-                    newId = e.getEId();
-                }
-                builder.put(e, newId);
+                oldToNewMap.putIfAbsent(origMapping, e.getEId());
+                builder.put(e, oldToNewMap.get(origMapping));
             }
         }
         return builder.build();
     }
 
-    private void split(SortedMap<Event, Integer> map, String filter, DelimType type){
-        int oldId = -1, newId = -1;
+    private void split(SortedMap<Event, Integer> map, String filter, DelimiterType type){
+        Map<Integer, Integer> oldToNewMap = new HashMap<>();
         for(Map.Entry<Event, Integer> entry : map.entrySet()){
             Event e = entry.getKey();
             int origMapping = entry.getValue();
             if(e.is(filter)){
                 switch (type){
                     case BEFORE:
-                        if(oldId == -1 || oldId != origMapping){
-                            newId = e.getEId();
-                        }
-                        map.put(e, newId);
-                        oldId = newId = -1;
+                        oldToNewMap.putIfAbsent(origMapping, e.getEId());
+                        map.put(e, oldToNewMap.get(origMapping));
+                        oldToNewMap.remove(origMapping);
                         break;
                     case AFTER:
-                        oldId = origMapping;
-                        newId = e.getEId();
-                        map.put(e, newId);
+                        map.put(e, e.getEId());
+                        oldToNewMap.put(origMapping, e.getEId());
                         break;
                     case SEPARATELY:
                         map.put(e, e.getEId());
-                        oldId = newId = -1;
-                        break;
-                    case EXCLUDE:
-                        oldId = newId = -1;
+                        oldToNewMap.remove(origMapping);
                         break;
                 }
             } else {
-                if(oldId == -1 || oldId != origMapping){
-                    oldId = origMapping;
-                    newId = e.getEId();
-                }
-                map.put(e, newId);
+                oldToNewMap.putIfAbsent(origMapping, e.getEId());
+                map.put(e, oldToNewMap.get(origMapping));
             }
         }
     }
 
-    private String mkId(int mask, Delim delim){
-        return delim != null ? mask + ":" + delim.id : Integer.toString(mask);
+    private String mkId(int mask, Delimiter delimiter){
+        return delimiter != null ? mask + ":" + delimiter.id : Integer.toString(mask);
     }
 }

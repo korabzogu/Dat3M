@@ -1,7 +1,7 @@
-package dartagnan.wmm.utils.splitter;
+package dartagnan.wmm.utils.splitter.event;
 
-public enum DelimType {
-    BEFORE, AFTER, SEPARATELY, EXCLUDE;
+public enum DelimiterType {
+    BEFORE, AFTER, SEPARATELY;
 
     @Override
     public String toString() {
@@ -12,8 +12,6 @@ public enum DelimType {
                 return "after";
             case SEPARATELY:
                 return "separately";
-            case EXCLUDE:
-                return "exclude";
         }
         return super.toString();
     }
