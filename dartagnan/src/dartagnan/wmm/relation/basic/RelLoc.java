@@ -6,6 +6,7 @@ import dartagnan.program.event.MemEvent;
 import dartagnan.program.utils.EventRepository;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+import dartagnan.wmm.utils.splitter.event.Delimiter;
 
 import java.util.Collection;
 
@@ -32,6 +33,11 @@ public class RelLoc extends BasicRelation {
             }
         }
         return maxTupleSet;
+    }
+
+    @Override
+    protected Delimiter getDelimiter(){
+        return Delimiter.Total.getInstance();
     }
 
     @Override

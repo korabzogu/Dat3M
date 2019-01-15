@@ -16,6 +16,7 @@ public class Splitter {
     public Splitter(Program program){
         cache = new HashMap<>();
         cache.put(mkId(EventRepository.ALL, null), buildBaseMap(program));
+        cache.put(mkId(EventRepository.ALL, Delimiter.Total.getInstance()), buildDelimitedMap(program));
     }
 
     public ImmutableSortedMap<Event, Long> get(int mask){
@@ -47,6 +48,14 @@ public class Splitter {
         ImmutableSortedMap.Builder<Event, Long> builder = ImmutableSortedMap.naturalOrder();
         for(Thread t : program.getThreads()) {
             group(builder, t.getEventRepository().getSortedList(EventRepository.ALL));
+        }
+        return builder.build();
+    }
+
+    private ImmutableSortedMap<Event, Long> buildDelimitedMap(Program program){
+        ImmutableSortedMap.Builder<Event, Long> builder = ImmutableSortedMap.naturalOrder();
+        for(Event e : program.getEventRepository().getSortedList(EventRepository.ALL)){
+            builder.put(e, (long)e.getEId());
         }
         return builder.build();
     }

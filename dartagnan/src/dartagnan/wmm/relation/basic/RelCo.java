@@ -9,9 +9,9 @@ import dartagnan.program.memory.Address;
 import dartagnan.program.memory.Location;
 import dartagnan.program.utils.EventRepository;
 import dartagnan.utils.Utils;
-import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+import dartagnan.wmm.utils.splitter.event.Delimiter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.Set;
 import static dartagnan.utils.Utils.edge;
 import static dartagnan.utils.Utils.intVar;
 
-public class RelCo extends Relation {
+public class RelCo extends BasicRelation {
 
     public RelCo(){
         term = "co";
@@ -52,6 +52,11 @@ public class RelCo extends Relation {
             }
         }
         return maxTupleSet;
+    }
+
+    @Override
+    protected Delimiter getDelimiter(){
+        return Delimiter.Total.getInstance();
     }
 
     @Override

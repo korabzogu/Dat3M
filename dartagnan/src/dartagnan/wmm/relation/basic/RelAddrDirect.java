@@ -8,6 +8,7 @@ import dartagnan.program.event.utils.RegWriter;
 import dartagnan.program.utils.EventRepository;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+import dartagnan.wmm.utils.splitter.event.Delimiter;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,5 +41,10 @@ public class RelAddrDirect extends BasicRegRelation {
             }
         }
         return maxTupleSet;
+    }
+
+    @Override
+    protected Delimiter getDelimiter(){
+        return Delimiter.Total.getInstance();
     }
 }

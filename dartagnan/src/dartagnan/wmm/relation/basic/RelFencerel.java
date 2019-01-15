@@ -5,9 +5,10 @@ import dartagnan.program.Thread;
 import dartagnan.program.event.Event;
 import dartagnan.program.event.Fence;
 import dartagnan.program.utils.EventRepository;
-import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+import dartagnan.wmm.utils.splitter.event.Delimiter;
+import dartagnan.wmm.utils.splitter.event.DelimiterType;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,9 +17,10 @@ import java.util.stream.Collectors;
 
 import static dartagnan.utils.Utils.edge;
 
-public class RelFencerel extends Relation {
+public class RelFencerel extends BasicRelation {
 
     private String fenceName;
+    private Delimiter delimiter;
 
     public static String makeTerm(String fenceName){
         return "fencerel(" + fenceName + ")";
@@ -67,8 +69,21 @@ public class RelFencerel extends Relation {
                     }
                 }
             }
+            System.out.println(fenceName);
+            getTupleGroupMap();
+            System.out.println("\n\n");
         }
         return maxTupleSet;
+    }
+
+    @Override
+    protected Delimiter getDelimiter(){
+        if(delimiter == null){
+            Delimiter.Builder builder = new Delimiter.Builder();
+            builder.add(fenceName, DelimiterType.SEPARATELY);
+            delimiter = builder.build();
+        }
+        return delimiter;
     }
 
     @Override

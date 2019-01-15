@@ -1,10 +1,9 @@
 package dartagnan.wmm.relation.basic;
 
 import com.microsoft.z3.BoolExpr;
-import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.TupleSet;
 
-public class RelEmpty extends Relation {
+public class RelEmpty extends BasicRelation {
 
     public RelEmpty(String name) {
         super(name);

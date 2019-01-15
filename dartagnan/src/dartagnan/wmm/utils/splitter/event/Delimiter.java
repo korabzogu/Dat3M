@@ -8,9 +8,30 @@ public class Delimiter {
     final ImmutableSortedSet<DelimiterBase> children;
     final String id;
 
+    private Delimiter(String id){
+        this.children = null;
+        this.id = id;
+    }
+
     private Delimiter(Builder builder){
-        children = builder.builder.build();
-        id = Joiner.on("_").join(children);
+        this.children = builder.builder.build();
+        this.id = Joiner.on("_").join(children);
+    }
+
+    public static class Total extends Delimiter {
+
+        private static Total instance = null;
+
+        private Total(){
+            super("total");
+        }
+
+        public static Total getInstance(){
+            if(instance == null){
+                instance = new Total();
+            }
+            return instance;
+        }
     }
 
     public static class Builder {

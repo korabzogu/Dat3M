@@ -4,19 +4,24 @@ import com.microsoft.z3.BoolExpr;
 import dartagnan.program.event.Event;
 import dartagnan.program.event.MemEvent;
 import dartagnan.program.utils.EventRepository;
-import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+import dartagnan.wmm.utils.splitter.event.Delimiter;
 
 import java.util.*;
 
 import static dartagnan.utils.Utils.edge;
 
-public class RelRf extends Relation {
+public class RelRf extends BasicRelation {
 
     public RelRf(){
         term = "rf";
         forceDoEncode = true;
+    }
+
+    @Override
+    protected Delimiter getDelimiter(){
+        return Delimiter.Total.getInstance();
     }
 
     @Override

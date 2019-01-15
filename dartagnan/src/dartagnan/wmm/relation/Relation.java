@@ -1,5 +1,6 @@
 package dartagnan.wmm.relation;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
@@ -34,6 +35,8 @@ public abstract class Relation {
 
     protected TupleSet maxTupleSet;
     protected TupleSet encodeTupleSet;
+
+    protected ImmutableMap<Tuple, Long> tupleGroupMap;
 
     protected int recursiveGroupId = 0;
     protected boolean forceUpdateRecursiveGroupId = false;
@@ -70,6 +73,10 @@ public abstract class Relation {
     }
 
     public abstract TupleSet getMaxTupleSet();
+
+    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+        throw new RuntimeException("Not Implemented");
+    }
 
     public TupleSet getMaxTupleSetRecursive(){
         return getMaxTupleSet();
