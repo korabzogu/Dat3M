@@ -11,18 +11,18 @@ import java.util.*;
 
 public class Splitter {
 
-    private Map<String, ImmutableSortedMap<Event, Integer>> cache;
+    private Map<String, ImmutableSortedMap<Event, Long>> cache;
 
     public Splitter(Program program){
         cache = new HashMap<>();
         cache.put(mkId(EventRepository.ALL, null), buildBaseMap(program));
     }
 
-    public ImmutableSortedMap<Event, Integer> get(int mask){
+    public ImmutableSortedMap<Event, Long> get(int mask){
         return get(mask, null);
     }
 
-    public ImmutableSortedMap<Event, Integer> get(int mask, Delimiter delimiter){
+    public ImmutableSortedMap<Event, Long> get(int mask, Delimiter delimiter){
         String requestedId = mkId(mask, delimiter);
 
         if(!cache.containsKey(requestedId)){
@@ -30,10 +30,10 @@ public class Splitter {
             if(!cache.containsKey(filteredId)){
                 cache.put(filteredId, filtered(mask));
             }
-            ImmutableSortedMap<Event, Integer> map = cache.get(filteredId);
+            ImmutableSortedMap<Event, Long> map = cache.get(filteredId);
 
             if(delimiter != null && !delimiter.children.isEmpty()){
-                SortedMap<Event, Integer> result = new TreeMap<>(map);
+                SortedMap<Event, Long> result = new TreeMap<>(map);
                 for(DelimiterBase d : delimiter.children){
                     split(result, d.filter, d.type);
                 }
@@ -43,25 +43,25 @@ public class Splitter {
         return cache.get(requestedId);
     }
 
-    private ImmutableSortedMap<Event, Integer> buildBaseMap(Program program){
-        ImmutableSortedMap.Builder<Event, Integer> builder = ImmutableSortedMap.naturalOrder();
+    private ImmutableSortedMap<Event, Long> buildBaseMap(Program program){
+        ImmutableSortedMap.Builder<Event, Long> builder = ImmutableSortedMap.naturalOrder();
         for(Thread t : program.getThreads()) {
             group(builder, t.getEventRepository().getSortedList(EventRepository.ALL));
         }
         return builder.build();
     }
 
-    private void group(ImmutableSortedMap.Builder<Event, Integer> builder, List<Event> events){
+    private void group(ImmutableSortedMap.Builder<Event, Long> builder, List<Event> events){
         if(!events.isEmpty()){
             Event e = events.get(0);
-            int groupFirstEid = e.getEId();
+            long groupFirstEid = e.getEId();
             builder.put(e, groupFirstEid);
 
             for(int i = 1; i < events.size(); i++){
                 e = events.get(i);
 
                 if(e.isCondExec()){
-                    builder.put(e, e.getEId());
+                    builder.put(e, (long)e.getEId());
 
                 } else if(e instanceof If){
                     builder.put(e, groupFirstEid);
@@ -81,43 +81,45 @@ public class Splitter {
         }
     }
 
-    private ImmutableSortedMap<Event, Integer> filtered(int mask){
-        ImmutableSortedMap.Builder<Event, Integer> builder = ImmutableSortedMap.naturalOrder();
-        Map<Integer, Integer> oldToNewMap = new HashMap<>();
-        for(Map.Entry<Event, Integer> entry : cache.get(mkId(EventRepository.ALL, null)).entrySet()){
+    private ImmutableSortedMap<Event, Long> filtered(int mask){
+        ImmutableSortedMap.Builder<Event, Long> builder = ImmutableSortedMap.naturalOrder();
+        Map<Long, Long> oldToNewMap = new HashMap<>();
+        for(Map.Entry<Event, Long> entry : cache.get(mkId(EventRepository.ALL, null)).entrySet()){
             Event e = entry.getKey();
             if(EventRepository.is(e, mask)){
-                int origMapping = entry.getValue();
-                oldToNewMap.putIfAbsent(origMapping, e.getEId());
+                long origMapping = entry.getValue();
+                oldToNewMap.putIfAbsent(origMapping, (long)e.getEId());
                 builder.put(e, oldToNewMap.get(origMapping));
             }
         }
         return builder.build();
     }
 
-    private void split(SortedMap<Event, Integer> map, String filter, DelimiterType type){
-        Map<Integer, Integer> oldToNewMap = new HashMap<>();
-        for(Map.Entry<Event, Integer> entry : map.entrySet()){
+    private void split(SortedMap<Event, Long> map, String filter, DelimiterType type){
+        Map<Long, Long> oldToNewMap = new HashMap<>();
+        for(Map.Entry<Event, Long> entry : map.entrySet()){
             Event e = entry.getKey();
-            int origMapping = entry.getValue();
+            long origMapping = entry.getValue();
+            long id = e.getEId();
+
             if(e.is(filter)){
                 switch (type){
                     case BEFORE:
-                        oldToNewMap.putIfAbsent(origMapping, e.getEId());
+                        oldToNewMap.putIfAbsent(origMapping, id);
                         map.put(e, oldToNewMap.get(origMapping));
                         oldToNewMap.remove(origMapping);
                         break;
                     case AFTER:
-                        map.put(e, e.getEId());
-                        oldToNewMap.put(origMapping, e.getEId());
+                        map.put(e, id);
+                        oldToNewMap.put(origMapping, id);
                         break;
                     case SEPARATELY:
-                        map.put(e, e.getEId());
+                        map.put(e, id);
                         oldToNewMap.remove(origMapping);
                         break;
                 }
             } else {
-                oldToNewMap.putIfAbsent(origMapping, e.getEId());
+                oldToNewMap.putIfAbsent(origMapping, id);
                 map.put(e, oldToNewMap.get(origMapping));
             }
         }
