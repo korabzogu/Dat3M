@@ -68,7 +68,7 @@ public class EventRepository {
         sets.clear();
     }
 
-    private boolean is(Event event, int mask){
+    public static boolean is(Event event, int mask){
         return ((mask & INIT) > 0 && event instanceof Init)
                 || ((mask & LOAD) > 0 && (event instanceof Load || event instanceof Read || event instanceof RMWAbstract || event instanceof Xchg))
                 || ((mask & LOCAL) > 0 && event instanceof Local)

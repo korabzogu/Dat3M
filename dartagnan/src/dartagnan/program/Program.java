@@ -10,7 +10,7 @@ import dartagnan.program.event.utils.RegWriter;
 import dartagnan.program.memory.Location;
 import dartagnan.program.memory.Memory;
 import dartagnan.program.utils.EventRepository;
-import dartagnan.wmm.utils.GroupSplitter;
+import dartagnan.wmm.utils.splitter.GroupSplitter;
 
 import java.util.*;
 
