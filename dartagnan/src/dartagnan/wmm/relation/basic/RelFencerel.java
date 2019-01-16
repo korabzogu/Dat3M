@@ -69,9 +69,6 @@ public class RelFencerel extends BasicRelation {
                     }
                 }
             }
-            System.out.println(fenceName);
-            getTupleGroupMap();
-            System.out.println("\n\n");
         }
         return maxTupleSet;
     }
