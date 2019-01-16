@@ -1,5 +1,6 @@
 package dartagnan.wmm.relation.binary;
 
+import com.google.common.collect.*;
 import com.microsoft.z3.BoolExpr;
 import dartagnan.program.event.Event;
 import dartagnan.utils.Utils;
@@ -60,6 +61,42 @@ public class RelComposition extends BinaryRelation {
             return maxTupleSet;
         }
         return getMaxTupleSet();
+    }
+
+    @Override
+    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+        if(tupleGroupMap == null){
+            SetMultimap<Set<Long>, Tuple> aggregated = HashMultimap.create();
+            ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMap();
+            ImmutableMap<Tuple, Long> g2 = r2.getTupleGroupMap();
+            long defVal = 0;
+
+            for(Tuple tuple : getMaxTupleSet()){
+                Set<Long> pathIds = new HashSet<>();
+                Set<Tuple> s1 = r1.getMaxTupleSet().getByFirst(tuple.getFirst());
+                Set<Tuple> s2 = r2.getMaxTupleSet().getBySecond(tuple.getSecond());
+                for(Tuple t1 : s1){
+                    for(Tuple t2 : s2){
+                        if(t1.getSecond().equals(t2.getFirst())){
+                            long tripleId = (g1.getOrDefault(t1, defVal) << 32) + g2.getOrDefault(t2, defVal);
+                            pathIds.add(tripleId);
+                        }
+                    }
+                }
+                aggregated.put(pathIds, tuple);
+            }
+
+            ImmutableMap.Builder<Tuple, Long> builder = new ImmutableMap.Builder<>();
+            long i = 1;
+            for(Set<Long> key : aggregated.keySet()){
+                for(Tuple tuple : aggregated.get(key)){
+                    builder.put(tuple, i);
+                }
+                i++;
+            }
+            tupleGroupMap = builder.build();
+        }
+        return tupleGroupMap;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package dartagnan.wmm.relation.unary;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
@@ -59,6 +60,19 @@ public class RelTrans extends UnaryRelation {
             }
         }
         return maxTupleSet;
+    }
+
+    @Override
+    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+        if(tupleGroupMap == null){
+            long i = 1;
+            ImmutableMap.Builder<Tuple, Long> builder = new ImmutableMap.Builder<>();
+            for(Tuple tuple : getMaxTupleSet()){
+                builder.put(tuple, i++);
+            }
+            tupleGroupMap = builder.build();
+        }
+        return tupleGroupMap;
     }
 
     @Override

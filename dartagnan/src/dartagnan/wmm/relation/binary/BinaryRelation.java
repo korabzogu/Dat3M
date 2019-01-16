@@ -1,10 +1,15 @@
 package dartagnan.wmm.relation.binary;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.SortedSetMultimap;
+import com.google.common.collect.TreeMultimap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
 import dartagnan.wmm.relation.Relation;
+import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+import dartagnan.wmm.utils.splitter.TupleGroupBuilder;
 
 /**
  *
@@ -26,6 +31,22 @@ public abstract class BinaryRelation extends Relation {
         super(name);
         this.r1 = r1;
         this.r2 = r2;
+    }
+
+    @Override
+    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+        if(tupleGroupMap == null){
+            SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();
+            ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMap();
+            ImmutableMap<Tuple, Long> g2 = r2.getTupleGroupMap();
+            long defVal = 0;
+
+            for(Tuple tuple : getMaxTupleSet()){
+                tupleMap.put((g1.getOrDefault(tuple, defVal) << 32) + g2.getOrDefault(tuple, defVal), tuple);
+            }
+            tupleGroupMap = TupleGroupBuilder.invertAndReduce(tupleMap);
+        }
+        return tupleGroupMap;
     }
 
     @Override
