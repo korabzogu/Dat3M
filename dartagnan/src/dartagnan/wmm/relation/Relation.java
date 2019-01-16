@@ -74,16 +74,18 @@ public abstract class Relation {
 
     public abstract TupleSet getMaxTupleSet();
 
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
-        throw new RuntimeException("Not Implemented");
-    }
-
     public TupleSet getMaxTupleSetRecursive(){
         return getMaxTupleSet();
     }
 
     public TupleSet getEncodeTupleSet(){
         return encodeTupleSet;
+    }
+
+    public abstract ImmutableMap<Tuple, Long> getTupleGroupMap();
+
+    public ImmutableMap<Tuple, Long> getTupleGroupMapRecursive(){
+        return getTupleGroupMap();
     }
 
     public void addEncodeTupleSet(TupleSet tuples){

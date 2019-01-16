@@ -67,6 +67,15 @@ public class RecursiveGroup {
         encodeIterations = iterationCounter + 2;
     }
 
+    public void intTupleGroupMaps(){
+        for(RecursiveRelation relation : relations){
+            relation.setDoRecurse();
+        }
+        for(RecursiveRelation relation : relations){
+            relation.getTupleGroupMapRecursive();
+        }
+    }
+
     public void updateEncodeTupleSets(){
         Map<Relation, Integer> encodeSetSizes = new HashMap<>();
         for(Relation relation : relations){

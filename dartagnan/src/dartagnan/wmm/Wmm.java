@@ -12,6 +12,7 @@ import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Arch;
 import dartagnan.wmm.utils.RecursiveGroup;
 import dartagnan.wmm.utils.RelationRepository;
+import dartagnan.wmm.utils.splitter.DebugHelper;
 
 import java.util.*;
 
@@ -108,6 +109,10 @@ public class Wmm {
 
         for(String relName : baseRelations){
             relationRepository.getRelation(relName).getMaxTupleSet();
+        }
+
+        for(RecursiveGroup recursiveGroup : recursiveGroups){
+            recursiveGroup.intTupleGroupMaps();
         }
 
         if(drawExecutionGraph){
