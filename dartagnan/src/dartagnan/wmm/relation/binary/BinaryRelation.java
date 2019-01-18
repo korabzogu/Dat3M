@@ -9,7 +9,7 @@ import dartagnan.program.Program;
 import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
-import dartagnan.wmm.utils.splitter.TupleGroupBuilder;
+import dartagnan.wmm.utils.splitter.GroupHelper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +47,7 @@ public abstract class BinaryRelation extends Relation {
             for(Tuple tuple : getMaxTupleSet()){
                 tupleMap.put((g1.getOrDefault(tuple, defVal) << 32) + g2.getOrDefault(tuple, defVal), tuple);
             }
-            tupleGroupMap = TupleGroupBuilder.invertAndReduce(tupleMap);
+            tupleGroupMap = GroupHelper.invertAndReduce(tupleMap);
         }
         return tupleGroupMap;
     }
@@ -69,7 +69,7 @@ public abstract class BinaryRelation extends Relation {
             tupleMap.put((g1.getOrDefault(tuple, defVal) << 32) + g2.getOrDefault(tuple, defVal), tuple);
         }
 
-        tupleGroupMap = TupleGroupBuilder.invertAndReduce(tupleMap);
+        tupleGroupMap = GroupHelper.invertAndReduce(tupleMap);
         return tupleGroupMap;
     }
 

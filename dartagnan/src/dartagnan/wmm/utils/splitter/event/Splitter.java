@@ -15,23 +15,15 @@ public class Splitter {
 
     public Splitter(Program program){
         cache = new HashMap<>();
-        cache.put(mkId(EventRepository.ALL, null), buildBaseMap(program));
-        cache.put(mkId(EventRepository.ALL, Delimiter.Total.getInstance()), buildDelimitedMap(program));
+        cache.put(null, buildBaseMap(program));
+        cache.put(Delimiter.Total.getInstance().id, buildDelimitedMap(program));
     }
 
-    public ImmutableSortedMap<Event, Long> get(int mask){
-        return get(mask, null);
-    }
-
-    public ImmutableSortedMap<Event, Long> get(int mask, Delimiter delimiter){
-        String requestedId = mkId(mask, delimiter);
+    public ImmutableSortedMap<Event, Long> get(Delimiter delimiter){
+        String requestedId = delimiter != null ? delimiter.id : null;
 
         if(!cache.containsKey(requestedId)){
-            String filteredId = mkId(mask, null);
-            if(!cache.containsKey(filteredId)){
-                cache.put(filteredId, filtered(mask));
-            }
-            ImmutableSortedMap<Event, Long> map = cache.get(filteredId);
+            ImmutableSortedMap<Event, Long> map = cache.get(null);
 
             if(delimiter != null && !delimiter.children.isEmpty()){
                 SortedMap<Event, Long> result = new TreeMap<>(map);
@@ -90,20 +82,6 @@ public class Splitter {
         }
     }
 
-    private ImmutableSortedMap<Event, Long> filtered(int mask){
-        ImmutableSortedMap.Builder<Event, Long> builder = ImmutableSortedMap.naturalOrder();
-        Map<Long, Long> oldToNewMap = new HashMap<>();
-        for(Map.Entry<Event, Long> entry : cache.get(mkId(EventRepository.ALL, null)).entrySet()){
-            Event e = entry.getKey();
-            if(EventRepository.is(e, mask)){
-                long origMapping = entry.getValue();
-                oldToNewMap.putIfAbsent(origMapping, (long)e.getEId());
-                builder.put(e, oldToNewMap.get(origMapping));
-            }
-        }
-        return builder.build();
-    }
-
     private void split(SortedMap<Event, Long> map, String filter, DelimiterType type){
         Map<Long, Long> oldToNewMap = new HashMap<>();
         for(Map.Entry<Event, Long> entry : map.entrySet()){
@@ -132,9 +110,5 @@ public class Splitter {
                 map.put(e, oldToNewMap.get(origMapping));
             }
         }
-    }
-
-    private String mkId(int mask, Delimiter delimiter){
-        return delimiter != null ? mask + ":" + delimiter.id : Integer.toString(mask);
     }
 }
