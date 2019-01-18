@@ -136,7 +136,7 @@ public abstract class BinaryRelation extends Relation {
         return encodeApprox();
     }
 
-    private BoolExpr encodeBase(boolean isIdl) {
+    protected BoolExpr encodeBase(boolean isIdl) {
         boolean recurseInR1 = isIdl && ((r1.getRecursiveGroupId() & recursiveGroupId) > 0);
         boolean recurseInR2 = isIdl && ((r2.getRecursiveGroupId() & recursiveGroupId) > 0);
 

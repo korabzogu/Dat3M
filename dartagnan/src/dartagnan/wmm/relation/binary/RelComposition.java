@@ -2,6 +2,7 @@ package dartagnan.wmm.relation.binary;
 
 import com.google.common.collect.*;
 import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.IntExpr;
 import dartagnan.program.event.Event;
 import dartagnan.utils.Utils;
 import dartagnan.wmm.relation.Relation;
@@ -195,77 +196,10 @@ public class RelComposition extends BinaryRelation {
         }
     }
 
-    private BoolExpr encodeTuple(Tuple tuple){
-        BoolExpr orClause = ctx.mkFalse();
-        Event e1 = tuple.getFirst();
-        Event e2 = tuple.getSecond();
-
-        for(Event e : groupedIntermediateEvents.get(tuple)){
-            orClause = ctx.mkOr(orClause, ctx.mkAnd(
-                    Utils.edge(r1.getName(), e1, e, ctx),
-                    Utils.edge(r2.getName(), e, e2, ctx)
-            ));
-        }
-        return ctx.mkEq(Utils.edge(getName(), e1, e2, ctx), orClause);
-    }
-
-    private BoolExpr encodeTupleIDL(Tuple tuple){
-        BoolExpr orClause = ctx.mkFalse();
-        BoolExpr idlClause = ctx.mkFalse();
-
-        Event e1 = tuple.getFirst();
-        Event e2 = tuple.getSecond();
-
-        BoolExpr edge = Utils.edge(getName(), e1, e2, ctx);
-
-        for(Event e : groupedIntermediateEvents.get(tuple)){
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e, e2, ctx);
-            orClause = ctx.mkOr(orClause, ctx.mkAnd(opt1, opt2));
-
-            if((r1.getRecursiveGroupId() & recursiveGroupId) > 0){
-                opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e, ctx)));
-            }
-            if((r2.getRecursiveGroupId() & recursiveGroupId) > 0){
-                opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r2.getName(), e, e2, ctx)));
-            }
-            idlClause = ctx.mkOr(idlClause, ctx.mkAnd(opt1, opt2));
-        }
-
-        return ctx.mkAnd(ctx.mkEq(edge, orClause), ctx.mkEq(edge, idlClause));
-    }
-
     @Override
-    protected BoolExpr encodeApprox() {
-        SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
-        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
-            if(encodeTupleSet.contains(entry.getKey())){
-                map.put(entry.getValue(), entry.getKey());
-            }
-        }
-
-        BoolExpr enc = ctx.mkTrue();
-        for(long group : map.keySet()){
-            SortedSet<Tuple> tuples = map.get(group);
-            Iterator<Tuple> it = tuples.iterator();
-            Tuple reprTuple = it.next();
-            BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
-            enc = ctx.mkAnd(enc, encodeTuple(reprTuple));
-
-            while(it.hasNext()){
-                Tuple tuple = it.next();
-                enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
-            }
-        }
-
-        return enc;
-    }
-
-    @Override
-    protected BoolExpr encodeIDL() {
-        if(recursiveGroupId == 0){
-            return encodeApprox();
-        }
+    protected BoolExpr encodeBase(boolean isIdl){
+        boolean recurseInR1 = isIdl && ((r1.getRecursiveGroupId() & recursiveGroupId) > 0);
+        boolean recurseInR2 = isIdl && ((r2.getRecursiveGroupId() & recursiveGroupId) > 0);
 
         SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
         for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
@@ -275,16 +209,44 @@ public class RelComposition extends BinaryRelation {
         }
 
         BoolExpr enc = ctx.mkTrue();
+
         for(long group : map.keySet()){
             SortedSet<Tuple> tuples = map.get(group);
             Iterator<Tuple> it = tuples.iterator();
-            Tuple reprTuple = it.next();
-            BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
-            enc = ctx.mkAnd(enc, encodeTupleIDL(reprTuple));
+            Tuple tuple = it.next();
+
+            BoolExpr edge = Utils.edge(getName(), tuple, ctx);
+            BoolExpr orClause = ctx.mkFalse();
+            BoolExpr idlClause = ctx.mkFalse();
+
+            Event e1 = tuple.getFirst();
+            Event e2 = tuple.getSecond();
+
+            for(Event e : groupedIntermediateEvents.get(tuple)){
+                BoolExpr opt1 = Utils.edge(r1.getName(), e1, e, ctx);
+                BoolExpr opt2 = Utils.edge(r2.getName(), e, e2, ctx);
+                orClause = ctx.mkOr(orClause, ctx.mkAnd(opt1, opt2));
+
+                if(recurseInR1 || recurseInR2){
+                    IntExpr intCount = Utils.intCount(this.getName(), tuple, ctx);
+                    if(recurseInR1){
+                        opt1 = ctx.mkAnd(opt1, ctx.mkGt(intCount, Utils.intCount(r1.getName(), e1, e, ctx)));
+                    }
+                    if(recurseInR2){
+                        opt2 = ctx.mkAnd(opt2, ctx.mkGt(intCount, Utils.intCount(r2.getName(), e, e2, ctx)));
+                    }
+                    idlClause = ctx.mkOr(idlClause, ctx.mkAnd(opt1, opt2));
+                }
+            }
+
+            enc = ctx.mkAnd(enc, ctx.mkEq(edge, orClause));
+
+            if(recurseInR1 || recurseInR2){
+                enc = ctx.mkAnd(enc, ctx.mkEq(edge, idlClause));
+            }
 
             while(it.hasNext()){
-                Tuple tuple = it.next();
-                enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
+                enc = ctx.mkAnd(enc, ctx.mkEq(edge, Utils.edge(getName(), it.next(), ctx)));
             }
         }
 
@@ -301,7 +263,7 @@ public class RelComposition extends BinaryRelation {
 
             if(iteration == 0 && isRecursive){
                 for(Tuple tuple : encodeTupleSet){
-                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx)));
+                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple, ctx)));
                 }
 
             } else {
@@ -341,7 +303,7 @@ public class RelComposition extends BinaryRelation {
                 }
 
                 for(Tuple tuple : encodeTupleSet){
-                    enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx), exprMap.get(tuple.hashCode())));
+                    enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(name, tuple, ctx), exprMap.get(tuple.hashCode())));
                 }
 
                 if(recurseInR1){
