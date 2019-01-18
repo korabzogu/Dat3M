@@ -1,5 +1,6 @@
 package dartagnan.wmm.utils;
 
+import com.google.common.collect.ImmutableSortedMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.wmm.relation.RecursiveRelation;
@@ -68,11 +69,35 @@ public class RecursiveGroup {
     }
 
     public void intTupleGroupMaps(){
+        Map<RecursiveRelation, Integer> fromMap = new HashMap<>();
+        Map<RecursiveRelation, Integer> toMap = new HashMap<>();
         for(RecursiveRelation relation : relations){
-            relation.setDoRecurse();
+            fromMap.put(relation, 0);
+            toMap.put(relation, 0);
         }
-        for(RecursiveRelation relation : relations){
-            relation.getTupleGroupMapRecursive();
+
+        boolean changed = true;
+        while(changed){
+            changed = false;
+            for(RecursiveRelation relation : relations){
+                relation.setDoRecurse();
+            }
+            for(RecursiveRelation relation : relations){
+                ImmutableSortedMap<Tuple, Long> map = relation.getTupleGroupMapRecursive();
+                int from = map.size();
+                Set<Long> temp = new HashSet<>(map.values());
+                int to = temp.size();
+
+                if(fromMap.get(relation) != from){
+                    fromMap.put(relation, from);
+                    changed = true;
+                }
+
+                if(toMap.get(relation) != to){
+                    toMap.put(relation, to);
+                    changed = true;
+                }
+            }
         }
     }
 

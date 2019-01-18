@@ -1,6 +1,6 @@
 package dartagnan.wmm.relation.unary;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.*;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
@@ -10,10 +10,7 @@ import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static dartagnan.utils.Utils.edge;
 import static dartagnan.utils.Utils.intCount;
@@ -62,11 +59,12 @@ public class RelTrans extends UnaryRelation {
         return maxTupleSet;
     }
 
+
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
             long i = 1;
-            ImmutableMap.Builder<Tuple, Long> builder = new ImmutableMap.Builder<>();
+            ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
             for(Tuple tuple : getMaxTupleSet()){
                 builder.put(tuple, i++);
             }

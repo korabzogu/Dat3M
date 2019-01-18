@@ -29,7 +29,7 @@ public abstract class BasicRelation extends Relation {
     }
 
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
             if(!getMaxTupleSet().isEmpty()){
                 SortedMap<Event, Long> eventMap = program.getGroupSplitter().get(EventRepository.ALL, getDelimiter());

@@ -1,6 +1,6 @@
 package dartagnan.wmm.relation.binary;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import com.microsoft.z3.BoolExpr;
@@ -10,6 +10,9 @@ import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
 import dartagnan.wmm.utils.splitter.TupleGroupBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -34,11 +37,11 @@ public abstract class BinaryRelation extends Relation {
     }
 
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
             SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();
-            ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMap();
-            ImmutableMap<Tuple, Long> g2 = r2.getTupleGroupMap();
+            ImmutableSortedMap<Tuple, Long> g1 = r1.getTupleGroupMap();
+            ImmutableSortedMap<Tuple, Long> g2 = r2.getTupleGroupMap();
             long defVal = 0;
 
             for(Tuple tuple : getMaxTupleSet()){
@@ -46,6 +49,27 @@ public abstract class BinaryRelation extends Relation {
             }
             tupleGroupMap = TupleGroupBuilder.invertAndReduce(tupleMap);
         }
+        return tupleGroupMap;
+    }
+
+    @Override
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMapRecursive(){
+        if(recursiveGroupId == 0){
+            return getTupleGroupMap();
+        }
+
+        SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();
+        ImmutableSortedMap<Tuple, Long> g1 = r1.getTupleGroupMapRecursive();
+        ImmutableSortedMap<Tuple, Long> g2 = r2.getTupleGroupMapRecursive();
+
+        Set<Tuple> tupleIterationSet = new HashSet<>(g1.keySet());
+        tupleIterationSet.addAll(g2.keySet());
+        long defVal = 0;
+        for(Tuple tuple : tupleIterationSet){
+            tupleMap.put((g1.getOrDefault(tuple, defVal) << 32) + g2.getOrDefault(tuple, defVal), tuple);
+        }
+
+        tupleGroupMap = TupleGroupBuilder.invertAndReduce(tupleMap);
         return tupleGroupMap;
     }
 

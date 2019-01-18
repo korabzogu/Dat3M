@@ -1,6 +1,7 @@
 package dartagnan.wmm.relation.unary;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import com.microsoft.z3.BoolExpr;
 import dartagnan.program.event.Event;
 import dartagnan.utils.Utils;
@@ -43,9 +44,9 @@ public class RelInverse extends UnaryRelation {
     }
 
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
-            ImmutableMap.Builder<Tuple, Long> builder = new ImmutableMap.Builder<>();
+            ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
             ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMap();
             for(Tuple tuple : getMaxTupleSet()){
                 builder.put(tuple, g1.get(new Tuple(tuple.getSecond(), tuple.getFirst())));

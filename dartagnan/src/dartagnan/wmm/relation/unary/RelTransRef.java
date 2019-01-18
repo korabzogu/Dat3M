@@ -1,5 +1,6 @@
 package dartagnan.wmm.relation.unary;
 
+import com.google.common.collect.ImmutableSortedMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
@@ -58,6 +59,23 @@ public class RelTransRef extends RelTrans {
             }
         }
         return maxTupleSet;
+    }
+
+    @Override
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
+        if(tupleGroupMap == null){
+            long i = 1;
+            ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
+            for(Tuple tuple : getMaxTupleSet()){
+                if(tuple.getFirst().getEId() != tuple.getSecond().getEId()){
+                    builder.put(tuple, i++);
+                } else {
+                    builder.put(tuple, (long)(tuple.getFirst().getTId() << 16));
+                }
+            }
+            tupleGroupMap = builder.build();
+        }
+        return tupleGroupMap;
     }
 
     @Override

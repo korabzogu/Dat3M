@@ -1,6 +1,6 @@
 package dartagnan.wmm.relation;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
@@ -65,18 +65,18 @@ public class RecursiveRelation extends Relation {
     }
 
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
-            tupleGroupMap = ImmutableMap.of();
+            tupleGroupMap = ImmutableSortedMap.of();
         }
         return tupleGroupMap;
     }
 
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMapRecursive(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMapRecursive(){
         if(doRecurse){
             doRecurse = false;
-            tupleGroupMap = r1.getTupleGroupMap();
+            tupleGroupMap = r1.getTupleGroupMapRecursive();
             return tupleGroupMap;
         }
         return getTupleGroupMap();

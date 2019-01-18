@@ -64,7 +64,7 @@ public class RelComposition extends BinaryRelation {
     }
 
     @Override
-    public ImmutableMap<Tuple, Long> getTupleGroupMap(){
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
             SetMultimap<Set<Long>, Tuple> aggregated = HashMultimap.create();
             ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMap();
@@ -86,7 +86,7 @@ public class RelComposition extends BinaryRelation {
                 aggregated.put(pathIds, tuple);
             }
 
-            ImmutableMap.Builder<Tuple, Long> builder = new ImmutableMap.Builder<>();
+            ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
             long i = 1;
             for(Set<Long> key : aggregated.keySet()){
                 for(Tuple tuple : aggregated.get(key)){
@@ -96,6 +96,58 @@ public class RelComposition extends BinaryRelation {
             }
             tupleGroupMap = builder.build();
         }
+        return tupleGroupMap;
+    }
+
+    @Override
+    public ImmutableSortedMap<Tuple, Long> getTupleGroupMapRecursive(){
+        if(recursiveGroupId == 0){
+            return getTupleGroupMap();
+        }
+
+        SetMultimap<Set<Long>, Tuple> aggregated = HashMultimap.create();
+        ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMapRecursive();
+        ImmutableMap<Tuple, Long> g2 = r2.getTupleGroupMapRecursive();
+        long defVal = 0;
+
+        TupleSet r1Set = new TupleSet();
+        r1Set.addAll(g1.keySet());
+
+        TupleSet r2Set = new TupleSet();
+        r2Set.addAll(g2.keySet());
+
+        TupleSet tupleIterationSet = new TupleSet();
+        for(Tuple rel1 : r1Set){
+            for(Tuple rel2 : r2Set.getByFirst(rel1.getSecond())){
+                tupleIterationSet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
+            }
+        }
+
+        for(Tuple tuple : tupleIterationSet){
+            Set<Long> pathIds = new HashSet<>();
+            Set<Tuple> s1 = r1Set.getByFirst(tuple.getFirst());
+            Set<Tuple> s2 = r2Set.getBySecond(tuple.getSecond());
+            for(Tuple t1 : s1){
+                for(Tuple t2 : s2){
+                    if(t1.getSecond().equals(t2.getFirst())){
+                        long tripleId = (g1.getOrDefault(t1, defVal) << 32) + g2.getOrDefault(t2, defVal);
+                        pathIds.add(tripleId);
+                    }
+                }
+            }
+            aggregated.put(pathIds, tuple);
+        }
+
+        ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
+        long i = 1;
+        for(Set<Long> key : aggregated.keySet()){
+            for(Tuple tuple : aggregated.get(key)){
+                builder.put(tuple, i);
+            }
+            i++;
+        }
+
+        tupleGroupMap = builder.build();
         return tupleGroupMap;
     }
 
@@ -138,6 +190,13 @@ public class RelComposition extends BinaryRelation {
 
     @Override
     protected BoolExpr encodeApprox() {
+        Map<Long, Tuple> invMap = new HashMap<>();
+        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
+            if(encodeTupleSet.contains(entry.getKey())){
+                invMap.putIfAbsent(entry.getValue(), entry.getKey());
+            }
+        }
+
         BoolExpr enc = ctx.mkTrue();
 
         TupleSet r1Set = new TupleSet();
@@ -167,8 +226,21 @@ public class RelComposition extends BinaryRelation {
             }
         }
 
+        for(Tuple tuple : invMap.values()){
+            enc = ctx.mkAnd(enc, ctx.mkEq(
+                    Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx),
+                    exprMap.get(tuple.hashCode())
+            ));
+        }
+
         for(Tuple tuple : encodeTupleSet){
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), exprMap.get(tuple.hashCode())));
+            if(!invMap.values().contains(tuple)){
+                Tuple encTuple = invMap.get(tupleGroupMap.get(tuple));
+                enc = ctx.mkAnd(enc, ctx.mkEq(
+                        Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx),
+                        Utils.edge(this.getName(), encTuple.getFirst(), encTuple.getSecond(), ctx)
+                ));
+            }
         }
 
         return enc;
