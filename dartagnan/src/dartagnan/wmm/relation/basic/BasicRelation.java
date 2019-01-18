@@ -1,6 +1,8 @@
 package dartagnan.wmm.relation.basic;
 
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.SortedSetMultimap;
+import com.google.common.collect.TreeMultimap;
 import com.microsoft.z3.BoolExpr;
 import dartagnan.program.event.Event;
 import dartagnan.wmm.relation.Relation;
@@ -30,8 +32,12 @@ public abstract class BasicRelation extends Relation {
     public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
             if(!getMaxTupleSet().isEmpty()){
+                SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
                 SortedMap<Event, Long> eventMap = program.getGroupSplitter().get(getDelimiter());
-                tupleGroupMap = GroupHelper.build(getMaxTupleSet(), eventMap, eventMap);
+                for(Tuple tuple : getMaxTupleSet()){
+                    map.put(((eventMap.get(tuple.getFirst()) + 1) << 32) + eventMap.get(tuple.getSecond()) + 1, tuple);
+                }
+                tupleGroupMap = GroupHelper.invertAndReduce(map);
             } else {
                 tupleGroupMap = ImmutableSortedMap.of();
             }

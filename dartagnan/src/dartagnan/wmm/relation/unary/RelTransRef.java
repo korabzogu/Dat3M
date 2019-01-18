@@ -61,6 +61,8 @@ public class RelTransRef extends RelTrans {
         return maxTupleSet;
     }
 
+    // For now, no optimisation for transitive relation.
+    // Assuming each tuple belongs to its own group of size one
     @Override
     public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
@@ -125,7 +127,8 @@ public class RelTransRef extends RelTrans {
             encodeTupleSet = temp;
 
             for(Tuple tuple : identityEncodeTupleSet){
-                enc = ctx.mkAnd(enc, Utils.edge(this.getName(), tuple.getFirst(), tuple.getFirst(), ctx));
+                Event e = tuple.getFirst();
+                enc = ctx.mkAnd(enc, ctx.mkEq(e.executes(ctx), Utils.edge(this.getName(), e, e, ctx)));
             }
             return enc;
 

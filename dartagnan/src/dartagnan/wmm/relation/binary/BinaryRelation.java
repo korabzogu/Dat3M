@@ -42,6 +42,7 @@ public abstract class BinaryRelation extends Relation {
             SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();
             ImmutableSortedMap<Tuple, Long> g1 = r1.getTupleGroupMap();
             ImmutableSortedMap<Tuple, Long> g2 = r2.getTupleGroupMap();
+
             long defVal = 0;
 
             for(Tuple tuple : getMaxTupleSet()){
@@ -54,23 +55,23 @@ public abstract class BinaryRelation extends Relation {
 
     @Override
     public ImmutableSortedMap<Tuple, Long> getTupleGroupMapRecursive(){
-        if(recursiveGroupId == 0){
-            return getTupleGroupMap();
+        if(recursiveGroupId > 0){
+            SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();
+            ImmutableSortedMap<Tuple, Long> g1 = r1.getTupleGroupMapRecursive();
+            ImmutableSortedMap<Tuple, Long> g2 = r2.getTupleGroupMapRecursive();
+
+            TupleSet tupleIterationSet = new TupleSet();
+            tupleIterationSet.addAll(g1.keySet());
+            tupleIterationSet.addAll(g2.keySet());
+
+            long defVal = 0;
+
+            for(Tuple tuple : tupleIterationSet){
+                tupleMap.put((g1.getOrDefault(tuple, defVal) << 32) + g2.getOrDefault(tuple, defVal), tuple);
+            }
+            tupleGroupMap = GroupHelper.invertAndReduce(tupleMap);
         }
-
-        SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();
-        ImmutableSortedMap<Tuple, Long> g1 = r1.getTupleGroupMapRecursive();
-        ImmutableSortedMap<Tuple, Long> g2 = r2.getTupleGroupMapRecursive();
-
-        Set<Tuple> tupleIterationSet = new HashSet<>(g1.keySet());
-        tupleIterationSet.addAll(g2.keySet());
-        long defVal = 0;
-        for(Tuple tuple : tupleIterationSet){
-            tupleMap.put((g1.getOrDefault(tuple, defVal) << 32) + g2.getOrDefault(tuple, defVal), tuple);
-        }
-
-        tupleGroupMap = GroupHelper.invertAndReduce(tupleMap);
-        return tupleGroupMap;
+        return getTupleGroupMap();
     }
 
     @Override

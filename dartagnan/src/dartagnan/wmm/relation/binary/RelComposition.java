@@ -8,10 +8,7 @@ import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -22,6 +19,8 @@ public class RelComposition extends BinaryRelation {
     public static String makeTerm(Relation r1, Relation r2){
         return "(" + r1.getName() + ";" + r2.getName() + ")";
     }
+
+    private Map<Tuple, Set<Event>> groupedIntermediateEvents = new HashMap<>();
 
     public RelComposition(Relation r1, Relation r2) {
         super(r1, r2);
@@ -72,6 +71,7 @@ public class RelComposition extends BinaryRelation {
             long defVal = 0;
 
             for(Tuple tuple : getMaxTupleSet()){
+                Set<Event> intermediateSet = new HashSet<>();
                 Set<Long> pathIds = new HashSet<>();
                 Set<Tuple> s1 = r1.getMaxTupleSet().getByFirst(tuple.getFirst());
                 Set<Tuple> s2 = r2.getMaxTupleSet().getBySecond(tuple.getSecond());
@@ -79,11 +79,15 @@ public class RelComposition extends BinaryRelation {
                     for(Tuple t2 : s2){
                         if(t1.getSecond().equals(t2.getFirst())){
                             long tripleId = (g1.getOrDefault(t1, defVal) << 32) + g2.getOrDefault(t2, defVal);
-                            pathIds.add(tripleId);
+                            if(!pathIds.contains(tripleId)){
+                                pathIds.add(tripleId);
+                                intermediateSet.add(t1.getSecond());
+                            }
                         }
                     }
                 }
                 aggregated.put(pathIds, tuple);
+                groupedIntermediateEvents.put(tuple, intermediateSet);
             }
 
             ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
@@ -101,54 +105,57 @@ public class RelComposition extends BinaryRelation {
 
     @Override
     public ImmutableSortedMap<Tuple, Long> getTupleGroupMapRecursive(){
-        if(recursiveGroupId == 0){
-            return getTupleGroupMap();
-        }
+        if(recursiveGroupId > 0){
+            SetMultimap<Set<Long>, Tuple> aggregated = HashMultimap.create();
+            ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMapRecursive();
+            ImmutableMap<Tuple, Long> g2 = r2.getTupleGroupMapRecursive();
+            long defVal = 0;
 
-        SetMultimap<Set<Long>, Tuple> aggregated = HashMultimap.create();
-        ImmutableMap<Tuple, Long> g1 = r1.getTupleGroupMapRecursive();
-        ImmutableMap<Tuple, Long> g2 = r2.getTupleGroupMapRecursive();
-        long defVal = 0;
+            TupleSet r1Set = new TupleSet();
+            r1Set.addAll(g1.keySet());
 
-        TupleSet r1Set = new TupleSet();
-        r1Set.addAll(g1.keySet());
+            TupleSet r2Set = new TupleSet();
+            r2Set.addAll(g2.keySet());
 
-        TupleSet r2Set = new TupleSet();
-        r2Set.addAll(g2.keySet());
-
-        TupleSet tupleIterationSet = new TupleSet();
-        for(Tuple rel1 : r1Set){
-            for(Tuple rel2 : r2Set.getByFirst(rel1.getSecond())){
-                tupleIterationSet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
-            }
-        }
-
-        for(Tuple tuple : tupleIterationSet){
-            Set<Long> pathIds = new HashSet<>();
-            Set<Tuple> s1 = r1Set.getByFirst(tuple.getFirst());
-            Set<Tuple> s2 = r2Set.getBySecond(tuple.getSecond());
-            for(Tuple t1 : s1){
-                for(Tuple t2 : s2){
-                    if(t1.getSecond().equals(t2.getFirst())){
-                        long tripleId = (g1.getOrDefault(t1, defVal) << 32) + g2.getOrDefault(t2, defVal);
-                        pathIds.add(tripleId);
-                    }
+            TupleSet tupleIterationSet = new TupleSet();
+            for(Tuple rel1 : r1Set){
+                for(Tuple rel2 : r2Set.getByFirst(rel1.getSecond())){
+                    tupleIterationSet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
                 }
             }
-            aggregated.put(pathIds, tuple);
-        }
 
-        ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
-        long i = 1;
-        for(Set<Long> key : aggregated.keySet()){
-            for(Tuple tuple : aggregated.get(key)){
-                builder.put(tuple, i);
+            for(Tuple tuple : tupleIterationSet){
+                Set<Event> intermediateSet = new HashSet<>();
+                Set<Long> pathIds = new HashSet<>();
+                Set<Tuple> s1 = r1Set.getByFirst(tuple.getFirst());
+                Set<Tuple> s2 = r2Set.getBySecond(tuple.getSecond());
+                for(Tuple t1 : s1){
+                    for(Tuple t2 : s2){
+                        if(t1.getSecond().equals(t2.getFirst())){
+                            long tripleId = (g1.getOrDefault(t1, defVal) << 32) + g2.getOrDefault(t2, defVal);
+                            if(!pathIds.contains(tripleId)){
+                                pathIds.add(tripleId);
+                                intermediateSet.add(t1.getSecond());
+                            }
+                        }
+                    }
+                }
+                aggregated.put(pathIds, tuple);
+                groupedIntermediateEvents.put(tuple, intermediateSet);
             }
-            i++;
-        }
 
-        tupleGroupMap = builder.build();
-        return tupleGroupMap;
+            ImmutableSortedMap.Builder<Tuple, Long> builder = ImmutableSortedMap.naturalOrder();
+            long i = 1;
+            for(Set<Long> key : aggregated.keySet()){
+                for(Tuple tuple : aggregated.get(key)){
+                    builder.put(tuple, i);
+                }
+                i++;
+            }
+
+            tupleGroupMap = builder.build();
+        }
+        return getTupleGroupMap();
     }
 
     @Override
@@ -188,58 +195,38 @@ public class RelComposition extends BinaryRelation {
         }
     }
 
+    private BoolExpr encodeTuple(Tuple tuple){
+        BoolExpr enc = ctx.mkFalse();
+        for(Event e : groupedIntermediateEvents.get(tuple)){
+            enc = ctx.mkOr(enc, ctx.mkAnd(
+                    Utils.edge(r1.getName(), tuple.getFirst(), e, ctx),
+                    Utils.edge(r2.getName(), e, tuple.getSecond(), ctx)
+            ));
+        }
+        return enc;
+    }
+
     @Override
     protected BoolExpr encodeApprox() {
-        Map<Long, Tuple> invMap = new HashMap<>();
+        SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
         for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
             if(encodeTupleSet.contains(entry.getKey())){
-                invMap.putIfAbsent(entry.getValue(), entry.getKey());
+                map.put(entry.getValue(), entry.getKey());
             }
         }
 
         BoolExpr enc = ctx.mkTrue();
+        for(long group : map.keySet()){
+            SortedSet<Tuple> tuples = map.get(group);
+            Iterator<Tuple> it = tuples.iterator();
 
-        TupleSet r1Set = new TupleSet();
-        r1Set.addAll(r1.getEncodeTupleSet());
-        r1Set.retainAll(r1.getMaxTupleSet());
+            Tuple reprTuple = it.next();
+            BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
+            enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, encodeTuple(reprTuple)));
 
-        TupleSet r2Set = new TupleSet();
-        r2Set.addAll(r2.getEncodeTupleSet());
-        r2Set.retainAll(r2.getMaxTupleSet());
-
-        Map<Integer, BoolExpr> exprMap = new HashMap<>();
-        for(Tuple tuple : encodeTupleSet){
-            exprMap.put(tuple.hashCode(), ctx.mkFalse());
-        }
-
-        for(Tuple tuple1 : r1Set){
-            Event e1 = tuple1.getFirst();
-            Event e3 = tuple1.getSecond();
-            for(Tuple tuple2 : r2Set.getByFirst(e3)){
-                Event e2 = tuple2.getSecond();
-                int id = Tuple.toHashCode(e1.getEId(), e2.getEId());
-                if(exprMap.containsKey(id)){
-                    BoolExpr e = exprMap.get(id);
-                    e = ctx.mkOr(e, ctx.mkAnd(Utils.edge(r1.getName(), e1, e3, ctx), Utils.edge(r2.getName(), e3, e2, ctx)));
-                    exprMap.put(id, e);
-                }
-            }
-        }
-
-        for(Tuple tuple : invMap.values()){
-            enc = ctx.mkAnd(enc, ctx.mkEq(
-                    Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx),
-                    exprMap.get(tuple.hashCode())
-            ));
-        }
-
-        for(Tuple tuple : encodeTupleSet){
-            if(!invMap.values().contains(tuple)){
-                Tuple encTuple = invMap.get(tupleGroupMap.get(tuple));
-                enc = ctx.mkAnd(enc, ctx.mkEq(
-                        Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx),
-                        Utils.edge(this.getName(), encTuple.getFirst(), encTuple.getSecond(), ctx)
-                ));
+            while(it.hasNext()){
+                Tuple tuple = it.next();
+                enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
             }
         }
 

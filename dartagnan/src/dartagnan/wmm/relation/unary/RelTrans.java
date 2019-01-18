@@ -59,7 +59,8 @@ public class RelTrans extends UnaryRelation {
         return maxTupleSet;
     }
 
-
+    // For now, no optimisation for transitive relation.
+    // Assuming each tuple belongs to its own group of size one
     @Override
     public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
