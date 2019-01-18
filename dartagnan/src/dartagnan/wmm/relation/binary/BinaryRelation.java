@@ -5,14 +5,15 @@ import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
+import com.microsoft.z3.IntExpr;
 import dartagnan.program.Program;
+import dartagnan.utils.Utils;
 import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
 import dartagnan.wmm.utils.splitter.GroupHelper;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -113,11 +114,67 @@ public abstract class BinaryRelation extends Relation {
         return ctx.mkAnd(r1.encode(), r2.encode(), doEncode());
     }
 
+    protected BoolExpr combine(BoolExpr r1Expr, BoolExpr r2Expr){
+        throw new UnsupportedOperationException("Method combine is not available for binary relation " + getClass().getName());
+    }
+
+    @Override
+    protected BoolExpr encodeApprox() {
+        return encodeBase(false);
+    }
+
+    @Override
+    protected BoolExpr encodeIDL() {
+        return encodeBase(true);
+    }
+
     @Override
     protected BoolExpr encodeLFP() {
         if(recursiveGroupId > 0){
             return ctx.mkTrue();
         }
         return encodeApprox();
+    }
+
+    private BoolExpr encodeBase(boolean isIdl) {
+        boolean recurseInR1 = isIdl && ((r1.getRecursiveGroupId() & recursiveGroupId) > 0);
+        boolean recurseInR2 = isIdl && ((r2.getRecursiveGroupId() & recursiveGroupId) > 0);
+
+        SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
+        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
+            if(encodeTupleSet.contains(entry.getKey())){
+                map.put(entry.getValue(), entry.getKey());
+            }
+        }
+
+        BoolExpr enc = ctx.mkTrue();
+
+        for(long group : map.keySet()) {
+            SortedSet<Tuple> tuples = map.get(group);
+            Iterator<Tuple> it = tuples.iterator();
+            Tuple tuple = it.next();
+
+            BoolExpr edge = Utils.edge(getName(), tuple, ctx);
+            BoolExpr opt1 = Utils.edge(r1.getName(), tuple, ctx);
+            BoolExpr opt2 = Utils.edge(r2.getName(), tuple, ctx);
+
+            enc = ctx.mkAnd(enc, ctx.mkEq(edge, combine(opt1, opt2)));
+
+            if(recurseInR1 || recurseInR2){
+                IntExpr intCount = Utils.intCount(this.getName(), tuple, ctx);
+                if (recurseInR1) {
+                    opt1 = ctx.mkAnd(opt1, ctx.mkGt(intCount, Utils.intCount(r1.getName(), tuple, ctx)));
+                }
+                if (recurseInR2) {
+                    opt2 = ctx.mkAnd(opt2, ctx.mkGt(intCount, Utils.intCount(r2.getName(), tuple, ctx)));
+                }
+                enc = ctx.mkAnd(enc, ctx.mkEq(edge, combine(opt1, opt2)));
+            }
+
+            while (it.hasNext()) {
+                enc = ctx.mkAnd(enc, ctx.mkEq(edge, Utils.edge(getName(), it.next(), ctx)));
+            }
+        }
+        return enc;
     }
 }
