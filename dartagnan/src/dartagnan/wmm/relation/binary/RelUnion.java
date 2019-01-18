@@ -1,11 +1,17 @@
 package dartagnan.wmm.relation.binary;
 
+import com.google.common.collect.SortedSetMultimap;
+import com.google.common.collect.TreeMultimap;
 import com.microsoft.z3.BoolExpr;
 import dartagnan.program.event.Event;
 import dartagnan.utils.Utils;
 import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedSet;
 
 /**
  *
@@ -47,20 +53,56 @@ public class RelUnion extends BinaryRelation {
         return getMaxTupleSet();
     }
 
+    private BoolExpr encodeTuple(Tuple tuple){
+        Event e1 = tuple.getFirst();
+        Event e2 = tuple.getSecond();
+        BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
+        BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
+        return ctx.mkEq(Utils.edge(getName(), e1, e2, ctx), ctx.mkOr(opt1, opt2));
+    }
+
+    private BoolExpr encodeTupleIDL(Tuple tuple){
+        Event e1 = tuple.getFirst();
+        Event e2 = tuple.getSecond();
+
+        BoolExpr edge = Utils.edge(getName(), e1, e2, ctx);
+        BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
+        BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
+
+        BoolExpr enc = ctx.mkEq(edge, ctx.mkOr(opt1, opt2));
+
+        if((r1.getRecursiveGroupId() & recursiveGroupId) > 0){
+            opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e2, ctx)));
+        }
+        if((r2.getRecursiveGroupId() & recursiveGroupId) > 0){
+            opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r2.getName(), e1, e2, ctx)));
+        }
+        enc = ctx.mkAnd(enc, ctx.mkEq(edge, ctx.mkOr(opt1, opt2)));
+
+        return enc;
+    }
+
     @Override
     protected BoolExpr encodeApprox() {
+        SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
+        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
+            if(encodeTupleSet.contains(entry.getKey())){
+                map.put(entry.getValue(), entry.getKey());
+            }
+        }
+
         BoolExpr enc = ctx.mkTrue();
 
-        for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
+        for(long group : map.keySet()){
+            SortedSet<Tuple> tuples = map.get(group);
+            Iterator<Tuple> it = tuples.iterator();
+            Tuple reprTuple = it.next();
+            BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
+            enc = ctx.mkAnd(enc, encodeTuple(reprTuple));
 
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
-            if (Relation.PostFixApprox) {
-                enc = ctx.mkAnd(enc, ctx.mkImplies(ctx.mkOr(opt1, opt2), Utils.edge(this.getName(), e1, e2, ctx)));
-            } else {
-                enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkOr(opt1, opt2)));
+            while(it.hasNext()){
+                Tuple tuple = it.next();
+                enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
             }
         }
         return enc;
@@ -72,26 +114,26 @@ public class RelUnion extends BinaryRelation {
             return encodeApprox();
         }
 
+        SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
+        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
+            if(encodeTupleSet.contains(entry.getKey())){
+                map.put(entry.getValue(), entry.getKey());
+            }
+        }
+
         BoolExpr enc = ctx.mkTrue();
 
-        boolean recurseInR1 = (r1.getRecursiveGroupId() & recursiveGroupId) > 0;
-        boolean recurseInR2 = (r2.getRecursiveGroupId() & recursiveGroupId) > 0;
+        for(long group : map.keySet()){
+            SortedSet<Tuple> tuples = map.get(group);
+            Iterator<Tuple> it = tuples.iterator();
+            Tuple reprTuple = it.next();
+            BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
+            enc = ctx.mkAnd(enc, encodeTupleIDL(reprTuple));
 
-        for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkOr(opt1, opt2)));
-
-            if(recurseInR1){
-                opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e2, ctx)));
+            while(it.hasNext()){
+                Tuple tuple = it.next();
+                enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
             }
-            if(recurseInR2){
-                opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r2.getName(), e1, e2, ctx)));
-            }
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkOr(opt1, opt2)));
         }
         return enc;
     }
