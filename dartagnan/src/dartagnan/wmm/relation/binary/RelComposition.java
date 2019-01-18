@@ -196,14 +196,43 @@ public class RelComposition extends BinaryRelation {
     }
 
     private BoolExpr encodeTuple(Tuple tuple){
-        BoolExpr enc = ctx.mkFalse();
+        BoolExpr orClause = ctx.mkFalse();
+        Event e1 = tuple.getFirst();
+        Event e2 = tuple.getSecond();
+
         for(Event e : groupedIntermediateEvents.get(tuple)){
-            enc = ctx.mkOr(enc, ctx.mkAnd(
-                    Utils.edge(r1.getName(), tuple.getFirst(), e, ctx),
-                    Utils.edge(r2.getName(), e, tuple.getSecond(), ctx)
+            orClause = ctx.mkOr(orClause, ctx.mkAnd(
+                    Utils.edge(r1.getName(), e1, e, ctx),
+                    Utils.edge(r2.getName(), e, e2, ctx)
             ));
         }
-        return enc;
+        return ctx.mkEq(Utils.edge(getName(), e1, e2, ctx), orClause);
+    }
+
+    private BoolExpr encodeTupleIDL(Tuple tuple){
+        BoolExpr orClause = ctx.mkFalse();
+        BoolExpr idlClause = ctx.mkFalse();
+
+        Event e1 = tuple.getFirst();
+        Event e2 = tuple.getSecond();
+
+        BoolExpr edge = Utils.edge(getName(), e1, e2, ctx);
+
+        for(Event e : groupedIntermediateEvents.get(tuple)){
+            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e, ctx);
+            BoolExpr opt2 = Utils.edge(r2.getName(), e, e2, ctx);
+            orClause = ctx.mkOr(orClause, ctx.mkAnd(opt1, opt2));
+
+            if((r1.getRecursiveGroupId() & recursiveGroupId) > 0){
+                opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e, ctx)));
+            }
+            if((r2.getRecursiveGroupId() & recursiveGroupId) > 0){
+                opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r2.getName(), e, e2, ctx)));
+            }
+            idlClause = ctx.mkOr(idlClause, ctx.mkAnd(opt1, opt2));
+        }
+
+        return ctx.mkAnd(ctx.mkEq(edge, orClause), ctx.mkEq(edge, idlClause));
     }
 
     @Override
@@ -219,10 +248,9 @@ public class RelComposition extends BinaryRelation {
         for(long group : map.keySet()){
             SortedSet<Tuple> tuples = map.get(group);
             Iterator<Tuple> it = tuples.iterator();
-
             Tuple reprTuple = it.next();
             BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, encodeTuple(reprTuple)));
+            enc = ctx.mkAnd(enc, encodeTuple(reprTuple));
 
             while(it.hasNext()){
                 Tuple tuple = it.next();
@@ -239,51 +267,25 @@ public class RelComposition extends BinaryRelation {
             return encodeApprox();
         }
 
-        BoolExpr enc = ctx.mkTrue();
-
-        boolean recurseInR1 = (r1.getRecursiveGroupId() & recursiveGroupId) > 0;
-        boolean recurseInR2 = (r2.getRecursiveGroupId() & recursiveGroupId) > 0;
-
-        TupleSet r1Set = new TupleSet();
-        r1Set.addAll(r1.getEncodeTupleSet());
-        r1Set.retainAll(r1.getMaxTupleSet());
-
-        TupleSet r2Set = new TupleSet();
-        r2Set.addAll(r2.getEncodeTupleSet());
-        r2Set.retainAll(r2.getMaxTupleSet());
-
-        Map<Integer, BoolExpr> orClauseMap = new HashMap<>();
-        Map<Integer, BoolExpr> idlClauseMap = new HashMap<>();
-        for(Tuple tuple : encodeTupleSet){
-            orClauseMap.put(tuple.hashCode(), ctx.mkFalse());
-            idlClauseMap.put(tuple.hashCode(), ctx.mkFalse());
-        }
-
-        for(Tuple tuple1 : r1Set){
-            Event e1 = tuple1.getFirst();
-            Event e3 = tuple1.getSecond();
-            for(Tuple tuple2 : r2Set.getByFirst(e3)){
-                Event e2 = tuple2.getSecond();
-                int id = Tuple.toHashCode(e1.getEId(), e2.getEId());
-                if(orClauseMap.containsKey(id)){
-                    BoolExpr opt1 = Utils.edge(r1.getName(), e1, e3, ctx);
-                    BoolExpr opt2 = Utils.edge(r2.getName(), e3, e2, ctx);
-                    orClauseMap.put(id, ctx.mkOr(orClauseMap.get(id), ctx.mkAnd(opt1, opt2)));
-
-                    if(recurseInR1){
-                        opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e3, ctx)));
-                    }
-                    if(recurseInR2){
-                        opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e3, e2, ctx)));
-                    }
-                    idlClauseMap.put(id, ctx.mkOr(idlClauseMap.get(id), ctx.mkAnd(opt1, opt2)));
-                }
+        SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
+        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
+            if(encodeTupleSet.contains(entry.getKey())){
+                map.put(entry.getValue(), entry.getKey());
             }
         }
 
-        for(Tuple tuple : encodeTupleSet){
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), orClauseMap.get(tuple.hashCode())));
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), idlClauseMap.get(tuple.hashCode())));
+        BoolExpr enc = ctx.mkTrue();
+        for(long group : map.keySet()){
+            SortedSet<Tuple> tuples = map.get(group);
+            Iterator<Tuple> it = tuples.iterator();
+            Tuple reprTuple = it.next();
+            BoolExpr reprEdge = Utils.edge(getName(), reprTuple.getFirst(), reprTuple.getSecond(), ctx);
+            enc = ctx.mkAnd(enc, encodeTupleIDL(reprTuple));
+
+            while(it.hasNext()){
+                Tuple tuple = it.next();
+                enc = ctx.mkAnd(enc, ctx.mkEq(reprEdge, Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
+            }
         }
 
         return enc;
