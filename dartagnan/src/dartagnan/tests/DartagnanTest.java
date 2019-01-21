@@ -28,10 +28,6 @@ public class DartagnanTest {
         HashSet<String> linuxFPBlacklist = runner.loadList("litmus/dart-fixpoint-long-exec-time.txt");
         linuxFPBlacklist.addAll(blacklist);
 
-        runner.runGroup("litmus/AARCH64", "arm", "cat/aarch64.cat", 2, false, false, blacklist);
-        runner.runGroup("litmus/AARCH64", "arm", "cat/aarch64.cat", 2, true, true, blacklist);
-        runner.runGroup("litmus/AARCH64", "arm", "cat/aarch64.cat", 2, true, false, blacklist);
-
         runner.runGroup("litmus/X86", "tso", "cat/tso.cat", 2, false, false, blacklist);
         runner.runGroup("litmus/X86", "tso", "cat/tso.cat", 2, false, true, blacklist);
         runner.runGroup("litmus/X86", "tso", "cat/tso.cat", 2, true, false, blacklist);
@@ -39,6 +35,10 @@ public class DartagnanTest {
         runner.runGroup("litmus/PPC", "power", "cat/power.cat", 2, false, false, blacklist);
         runner.runGroup("litmus/PPC", "power", "cat/power.cat", 2, false, true, blacklist);
         runner.runGroup("litmus/PPC", "power", "cat/power.cat", 2, true, false, blacklist);
+
+        runner.runGroup("litmus/AARCH64", "arm", "cat/aarch64.cat", 2, false, false, blacklist);
+        runner.runGroup("litmus/AARCH64", "arm", "cat/aarch64.cat", 2, true, true, blacklist);
+        runner.runGroup("litmus/AARCH64", "arm", "cat/aarch64.cat", 2, true, false, blacklist);
 
         runner.runGroup("litmus/C/manual", "sc", "cat/linux-kernel.cat", 2, false, false, linuxFPBlacklist);
         runner.runGroup("litmus/C/luc", "sc", "cat/linux-kernel.cat", 2, false, false, linuxFPBlacklist);
@@ -75,6 +75,7 @@ class Runner {
 
     void runGroup(String path, String target, String catPath, int steps, boolean relax, boolean idl, HashSet<String> blacklist){
         try{
+            long startTime = System.currentTimeMillis();
             Wmm wmm = new ParserCat().parse(catPath, target);
             Stream<Path> paths = Files.walk(Paths.get(path));
             paths.filter(Files::isRegularFile)
@@ -100,6 +101,10 @@ class Runner {
                             }
                         }
                     });
+
+            long stopTime = System.currentTimeMillis();
+            System.out.println(String.format("Group test %-18s target=%-10s cat=%-15s steps=%-3d relax=%-6s idl=%-6s : finished in %d ms",
+                    path, target, catPath, steps, relax, idl, stopTime - startTime));
 
         } catch(IOException e){
             e.printStackTrace();
