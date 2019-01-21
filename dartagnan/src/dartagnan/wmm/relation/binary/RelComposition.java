@@ -233,7 +233,7 @@ public class RelComposition extends BinaryRelation {
 
         for(Tuple tuple : invMap.values()){
             enc = ctx.mkAnd(enc, ctx.mkEq(
-                    Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx),
+                    Utils.edge(this.getName(), tuple, ctx),
                     exprMap.get(tuple.hashCode())
             ));
         }
@@ -242,8 +242,8 @@ public class RelComposition extends BinaryRelation {
             if(!invMap.values().contains(tuple)){
                 Tuple encTuple = invMap.get(tupleGroupMap.get(tuple));
                 enc = ctx.mkAnd(enc, ctx.mkEq(
-                        Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx),
-                        Utils.edge(this.getName(), encTuple.getFirst(), encTuple.getSecond(), ctx)
+                        Utils.edge(this.getName(), tuple, ctx),
+                        Utils.edge(this.getName(), encTuple, ctx)
                 ));
             }
         }
@@ -300,8 +300,8 @@ public class RelComposition extends BinaryRelation {
         }
 
         for(Tuple tuple : encodeTupleSet){
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), orClauseMap.get(tuple.hashCode())));
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), idlClauseMap.get(tuple.hashCode())));
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), orClauseMap.get(tuple.hashCode())));
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), idlClauseMap.get(tuple.hashCode())));
         }
 
         return enc;
@@ -317,7 +317,7 @@ public class RelComposition extends BinaryRelation {
 
             if(iteration == 0 && isRecursive){
                 for(Tuple tuple : encodeTupleSet){
-                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx)));
+                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple, ctx)));
                 }
 
             } else {
@@ -357,7 +357,7 @@ public class RelComposition extends BinaryRelation {
                 }
 
                 for(Tuple tuple : encodeTupleSet){
-                    enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx), exprMap.get(tuple.hashCode())));
+                    enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(name, tuple, ctx), exprMap.get(tuple.hashCode())));
                 }
 
                 if(recurseInR1){

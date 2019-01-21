@@ -3,7 +3,6 @@ package dartagnan.wmm.relation.binary;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
-import dartagnan.program.event.Event;
 import dartagnan.utils.Utils;
 import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
@@ -70,15 +69,12 @@ public class RelMinus extends BinaryRelation {
         BoolExpr enc = ctx.mkTrue();
 
         for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
+            BoolExpr opt1 = Utils.edge(r1.getName(), tuple, ctx);
+            BoolExpr opt2 = ctx.mkNot(Utils.edge(r2.getName(), tuple, ctx));
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
 
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = ctx.mkNot(Utils.edge(r2.getName(), e1, e2, ctx));
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
-
-            opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e2, ctx)));
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
+            opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), tuple, ctx), Utils.intCount(r1.getName(), tuple, ctx)));
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
         }
         return enc;
     }
@@ -94,7 +90,7 @@ public class RelMinus extends BinaryRelation {
 
             if(iteration == 0 && isRecursive){
                 for(Tuple tuple : encodeTupleSet){
-                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx)));
+                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple, ctx)));
                 }
 
             } else {
@@ -105,9 +101,9 @@ public class RelMinus extends BinaryRelation {
                 String r2Name = r2.getName();
 
                 for(Tuple tuple : encodeTupleSet){
-                    BoolExpr edge = Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx);
-                    BoolExpr opt1 = Utils.edge(r1Name, tuple.getFirst(), tuple.getSecond(), ctx);
-                    BoolExpr opt2 = ctx.mkNot(Utils.edge(r2Name, tuple.getFirst(), tuple.getSecond(), ctx));
+                    BoolExpr edge = Utils.edge(name, tuple, ctx);
+                    BoolExpr opt1 = Utils.edge(r1Name, tuple, ctx);
+                    BoolExpr opt2 = ctx.mkNot(Utils.edge(r2Name, tuple, ctx));
                     enc = ctx.mkAnd(enc, ctx.mkEq(edge, ctx.mkAnd(opt1, opt2)));
                 }
 

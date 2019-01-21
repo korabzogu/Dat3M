@@ -6,7 +6,6 @@ import com.google.common.collect.TreeMultimap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
-import dartagnan.program.event.Event;
 import dartagnan.utils.Utils;
 import dartagnan.wmm.relation.Relation;
 import dartagnan.wmm.utils.Tuple;
@@ -121,11 +120,9 @@ public abstract class BinaryRelation extends Relation {
         BoolExpr enc = ctx.mkTrue();
 
         for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), combine(opt1, opt2)));
+            BoolExpr opt1 = Utils.edge(r1.getName(), tuple, ctx);
+            BoolExpr opt2 = Utils.edge(r2.getName(), tuple, ctx);
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), combine(opt1, opt2)));
         }
         return enc;
     }
