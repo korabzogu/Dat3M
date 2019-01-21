@@ -251,6 +251,13 @@ public class RelComposition extends BinaryRelation {
             return encodeApprox();
         }
 
+        Map<Long, Tuple> map = new HashMap<>();
+        for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
+            if(encodeTupleSet.contains(entry.getKey())){
+                map.putIfAbsent(entry.getValue(), entry.getKey());
+            }
+        }
+
         BoolExpr enc = ctx.mkTrue();
 
         boolean recurseInR1 = (r1.getRecursiveGroupId() & recursiveGroupId) > 0;
@@ -293,9 +300,16 @@ public class RelComposition extends BinaryRelation {
             }
         }
 
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : map.values()){
             enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), orClauseMap.get(tuple.hashCode())));
             enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), idlClauseMap.get(tuple.hashCode())));
+        }
+
+        for(Tuple tuple : encodeTupleSet){
+            if(!map.values().contains(tuple)){
+                Tuple encTuple = map.get(tupleGroupMap.get(tuple));
+                enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), Utils.edge(this.getName(), encTuple, ctx)));
+            }
         }
 
         return enc;
