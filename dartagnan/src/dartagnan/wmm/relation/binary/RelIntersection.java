@@ -48,18 +48,8 @@ public class RelIntersection extends BinaryRelation {
     }
 
     @Override
-    public BoolExpr encodeApprox() {
-        BoolExpr enc = ctx.mkTrue();
-
-        for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
-        }
-        return enc;
+    protected BoolExpr combine(BoolExpr expr1, BoolExpr expr2){
+        return ctx.mkAnd(expr1, expr2);
     }
 
     @Override

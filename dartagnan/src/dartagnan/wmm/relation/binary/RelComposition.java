@@ -189,6 +189,11 @@ public class RelComposition extends BinaryRelation {
     }
 
     @Override
+    protected BoolExpr combine(BoolExpr expr1, BoolExpr expr2){
+        throw new UnsupportedOperationException("Method combine is not supported by " + getClass().getName());
+    }
+
+    @Override
     protected BoolExpr encodeApprox() {
         Map<Long, Tuple> invMap = new HashMap<>();
         for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
