@@ -195,10 +195,10 @@ public class RelComposition extends BinaryRelation {
 
     @Override
     protected BoolExpr encodeApprox() {
-        Map<Long, Tuple> invMap = new HashMap<>();
+        Map<Long, Tuple> map = new HashMap<>();
         for(Map.Entry<Tuple, Long> entry : getTupleGroupMap().entrySet()){
             if(encodeTupleSet.contains(entry.getKey())){
-                invMap.putIfAbsent(entry.getValue(), entry.getKey());
+                map.putIfAbsent(entry.getValue(), entry.getKey());
             }
         }
 
@@ -213,7 +213,7 @@ public class RelComposition extends BinaryRelation {
         r2Set.retainAll(r2.getMaxTupleSet());
 
         Map<Integer, BoolExpr> exprMap = new HashMap<>();
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : map.values()){
             exprMap.put(tuple.hashCode(), ctx.mkFalse());
         }
 
@@ -231,20 +231,14 @@ public class RelComposition extends BinaryRelation {
             }
         }
 
-        for(Tuple tuple : invMap.values()){
-            enc = ctx.mkAnd(enc, ctx.mkEq(
-                    Utils.edge(this.getName(), tuple, ctx),
-                    exprMap.get(tuple.hashCode())
-            ));
+        for(Tuple tuple : map.values()){
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), exprMap.get(tuple.hashCode())));
         }
 
         for(Tuple tuple : encodeTupleSet){
-            if(!invMap.values().contains(tuple)){
-                Tuple encTuple = invMap.get(tupleGroupMap.get(tuple));
-                enc = ctx.mkAnd(enc, ctx.mkEq(
-                        Utils.edge(this.getName(), tuple, ctx),
-                        Utils.edge(this.getName(), encTuple, ctx)
-                ));
+            if(!map.values().contains(tuple)){
+                Tuple encTuple = map.get(tupleGroupMap.get(tuple));
+                enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), Utils.edge(this.getName(), encTuple, ctx)));
             }
         }
 
