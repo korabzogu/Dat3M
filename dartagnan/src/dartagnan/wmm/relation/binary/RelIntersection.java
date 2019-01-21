@@ -52,33 +52,6 @@ public class RelIntersection extends BinaryRelation {
     }
 
     @Override
-    protected BoolExpr encodeIDL() {
-        if(recursiveGroupId == 0){
-            return encodeApprox();
-        }
-
-        BoolExpr enc = ctx.mkTrue();
-
-        boolean recurseInR1 = (r1.getRecursiveGroupId() & recursiveGroupId) > 0;
-        boolean recurseInR2 = (r2.getRecursiveGroupId() & recursiveGroupId) > 0;
-
-        for(Tuple tuple : encodeTupleSet){
-            BoolExpr opt1 = Utils.edge(r1.getName(), tuple, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), tuple, ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
-
-            if(recurseInR1){
-                opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), tuple, ctx), Utils.intCount(r1.getName(), tuple, ctx)));
-            }
-            if(recurseInR2){
-                opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), tuple, ctx), Utils.intCount(r2.getName(), tuple, ctx)));
-            }
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
-        }
-        return enc;
-    }
-
-    @Override
     public BoolExpr encodeIteration(int groupId, int iteration){
         BoolExpr enc = ctx.mkTrue();
 
