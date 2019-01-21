@@ -3,9 +3,7 @@ package dartagnan.wmm.relation.binary;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import dartagnan.program.Program;
-import dartagnan.utils.Utils;
 import dartagnan.wmm.relation.Relation;
-import dartagnan.wmm.utils.Tuple;
 import dartagnan.wmm.utils.TupleSet;
 
 /**
@@ -58,43 +56,5 @@ public class RelMinus extends BinaryRelation {
     @Override
     protected BoolExpr combine(BoolExpr expr1, BoolExpr expr2){
         return ctx.mkAnd(expr1, ctx.mkNot(expr2));
-    }
-
-    @Override
-    public BoolExpr encodeIteration(int groupId, int iteration){
-        BoolExpr enc = ctx.mkTrue();
-
-        if((groupId & recursiveGroupId) > 0 && iteration > lastEncodedIteration){
-            lastEncodedIteration = iteration;
-
-            String name = this.getName() + "_" + iteration;
-
-            if(iteration == 0 && isRecursive){
-                for(Tuple tuple : encodeTupleSet){
-                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple, ctx)));
-                }
-
-            } else {
-                int childIteration = isRecursive ? iteration - 1 : iteration;
-                boolean recurse = (r1.getRecursiveGroupId() & groupId) > 0;
-
-                String r1Name = recurse ? r1.getName() + "_" + childIteration : r1.getName();
-                String r2Name = r2.getName();
-
-                for(Tuple tuple : encodeTupleSet){
-                    BoolExpr edge = Utils.edge(name, tuple, ctx);
-                    BoolExpr opt1 = Utils.edge(r1Name, tuple, ctx);
-                    BoolExpr opt2 = ctx.mkNot(Utils.edge(r2Name, tuple, ctx));
-                    enc = ctx.mkAnd(enc, ctx.mkEq(edge, ctx.mkAnd(opt1, opt2)));
-                }
-
-                if(recurse){
-                    enc = ctx.mkAnd(enc, r1.encodeIteration(groupId, childIteration));
-                }
-
-            }
-        }
-
-        return enc;
     }
 }
