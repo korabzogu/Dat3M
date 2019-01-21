@@ -7,7 +7,7 @@ import dartagnan.wmm.utils.TupleSet;
 
 import java.util.Map;
 
-public class TupleGroupBuilder {
+public class GroupHelper {
 
     public static ImmutableSortedMap<Tuple, Long> build(TupleSet set, Map<Event, Long> source, Map<Event, Long> target){
         SortedSetMultimap<Long, Tuple> map = TreeMultimap.create();
