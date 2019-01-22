@@ -10,7 +10,11 @@ public class RelCrit extends BasicRelation {
 
     public RelCrit(){
         term = "crit";
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

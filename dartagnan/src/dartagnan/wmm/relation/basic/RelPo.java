@@ -24,7 +24,11 @@ public class RelPo extends BasicRelation {
             term = "po";
             eventMask = EventRepository.VISIBLE;
         }
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

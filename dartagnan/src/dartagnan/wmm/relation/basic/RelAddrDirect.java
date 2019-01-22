@@ -18,7 +18,6 @@ public class RelAddrDirect extends BasicRegRelation {
     public RelAddrDirect(){
         term = "addrDirect";
         forceDoEncode = true;
-        isStatic = true;
     }
 
     @Override

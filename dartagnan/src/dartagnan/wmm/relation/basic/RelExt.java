@@ -12,7 +12,11 @@ public class RelExt extends BasicRelation {
 
     public RelExt(){
         term = "ext";
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

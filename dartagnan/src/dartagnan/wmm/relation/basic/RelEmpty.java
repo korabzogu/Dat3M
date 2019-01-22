@@ -8,7 +8,11 @@ public class RelEmpty extends BasicRelation {
     public RelEmpty(String name) {
         super(name);
         term = name;
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

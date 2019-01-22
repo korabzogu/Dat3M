@@ -9,7 +9,11 @@ public class RelId extends BasicRelation {
 
     public RelId(){
         term = "id";
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

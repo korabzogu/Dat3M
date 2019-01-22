@@ -35,6 +35,11 @@ public abstract class BinaryRelation extends Relation {
     }
 
     @Override
+    public boolean getIsStatic(){
+        return r1.getIsStatic() && r2.getIsStatic();
+    }
+
+    @Override
     public ImmutableSortedMap<Tuple, Long> getTupleGroupMap(){
         if(tupleGroupMap == null){
             SortedSetMultimap<Long, Tuple> tupleMap = TreeMultimap.create();

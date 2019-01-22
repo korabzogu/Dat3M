@@ -10,7 +10,11 @@ public class RelCtrlDirect extends BasicRelation {
 
     public RelCtrlDirect(){
         term = "ctrlDirect";
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

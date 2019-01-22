@@ -29,7 +29,11 @@ public class RelFencerel extends BasicRelation {
     public RelFencerel(String fenceName) {
         this.fenceName = fenceName;
         term = makeTerm(fenceName);
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     public RelFencerel(String fenceName, String name) {

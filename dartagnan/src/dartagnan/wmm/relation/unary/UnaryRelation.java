@@ -23,6 +23,11 @@ public abstract class UnaryRelation extends Relation {
     }
 
     @Override
+    public boolean getIsStatic(){
+        return r1.getIsStatic();
+    }
+
+    @Override
     public int updateRecursiveGroupId(int parentId){
         if(recursiveGroupId == 0 || forceUpdateRecursiveGroupId){
             forceUpdateRecursiveGroupId = false;

@@ -17,14 +17,17 @@ public class RelSetIdentity extends BasicRelation {
     public RelSetIdentity(FilterAbstract filter) {
         this.filter = filter;
         term = makeTerm(filter);
-        isStatic = true;
     }
 
     public RelSetIdentity(FilterAbstract filter, String name) {
         super(name);
         this.filter = filter;
         term = makeTerm(filter);
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

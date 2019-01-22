@@ -10,7 +10,11 @@ public class RelRMW extends BasicRelation {
 
     public RelRMW(){
         term = "rmw";
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override

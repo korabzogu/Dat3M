@@ -26,6 +26,11 @@ public class RecursiveRelation extends Relation {
         return name;
     }
 
+    @Override
+    public boolean getIsStatic(){
+        return r1.getIsStatic();
+    }
+
     public void initialise(Program program, Context ctx, int encodingMode){
         if(doRecurse){
             doRecurse = false;

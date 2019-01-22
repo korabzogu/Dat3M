@@ -20,7 +20,6 @@ public class RelCartesian extends BasicRelation {
         this.filter1 = filter1;
         this.filter2 = filter2;
         this.term = makeTerm(filter1, filter2);
-        isStatic = true;
     }
 
     public RelCartesian(FilterAbstract filter1, FilterAbstract filter2, String name) {
@@ -28,7 +27,11 @@ public class RelCartesian extends BasicRelation {
         this.filter1 = filter1;
         this.filter2 = filter2;
         this.term = makeTerm(filter1, filter2);
-        isStatic = true;
+    }
+
+    @Override
+    public boolean getIsStatic(){
+        return true;
     }
 
     @Override
