@@ -15,10 +15,10 @@ variableDeclaratorList
     ;
 
 globalDeclarator
-    :   typeSpecifier? varName (Equals initConstantValue)?                                                              # globalDeclaratorLocation
-    |   typeSpecifier? t = threadId Colon n = varName (Equals initConstantValue)?                                       # globalDeclaratorRegister
-    |   typeSpecifier? varName (Equals Ast? (Amp? varName | LPar Amp? varName RPar))?                                   # globalDeclaratorLocationLocation
-    |   typeSpecifier? t = threadId Colon n = varName (Equals Ast? (Amp? varName | LPar Amp? varName RPar))?            # globalDeclaratorRegisterLocation
+    :   typeSpecifier? Ast? varName (Equals initConstantValue)?                                                         # globalDeclaratorLocation
+    |   typeSpecifier? Ast? t = threadId Colon n = varName (Equals initConstantValue)?                                  # globalDeclaratorRegister
+    |   typeSpecifier? Ast? varName (Equals Ast? (Amp? varName | LPar Amp? varName RPar))?                              # globalDeclaratorLocationLocation
+    |   typeSpecifier? Ast? t = threadId Colon n = varName (Equals Ast? (Amp? varName | LPar Amp? varName RPar))?       # globalDeclaratorRegisterLocation
     |   typeSpecifier? varName LBracket DigitSequence? RBracket (Equals initArray)?                                     # globalDeclaratorArray
     ;
 
