@@ -1,0 +1,114 @@
+package com.dat3m.dartagnan.wmm.relation.basic;
+
+import com.dat3m.dartagnan.program.Program;
+import com.dat3m.dartagnan.program.arch.linux.utils.EType;
+import com.dat3m.dartagnan.wmm.filter.FilterBasic;
+import com.dat3m.dartagnan.wmm.filter.FilterMinus;
+import com.dat3m.dartagnan.wmm.utils.Mode;
+import com.microsoft.z3.BoolExpr;
+import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.program.event.MemEvent;
+import com.dat3m.dartagnan.wmm.relation.Relation;
+import com.dat3m.dartagnan.wmm.utils.Tuple;
+import com.dat3m.dartagnan.wmm.utils.TupleSet;
+import com.microsoft.z3.Context;
+
+import java.util.*;
+
+import static com.dat3m.dartagnan.wmm.utils.Utils.edge;
+
+public class RelRf extends Relation {
+
+    private Set<MemEvent> reads;
+
+    public RelRf(){
+        term = "rf";
+        forceDoEncode = true;
+    }
+
+    @Override
+    public void initialise(Program program, Context ctx, Mode mode){
+        super.initialise(program, ctx, mode);
+        reads = null;
+    }
+
+    @Override
+    public TupleSet getMaxTupleSet(){
+        if(maxTupleSet == null){
+            maxTupleSet = new TupleSet();
+
+            List<Event> eventsLoad = program.getCache().getEvents(FilterBasic.get(EType.READ));
+            List<Event> eventsInit = program.getCache().getEvents(FilterBasic.get(EType.INIT));
+            List<Event> eventsStore = program.getCache().getEvents(FilterMinus.get(
+                    FilterBasic.get(EType.WRITE),
+                    FilterBasic.get(EType.INIT)
+            ));
+
+            for(Event e1 : eventsInit){
+                for(Event e2 : eventsLoad){
+                    if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent) e2)){
+                        maxTupleSet.add(new Tuple(e1, e2));
+                    }
+                }
+            }
+
+            for(Event e1 : eventsStore){
+                for(Event e2 : eventsLoad){
+                    if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent) e2)){
+                        maxTupleSet.add(new Tuple(e1, e2));
+                    }
+                }
+            }
+        }
+        return maxTupleSet;
+    }
+
+    @Override
+    protected BoolExpr encodeApprox() {
+        BoolExpr enc = ctx.mkTrue();
+        for(Tuple tuple : maxTupleSet){
+            MemEvent write = (MemEvent) tuple.getFirst();
+            MemEvent read = (MemEvent) tuple.getSecond();
+            BoolExpr edge = edge("rf", write, read, ctx);
+            enc = ctx.mkAnd(enc, ctx.mkImplies(edge, ctx.mkAnd(
+                    write.executes(ctx),
+                    read.executes(ctx),
+                    ctx.mkEq(write.getMemAddressExpr(), read.getMemAddressExpr()),
+                    ctx.mkEq(write.getMemValueExpr(), read.getMemValueExpr())
+            )));
+        }
+        return ctx.mkAnd(enc, atMostOneEdgeToRead());
+    }
+
+    private BoolExpr atMostOneEdgeToRead(){
+        BoolExpr enc = ctx.mkTrue();
+        for(MemEvent read : getReads()){
+            int i = 0;
+            int cId = read.getCId();
+            BoolExpr clause = ctx.mkEq(mkL(cId, 0), ctx.mkFalse());
+
+            for(Tuple tuple : maxTupleSet.getBySecond(read)){
+                BoolExpr prev = mkL(cId, ++i - 1);
+                BoolExpr edge = edge("rf", tuple.getFirst(), read, ctx);
+                clause = ctx.mkAnd(clause, ctx.mkNot(ctx.mkAnd(prev, edge)));
+                clause = ctx.mkAnd(clause, ctx.mkEq(mkL(cId, i), ctx.mkOr(prev, edge)));
+            }
+            enc = ctx.mkAnd(enc, ctx.mkImplies(read.executes(ctx), ctx.mkAnd(clause, mkL(cId, i))));
+        }
+        return enc;
+    }
+
+    private BoolExpr mkL(int readId, int i) {
+        return (BoolExpr) ctx.mkConst("l(" + readId + "," + i + ")", ctx.mkBoolSort());
+    }
+
+    private Set<MemEvent> getReads(){
+        if(reads == null){
+            reads = new HashSet<>();
+            for(Tuple tuple : getMaxTupleSet()){
+                reads.add((MemEvent) tuple.getSecond());
+            }
+        }
+        return reads;
+    }
+}

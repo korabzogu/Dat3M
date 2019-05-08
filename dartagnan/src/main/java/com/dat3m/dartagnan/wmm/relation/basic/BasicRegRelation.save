@@ -1,0 +1,171 @@
+package com.dat3m.dartagnan.wmm.relation.basic;
+
+import com.dat3m.dartagnan.expression.IConst;
+import com.dat3m.dartagnan.program.Program;
+import com.dat3m.dartagnan.wmm.utils.Mode;
+import com.dat3m.dartagnan.wmm.utils.Utils;
+import com.dat3m.dartagnan.wmm.utils.Tuple;
+import com.dat3m.dartagnan.wmm.utils.TupleSet;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.microsoft.z3.BoolExpr;
+import com.dat3m.dartagnan.program.Register;
+import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.program.event.utils.RegWriter;
+import com.microsoft.z3.Context;
+
+import java.util.*;
+
+abstract class BasicRegRelation extends BasicRelation {
+
+    abstract Collection<Register> getRegisters(Event regReader);
+
+    private Map<Event, Map<Register, List<Event>>> regWritersMap;
+    private BoolExpr regSeqEnc;
+
+    @Override
+    public void initialise(Program program, Context ctx, Mode mode){
+        super.initialise(program, ctx, mode);
+        regWritersMap = new HashMap<>();
+        regSeqEnc = ctx.mkTrue();
+    }
+
+
+    void mkMaxTupleSet(Collection<Event> regReaders){
+        maxTupleSet = new TupleSet();
+        ImmutableMap<Register, ImmutableList<Event>> regWriterMap = program.getCache().getRegWriterMap();
+        for(Event regReader : regReaders){
+            for(Register register : getRegisters(regReader)){
+                for(Event regWriter : regWriterMap.getOrDefault(register, ImmutableList.of())){
+                    if(regWriter.getCId() >= regReader.getCId()){
+                        break;
+                    }
+                    maxTupleSet.add(new Tuple(regWriter, regReader));
+                }
+            }
+        }
+    }
+
+
+    BoolExpr doEncodeApprox(Collection<Event> regReaders) {
+        BoolExpr enc = ctx.mkTrue();
+        ImmutableMap<Register, ImmutableList<Event>> regWriterMap = program.getCache().getRegWriterMap();
+
+        for (Event regReader : regReaders) {
+            for (Register register : getRegisters(regReader)) {
+                List<Event> writers = regWriterMap.getOrDefault(register, ImmutableList.of());
+                if(writers.isEmpty() || writers.get(0).getCId() >= regReader.getCId()){
+                    enc = ctx.mkAnd(enc, ctx.mkEq(register.toZ3Int(regReader, ctx), new IConst(0).toZ3Int(ctx)));
+
+                } else {
+                    ListIterator<Event> writerIt = writers.listIterator();
+                    while (writerIt.hasNext()) {
+                        Event regWriter = writerIt.next();
+                        if (regWriter.getCId() >= regReader.getCId()) {
+                            break;
+                        }
+
+                        // RegReader uses the value of RegWriter if it is executed ..
+                        BoolExpr clause = ctx.mkAnd(regWriter.executes(ctx), regReader.executes(ctx));
+                        BoolExpr edge = Utils.edge(this.getName(), regWriter, regReader, ctx);
+
+                        // .. and no other write to the same register is executed in between
+                        ListIterator<Event> otherIt = writers.listIterator(writerIt.nextIndex());
+                        while (otherIt.hasNext()) {
+                            Event other = otherIt.next();
+                            if (other.getCId() >= regReader.getCId()) {
+                                break;
+                            }
+                            clause = ctx.mkAnd(clause, ctx.mkNot(other.executes(ctx)));
+                        }
+
+                        // Encode edge and value binding
+                        enc = ctx.mkAnd(enc, ctx.mkEq(edge, clause));
+                        enc = ctx.mkAnd(enc, ctx.mkImplies(edge, ctx.mkEq(
+                                ((RegWriter) regWriter).getResultRegisterExpr(),
+                                register.toZ3Int(regReader, ctx)
+                        )));
+                    }
+                }
+            }
+        }
+        return enc;
+    }
+
+    /*
+    BoolExpr doEncodeApprox(Collection<Event> regReaders) {
+        BoolExpr enc = ctx.mkTrue();
+        for (Event regReader : regReaders) {
+            for (Register register : getRegisters(regReader)) {
+                List<Event> writers = getRegWriterList(register, regReader);
+
+                if(writers.isEmpty()){
+                    enc = ctx.mkAnd(enc, ctx.mkEq(register.toZ3Int(regReader, ctx), new IConst(0).toZ3Int(ctx)));
+
+                } else {
+                    Event max = writers.get(0);
+
+                    BoolExpr edge = Utils.edge(this.getName(), max, regReader, ctx);
+                    enc = ctx.mkAnd(enc, ctx.mkEq(edge, max.executes(ctx)));
+                    enc = ctx.mkAnd(enc, ctx.mkImplies(edge, ctx.mkEq(
+                            ((RegWriter) max).getResultRegisterExpr(),
+                            register.toZ3Int(regReader, ctx)
+                    )));
+
+                    for(int i = 1; i < writers.size(); i++){
+                        Event previous = writers.get(i - 1);
+                        Event current = writers.get(i);
+
+                        edge = Utils.edge(this.getName(), current, regReader, ctx);
+                        enc = ctx.mkAnd(enc, ctx.mkEq(edge,
+                                ctx.mkAnd(current.executes(ctx), ctx.mkNot(mkRegSeq(register, max, previous)))));
+
+                        enc = ctx.mkAnd(enc, ctx.mkImplies(edge, ctx.mkEq(
+                                ((RegWriter) current).getResultRegisterExpr(),
+                                register.toZ3Int(regReader, ctx)
+                        )));
+                    }
+
+                    Event last = writers.get(writers.size() - 1);
+                    enc = ctx.mkAnd(enc, ctx.mkImplies(ctx.mkNot(mkRegSeq(register, max, last)),
+                            ctx.mkEq(new IConst(0).toZ3Int(ctx), register.toZ3Int(regReader, ctx))
+                    ));
+                }
+            }
+        }
+        return ctx.mkAnd(enc, regSeqEnc);
+    }*/
+
+
+    private List<Event> getRegWriterList(Register r, Event e){
+        regWritersMap.putIfAbsent(e, new HashMap<>());
+        if(regWritersMap.get(e).get(r) == null){
+            ImmutableMap<Register, ImmutableList<Event>> regWriterMap = program.getCache().getRegWriterMap();
+            List<Event> writers = new ArrayList<>();
+            for(Event ev : regWriterMap.get(r)){
+                if(ev.getCId() < e.getCId()){
+                    writers.add(ev);
+                }
+            }
+            Collections.sort(writers, Collections.reverseOrder());
+            regWritersMap.get(e).put(r, writers);
+
+            if(!writers.isEmpty()){
+                Event max = writers.get(0);
+                regSeqEnc = ctx.mkAnd(regSeqEnc, ctx.mkEq(mkRegSeq(r, max, max), max.executes(ctx)));
+                for(int i = 1; i < writers.size(); i++){
+                    Event previous = writers.get(i - 1);
+                    Event current = writers.get(i);
+                    regSeqEnc = ctx.mkAnd(regSeqEnc, ctx.mkEq(mkRegSeq(r, max, current),
+                            ctx.mkOr(current.executes(ctx), mkRegSeq(r, max, previous))));
+                }
+            }
+        }
+        return regWritersMap.get(e).get(r);
+    }
+
+    private BoolExpr mkRegSeq(Register register, Event max, Event e){
+        return ctx.mkBoolConst("RegSeq(" + register.getThreadId() + "," + register.getName() + ","
+                + max.getCId() + "," + e.getCId() + ")");
+    }
+}
