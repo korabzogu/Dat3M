@@ -96,34 +96,30 @@ public class RelRf extends Relation {
         }
 
         if(settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY)) {
-            atLeastOne = ctx.mkImplies(ctx.mkAnd(read.exec(), isMemInit), atLeastOne);
-        } else {
-            atLeastOne = ctx.mkImplies(read.exec(), atLeastOne);
+            return ctx.mkAnd(atMostOne, ctx.mkImplies(ctx.mkAnd(read.exec(), isMemInit), atLeastOne));
         }
-        return ctx.mkAnd(atMostOne, atLeastOne);
+        return ctx.mkImplies(read.exec(), ctx.mkAnd(atMostOne, atLeastOne));
     }
 
     private BoolExpr encodeEdgeSeq(Event read, BoolExpr isMemInit, List<BoolExpr> edges){
         int num = edges.size();
         int readId = read.getCId();
         BoolExpr lastSeqVar = mkSeqVar(readId, 0);
-        BoolExpr newSeqVar = lastSeqVar;
-        BoolExpr atMostOne = ctx.mkEq(lastSeqVar, edges.get(0));
+        BoolExpr atMostOne = ctx.mkEq(lastSeqVar, ctx.mkFalse());
+        BoolExpr atLeastOne = edges.get(0);
 
         for(int i = 1; i < num; i++){
-            newSeqVar = mkSeqVar(readId, i);
-            atMostOne = ctx.mkAnd(atMostOne, ctx.mkEq(newSeqVar, ctx.mkOr(lastSeqVar, edges.get(i))));
-            atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edges.get(i), lastSeqVar)));
+            BoolExpr newSeqVar = mkSeqVar(readId, i);
+            atMostOne = ctx.mkAnd(atMostOne, ctx.mkEq(newSeqVar, ctx.mkOr(lastSeqVar, edges.get(i - 1))));
+            atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edges.get(i), newSeqVar)));
+            atLeastOne = ctx.mkOr(atLeastOne, edges.get(i));
             lastSeqVar = newSeqVar;
         }
-        BoolExpr atLeastOne = ctx.mkOr(newSeqVar, edges.get(edges.size() - 1));
 
         if(settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY)) {
-            atLeastOne = ctx.mkImplies(ctx.mkAnd(read.exec(), isMemInit), atLeastOne);
-        } else {
-            atLeastOne = ctx.mkImplies(read.exec(), atLeastOne);
+            return ctx.mkAnd(atMostOne, ctx.mkImplies(ctx.mkAnd(read.exec(), isMemInit), atLeastOne));
         }
-        return ctx.mkAnd(atMostOne, atLeastOne);
+        return ctx.mkImplies(read.exec(), ctx.mkAnd(atMostOne, atLeastOne));
     }
 
     private BoolExpr mkSeqVar(int readId, int i) {

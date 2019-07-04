@@ -28,7 +28,7 @@ public class Settings {
 
     private Map<Integer, Boolean> flags = new HashMap<Integer, Boolean>(){{
             put(FLAG_FORCE_PRECISE_EDGES_IN_GRAPHS, true);
-            put(FLAG_USE_SEQ_ENCODING_REL_RF, true);
+            put(FLAG_USE_SEQ_ENCODING_REL_RF, false);
             put(FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY, false);
     }};
 
