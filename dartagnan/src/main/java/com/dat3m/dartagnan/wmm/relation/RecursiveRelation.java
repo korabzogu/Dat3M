@@ -27,11 +27,8 @@ public class RecursiveRelation extends Relation {
     }
 
     public void initialise(Program program, Context ctx, Settings settings){
-        if(doRecurse){
-            doRecurse = false;
-            super.initialise(program, ctx, settings);
-            r1.initialise(program, ctx, settings);
-        }
+        super.initialise(program, ctx, settings);
+        r1.initialise(program, ctx, settings);
     }
 
     public void setConcreteRelation(Relation r1){
