@@ -60,9 +60,9 @@ public class OptionsPane extends JPanel implements ActionListener {
         int height = Math.min(getIconHeight(), (int) Math.round(Toolkit.getDefaultToolkit().getScreenSize().getHeight()) * 7 / 18);
         iconPane = new IconPane(IconCode.DARTAGNAN, height, JLabel.CENTER);
 
-        taskPane = new Selector<>(EnumSet.allOf(Task.class).toArray(new Task[0]), ControlCode.TASK);
-        modePane = new Selector<>(EnumSet.allOf(Mode.class).toArray(new Mode[0]), ControlCode.MODE);
-        aliasPane = new Selector<>(EnumSet.allOf(Alias.class).toArray(new Alias[0]), ControlCode.ALIAS);
+        taskPane = new Selector<>(EnumSet.allOf(Task.class).toArray(new Task[0]), ControlCode.TASK, Task.REACHABILITY);
+        modePane = new Selector<>(EnumSet.allOf(Mode.class).toArray(new Mode[0]), ControlCode.MODE, Mode.KNASTER);
+        aliasPane = new Selector<>(EnumSet.allOf(Alias.class).toArray(new Alias[0]), ControlCode.ALIAS, Alias.CFIS);
 
         Arch[] architectures = EnumSet.allOf(Arch.class).toArray(new Arch[0]);
         sourcePane = new Selector<>(architectures, ControlCode.SOURCE);

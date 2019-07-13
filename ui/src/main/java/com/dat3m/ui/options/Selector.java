@@ -18,6 +18,11 @@ public class Selector<T> extends JPanel {
         this.add(selector);
     }
 
+    Selector(T[] options, ControlCode code, T defaultOption) {
+        this(options, code);
+        selector.setSelectedItem(defaultOption);
+    }
+
     @Override
     public void setEnabled(boolean flag) {
         selector.setEnabled(flag);
