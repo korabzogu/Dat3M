@@ -28,7 +28,6 @@ public class Editor extends JScrollPane implements ActionListener {
     private final JMenuItem importerItem;
     private final JMenuItem exporterItem;
     private final JFileChooser chooser;
-    private final LineNumbersView lineNumbers;
 
     private final ImmutableSet<String> allowedFormats;
     private String loadedFormat = "";
@@ -39,7 +38,7 @@ public class Editor extends JScrollPane implements ActionListener {
         super(editorPane);
         this.code = code;
         this.editorPane = editorPane;
-        this.lineNumbers = new LineNumbersView(editorPane);
+        LineNumbersView lineNumbers = new LineNumbersView(editorPane);
         this.addActionListener(lineNumbers);
         this.importerItem = new JMenuItem(code.toString());
         importerItem.setActionCommand(code.editorMenuImportActionCommand());
