@@ -19,8 +19,6 @@ import static com.dat3m.dartagnan.wmm.utils.Utils.edge;
  */
 public abstract class Relation {
 
-    public static boolean PostFixApprox = false;
-
     protected String name;
     protected String term;
 
