@@ -12,15 +12,15 @@ public class RelEmpty extends Relation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         return ctx.mkTrue();
     }
 }

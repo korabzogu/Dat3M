@@ -31,34 +31,34 @@ public class RelInverse extends UnaryRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
-            for(Tuple pair : r1.getMaxTupleSet()){
-                maxTupleSet.add(new Tuple(pair.getSecond(), pair.getFirst()));
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
+            for(Tuple pair : r1.getMaySet()){
+                maySet.add(new Tuple(pair.getSecond(), pair.getFirst()));
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
-        encodeTupleSet.addAll(tuples);
+    public void addToActiveSet(TupleSet tuples){
+        activeSet.addAll(tuples);
         Set<Tuple> activeSet = new HashSet<>(tuples);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.retainAll(maySet);
         if(!activeSet.isEmpty()){
             TupleSet invSet = new TupleSet();
             for(Tuple pair : activeSet){
                 invSet.add(new Tuple(pair.getSecond(), pair.getFirst()));
             }
-            r1.addEncodeTupleSet(invSet);
+            r1.addToActiveSet(invSet);
         }
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
             BoolExpr opt = Utils.edge(r1.getName(), e2, e1, ctx);

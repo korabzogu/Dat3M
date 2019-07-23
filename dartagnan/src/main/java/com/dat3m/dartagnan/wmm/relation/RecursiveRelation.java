@@ -44,31 +44,31 @@ public class RecursiveRelation extends Relation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public TupleSet getMaxTupleSetRecursive(){
+    public TupleSet getMaySetRecursive(){
         if(doRecurse){
             doRecurse = false;
-            maxTupleSet = r1.getMaxTupleSetRecursive();
-            return maxTupleSet;
+            maySet = r1.getMaySetRecursive();
+            return maySet;
         }
-        return getMaxTupleSet();
+        return getMaySet();
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
-        if(encodeTupleSet != tuples){
-            encodeTupleSet.addAll(tuples);
+    public void addToActiveSet(TupleSet tuples){
+        if(activeSet != tuples){
+            activeSet.addAll(tuples);
         }
         if(doRecurse){
             doRecurse = false;
-            r1.addEncodeTupleSet(encodeTupleSet);
+            r1.addToActiveSet(activeSet);
         }
     }
 
@@ -102,8 +102,8 @@ public class RecursiveRelation extends Relation {
     }
 
     @Override
-    protected BoolExpr encodeLFP() {
-        return r1.encodeLFP();
+    protected BoolExpr encodeKleene() {
+        return r1.encodeKleene();
     }
 
     @Override
@@ -112,8 +112,8 @@ public class RecursiveRelation extends Relation {
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
-        return r1.encodeApprox();
+    protected BoolExpr encodeKnaster() {
+        return r1.encodeKnaster();
     }
 
     @Override
@@ -127,7 +127,7 @@ public class RecursiveRelation extends Relation {
 
     public BoolExpr encodeFinalIteration(int iteration){
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(
                     Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx),
                     Utils.edge(getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx)

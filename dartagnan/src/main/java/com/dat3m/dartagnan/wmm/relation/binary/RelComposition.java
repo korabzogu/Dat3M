@@ -33,41 +33,41 @@ public class RelComposition extends BinaryRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
-            TupleSet set1 = r1.getMaxTupleSet();
-            TupleSet set2 = r2.getMaxTupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
+            TupleSet set1 = r1.getMaySet();
+            TupleSet set2 = r2.getMaySet();
             for(Tuple rel1 : set1){
                 for(Tuple rel2 : set2.getByFirst(rel1.getSecond())){
-                    maxTupleSet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
+                    maySet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public TupleSet getMaxTupleSetRecursive(){
-        if(recursiveGroupId > 0 && maxTupleSet != null){
-            TupleSet set1 = r1.getMaxTupleSetRecursive();
-            TupleSet set2 = r2.getMaxTupleSetRecursive();
+    public TupleSet getMaySetRecursive(){
+        if(recursiveGroupId > 0 && maySet != null){
+            TupleSet set1 = r1.getMaySetRecursive();
+            TupleSet set2 = r2.getMaySetRecursive();
             for(Tuple rel1 : set1){
                 for(Tuple rel2 : set2.getByFirst(rel1.getSecond())){
-                    maxTupleSet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
+                    maySet.add(new Tuple(rel1.getFirst(), rel2.getSecond()));
                 }
             }
-            return maxTupleSet;
+            return maySet;
         }
-        return getMaxTupleSet();
+        return getMaySet();
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
+    public void addToActiveSet(TupleSet tuples){
         Set<Tuple> activeSet = new HashSet<>(tuples);
-        activeSet.removeAll(encodeTupleSet);
-        encodeTupleSet.addAll(tuples);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.removeAll(this.activeSet);
+        this.activeSet.addAll(tuples);
+        activeSet.retainAll(maySet);
 
         if(!activeSet.isEmpty()){
             TupleSet r1Set = new TupleSet();
@@ -81,11 +81,11 @@ public class RelComposition extends BinaryRelation {
                 myMap.get(id1).add(id2);
             }
 
-            for(Tuple tuple1 : r1.getMaxTupleSet()){
+            for(Tuple tuple1 : r1.getMaySet()){
                 Event e1 = tuple1.getFirst();
                 Set<Integer> ends = myMap.get(e1.getCId());
                 if(ends == null) continue;
-                for(Tuple tuple2 : r2.getMaxTupleSet().getByFirst(tuple1.getSecond())){
+                for(Tuple tuple2 : r2.getMaySet().getByFirst(tuple1.getSecond())){
                     Event e2 = tuple2.getSecond();
                     if(ends.contains(e2.getCId())){
                         r1Set.add(tuple1);
@@ -94,25 +94,25 @@ public class RelComposition extends BinaryRelation {
                 }
             }
 
-            r1.addEncodeTupleSet(r1Set);
-            r2.addEncodeTupleSet(r2Set);
+            r1.addToActiveSet(r1Set);
+            r2.addToActiveSet(r2Set);
         }
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
 
         TupleSet r1Set = new TupleSet();
-        r1Set.addAll(r1.getEncodeTupleSet());
-        r1Set.retainAll(r1.getMaxTupleSet());
+        r1Set.addAll(r1.getActiveSet());
+        r1Set.retainAll(r1.getMaySet());
 
         TupleSet r2Set = new TupleSet();
-        r2Set.addAll(r2.getEncodeTupleSet());
-        r2Set.retainAll(r2.getMaxTupleSet());
+        r2Set.addAll(r2.getActiveSet());
+        r2Set.retainAll(r2.getMaySet());
 
         Map<Integer, BoolExpr> exprMap = new HashMap<>();
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             exprMap.put(tuple.hashCode(), ctx.mkFalse());
         }
 
@@ -130,7 +130,7 @@ public class RelComposition extends BinaryRelation {
             }
         }
 
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), exprMap.get(tuple.hashCode())));
         }
 
@@ -140,7 +140,7 @@ public class RelComposition extends BinaryRelation {
     @Override
     protected BoolExpr encodeIDL() {
         if(recursiveGroupId == 0){
-            return encodeApprox();
+            return encodeKnaster();
         }
 
         BoolExpr enc = ctx.mkTrue();
@@ -149,16 +149,16 @@ public class RelComposition extends BinaryRelation {
         boolean recurseInR2 = (r2.getRecursiveGroupId() & recursiveGroupId) > 0;
 
         TupleSet r1Set = new TupleSet();
-        r1Set.addAll(r1.getEncodeTupleSet());
-        r1Set.retainAll(r1.getMaxTupleSet());
+        r1Set.addAll(r1.getActiveSet());
+        r1Set.retainAll(r1.getMaySet());
 
         TupleSet r2Set = new TupleSet();
-        r2Set.addAll(r2.getEncodeTupleSet());
-        r2Set.retainAll(r2.getMaxTupleSet());
+        r2Set.addAll(r2.getActiveSet());
+        r2Set.retainAll(r2.getMaySet());
 
         Map<Integer, BoolExpr> orClauseMap = new HashMap<>();
         Map<Integer, BoolExpr> idlClauseMap = new HashMap<>();
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             orClauseMap.put(tuple.hashCode(), ctx.mkFalse());
             idlClauseMap.put(tuple.hashCode(), ctx.mkFalse());
         }
@@ -185,7 +185,7 @@ public class RelComposition extends BinaryRelation {
             }
         }
 
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), orClauseMap.get(tuple.hashCode())));
             enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx), idlClauseMap.get(tuple.hashCode())));
         }
@@ -202,7 +202,7 @@ public class RelComposition extends BinaryRelation {
             String name = this.getName() + "_" + iteration;
 
             if(iteration == 0 && isRecursive){
-                for(Tuple tuple : encodeTupleSet){
+                for(Tuple tuple : activeSet){
                     enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx)));
                 }
             } else {
@@ -215,15 +215,15 @@ public class RelComposition extends BinaryRelation {
                 String r2Name = recurseInR2 ? r2.getName() + "_" + childIteration : r2.getName();
 
                 TupleSet r1Set = new TupleSet();
-                r1Set.addAll(r1.getEncodeTupleSet());
-                r1Set.retainAll(r1.getMaxTupleSet());
+                r1Set.addAll(r1.getActiveSet());
+                r1Set.retainAll(r1.getMaySet());
 
                 TupleSet r2Set = new TupleSet();
-                r2Set.addAll(r2.getEncodeTupleSet());
-                r2Set.retainAll(r2.getMaxTupleSet());
+                r2Set.addAll(r2.getActiveSet());
+                r2Set.retainAll(r2.getMaySet());
 
                 Map<Integer, BoolExpr> exprMap = new HashMap<>();
-                for(Tuple tuple : encodeTupleSet){
+                for(Tuple tuple : activeSet){
                     exprMap.put(tuple.hashCode(), ctx.mkFalse());
                 }
 
@@ -241,7 +241,7 @@ public class RelComposition extends BinaryRelation {
                     }
                 }
 
-                for(Tuple tuple : encodeTupleSet){
+                for(Tuple tuple : activeSet){
                     enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx), exprMap.get(tuple.hashCode())));
                 }
 

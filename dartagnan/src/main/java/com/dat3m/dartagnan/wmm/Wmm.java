@@ -87,24 +87,24 @@ public class Wmm {
         }
 
         for (Axiom ax : axioms) {
-            ax.getRel().getMaxTupleSet();
+            ax.getRel().getMaySet();
         }
 
         for(String relName : baseRelations){
-            relationRepository.getRelation(relName).getMaxTupleSet();
+            relationRepository.getRelation(relName).getMaySet();
         }
 
         if(settings.getDrawGraph()){
             for(String relName : settings.getGraphRelations()){
                 Relation relation = relationRepository.getRelation(relName);
                 if(relation != null){
-                    relation.addEncodeTupleSet(relation.getMaxTupleSet());
+                    relation.addToActiveSet(relation.getMaySet());
                 }
             }
         }
 
         for (Axiom ax : axioms) {
-            ax.getRel().addEncodeTupleSet(ax.getEncodeTupleSet());
+            ax.getRel().addToActiveSet(ax.getEncodeTupleSet());
         }
 
         Collections.reverse(recursiveGroups);

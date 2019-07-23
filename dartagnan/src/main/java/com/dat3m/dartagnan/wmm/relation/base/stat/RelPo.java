@@ -30,9 +30,9 @@ public class RelPo extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             for(Thread t : program.getThreads()){
                 List<Event> events = t.getCache().getEvents(filter);
 
@@ -41,11 +41,11 @@ public class RelPo extends StaticRelation {
                     Event e1 = it1.next();
                     ListIterator<Event> it2 = events.listIterator(it1.nextIndex());
                     while(it2.hasNext()){
-                        maxTupleSet.add(new Tuple(e1, it2.next()));
+                        maySet.add(new Tuple(e1, it2.next()));
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 }

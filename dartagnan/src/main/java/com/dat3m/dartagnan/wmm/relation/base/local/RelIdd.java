@@ -18,15 +18,15 @@ public class RelIdd extends BasicRegRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
+    public TupleSet getMaySet(){
+        if(maySet == null){
             mkMaxTupleSet(program.getCache().getEvents(FilterBasic.get(EType.REG_READER)));
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         return doEncodeApprox(program.getCache().getEvents(FilterBasic.get(EType.REG_READER)));
     }
 

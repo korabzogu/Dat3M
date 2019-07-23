@@ -18,33 +18,33 @@ public class RelCrit extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             for(Thread thread : program.getThreads()){
                 for(Event lock : thread.getCache().getEvents(FilterBasic.get(EType.RCU_LOCK))){
                     for(Event unlock : thread.getCache().getEvents(FilterBasic.get(EType.RCU_UNLOCK))){
                         if(lock.getCId() < unlock.getCId()){
-                            maxTupleSet.add(new Tuple(lock, unlock));
+                            maySet.add(new Tuple(lock, unlock));
                         }
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     // TODO: Not the most efficient implementation
     // Let's see if we need to keep a reference to a thread in events for anything else, and then optimize this method
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
         for(Thread thread : program.getThreads()){
             for(Event lock : thread.getCache().getEvents(FilterBasic.get(EType.RCU_LOCK))){
                 for(Event unlock : thread.getCache().getEvents(FilterBasic.get(EType.RCU_UNLOCK))){
                     if(lock.getCId() < unlock.getCId()){
                         Tuple tuple = new Tuple(lock, unlock);
-                        if(encodeTupleSet.contains(tuple)){
+                        if(activeSet.contains(tuple)){
                             BoolExpr relation = ctx.mkAnd(lock.exec(), unlock.exec());
                             for(Event otherLock : thread.getCache().getEvents(FilterBasic.get(EType.RCU_LOCK))){
                                 if(otherLock.getCId() > lock.getCId() && otherLock.getCId() < unlock.getCId()){

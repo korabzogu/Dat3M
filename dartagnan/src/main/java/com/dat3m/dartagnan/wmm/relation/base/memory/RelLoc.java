@@ -20,25 +20,25 @@ public class RelLoc extends Relation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             Collection<Event> events = program.getCache().getEvents(FilterBasic.get(EType.MEMORY));
             for(Event e1 : events){
                 for(Event e2 : events){
                     if(e1.getCId() != e2.getCId() && MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent)e2)){
-                        maxTupleSet.add(new Tuple(e1, e2));
+                        maySet.add(new Tuple(e1, e2));
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : encodeTupleSet) {
+        for(Tuple tuple : activeSet) {
             BoolExpr rel = edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx);
             enc = ctx.mkAnd(enc, ctx.mkEq(rel, ctx.mkAnd(
                     ctx.mkAnd(tuple.getFirst().exec(), tuple.getSecond().exec()),

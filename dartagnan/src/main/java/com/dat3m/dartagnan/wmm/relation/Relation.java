@@ -28,8 +28,8 @@ public abstract class Relation {
 
     protected boolean isEncoded;
 
-    protected TupleSet maxTupleSet;
-    protected TupleSet encodeTupleSet;
+    protected TupleSet maySet;
+    protected TupleSet activeSet;
 
     protected int recursiveGroupId = 0;
     protected boolean forceUpdateRecursiveGroupId = false;
@@ -59,23 +59,23 @@ public abstract class Relation {
         this.program = program;
         this.ctx = ctx;
         this.settings = settings;
-        this.maxTupleSet = null;
+        this.maySet = null;
         this.isEncoded = false;
-        encodeTupleSet = new TupleSet();
+        activeSet = new TupleSet();
     }
 
-    public abstract TupleSet getMaxTupleSet();
+    public abstract TupleSet getMaySet();
 
-    public TupleSet getMaxTupleSetRecursive(){
-        return getMaxTupleSet();
+    public TupleSet getMaySetRecursive(){
+        return getMaySet();
     }
 
-    public TupleSet getEncodeTupleSet(){
-        return encodeTupleSet;
+    public TupleSet getActiveSet(){
+        return activeSet;
     }
 
-    public void addEncodeTupleSet(TupleSet tuples){
-        encodeTupleSet.addAll(tuples);
+    public void addToActiveSet(TupleSet tuples){
+        activeSet.addAll(tuples);
     }
 
     public String getName() {
@@ -130,15 +130,15 @@ public abstract class Relation {
         return doEncode();
     }
 
-    protected BoolExpr encodeLFP() {
-        return encodeApprox();
+    protected BoolExpr encodeKleene() {
+        return encodeKnaster();
     }
 
     protected BoolExpr encodeIDL() {
-        return encodeApprox();
+        return encodeKnaster();
     }
 
-    protected abstract BoolExpr encodeApprox();
+    protected abstract BoolExpr encodeKnaster();
 
     public BoolExpr encodeIteration(int recGroupId, int iteration){
         return ctx.mkTrue();
@@ -146,26 +146,26 @@ public abstract class Relation {
 
     protected BoolExpr doEncode(){
         BoolExpr enc = encodeNegations();
-        if(!encodeTupleSet.isEmpty() || forceDoEncode){
+        if(!activeSet.isEmpty() || forceDoEncode){
             if(settings.getMode() == Mode.KLEENE) {
-                return ctx.mkAnd(enc, encodeLFP());
+                return ctx.mkAnd(enc, encodeKleene());
             } else if(settings.getMode() == Mode.IDL) {
                 return ctx.mkAnd(enc, encodeIDL());
             }
-            return ctx.mkAnd(enc, encodeApprox());
+            return ctx.mkAnd(enc, encodeKnaster());
         }
         return enc;
     }
 
     private BoolExpr encodeNegations(){
         BoolExpr enc = ctx.mkTrue();
-        if(!encodeTupleSet.isEmpty()){
-            Set<Tuple> negations = new HashSet<>(encodeTupleSet);
-            negations.removeAll(maxTupleSet);
+        if(!activeSet.isEmpty()){
+            Set<Tuple> negations = new HashSet<>(activeSet);
+            negations.removeAll(maySet);
             for(Tuple tuple : negations){
                 enc = ctx.mkAnd(enc, ctx.mkNot(edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
             }
-            encodeTupleSet.removeAll(negations);
+            activeSet.removeAll(negations);
         }
         return enc;
     }

@@ -30,7 +30,7 @@ public class Acyclic extends Axiom {
 
     @Override
     public TupleSet getEncodeTupleSet(){
-        Map<Event, Set<Event>> transMap = rel.getMaxTupleSet().transMap();
+        Map<Event, Set<Event>> transMap = rel.getMaySet().transMap();
         TupleSet result = new TupleSet();
 
         for(Event e1 : transMap.keySet()){
@@ -43,20 +43,20 @@ public class Acyclic extends Axiom {
             }
         }
 
-        for(Tuple tuple : rel.getMaxTupleSet()){
+        for(Tuple tuple : rel.getMaySet()){
             if(tuple.getFirst().getCId() == tuple.getSecond().getCId()){
                 result.add(tuple);
             }
         }
 
-        result.retainAll(rel.getMaxTupleSet());
+        result.retainAll(rel.getMaySet());
         return result;
     }
 
     @Override
     protected BoolExpr _consistent(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : rel.getEncodeTupleSet()){
+        for(Tuple tuple : rel.getActiveSet()){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
             enc = ctx.mkAnd(enc, ctx.mkImplies(e1.exec(), ctx.mkGt(Utils.intVar(rel.getName(), e1, ctx), ctx.mkInt(0))));
@@ -77,7 +77,7 @@ public class Acyclic extends Axiom {
 
     private BoolExpr satCycle(Context ctx) {
         Set<Event> cycleEvents = new HashSet<>();
-        for(Tuple tuple : rel.getEncodeTupleSet()){
+        for(Tuple tuple : rel.getActiveSet()){
             cycleEvents.add(tuple.getFirst());
         }
 
@@ -94,7 +94,7 @@ public class Acyclic extends Axiom {
         Set<Event> encoded = new HashSet<>();
         String name = rel.getName();
 
-        for(Tuple t : rel.getEncodeTupleSet()){
+        for(Tuple t : rel.getActiveSet()){
             Event e1 = t.getFirst();
             Event e2 = t.getSecond();
 
@@ -112,9 +112,9 @@ public class Acyclic extends Axiom {
                 encoded.add(e1);
 
                 BoolExpr source = ctx.mkFalse();
-                for(Tuple tuple1 : rel.getEncodeTupleSet().getByFirst(e1)){
+                for(Tuple tuple1 : rel.getActiveSet().getByFirst(e1)){
                     BoolExpr opt = cycleEdge(name, e1, tuple1.getSecond(), ctx);
-                    for(Tuple tuple2 : rel.getEncodeTupleSet().getByFirst(e1)){
+                    for(Tuple tuple2 : rel.getActiveSet().getByFirst(e1)){
                         if(tuple1.getSecond().getCId() != tuple2.getSecond().getCId()){
                             opt = ctx.mkAnd(opt, ctx.mkNot(cycleEdge(name, e1, tuple2.getSecond(), ctx)));
                         }
@@ -123,9 +123,9 @@ public class Acyclic extends Axiom {
                 }
 
                 BoolExpr target = ctx.mkFalse();
-                for(Tuple tuple1 : rel.getEncodeTupleSet().getBySecond(e1)){
+                for(Tuple tuple1 : rel.getActiveSet().getBySecond(e1)){
                     BoolExpr opt = cycleEdge(name, tuple1.getFirst(), e1, ctx);
-                    for(Tuple tuple2 : rel.getEncodeTupleSet().getBySecond(e1)){
+                    for(Tuple tuple2 : rel.getActiveSet().getBySecond(e1)){
                         if(tuple1.getFirst().getCId() != tuple2.getFirst().getCId()){
                             opt = ctx.mkAnd(opt, ctx.mkNot(cycleEdge(name, tuple2.getFirst(), e1, ctx)));
                         }

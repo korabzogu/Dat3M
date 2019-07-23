@@ -24,7 +24,7 @@ public class Irreflexive extends Axiom {
     @Override
     public TupleSet getEncodeTupleSet(){
         TupleSet set = new TupleSet();
-        for(Tuple tuple : rel.getMaxTupleSet()){
+        for(Tuple tuple : rel.getMaySet()){
             if(tuple.getFirst().getCId() == tuple.getSecond().getCId()){
                 set.add(tuple);
             }
@@ -35,7 +35,7 @@ public class Irreflexive extends Axiom {
     @Override
     protected BoolExpr _consistent(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : rel.getEncodeTupleSet()){
+        for(Tuple tuple : rel.getActiveSet()){
             if(tuple.getFirst().getCId() == tuple.getSecond().getCId()){
                 enc = ctx.mkAnd(enc, ctx.mkNot(Utils.edge(rel.getName(), tuple.getFirst(), tuple.getFirst(), ctx)));
             }
@@ -46,7 +46,7 @@ public class Irreflexive extends Axiom {
     @Override
     protected BoolExpr _inconsistent(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : rel.getEncodeTupleSet()){
+        for(Tuple tuple : rel.getActiveSet()){
             if(tuple.getFirst().getCId() == tuple.getSecond().getCId()){
                 enc = ctx.mkOr(enc, Utils.edge(rel.getName(), tuple.getFirst(), tuple.getFirst(), ctx));
             }

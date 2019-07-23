@@ -27,37 +27,37 @@ public class RelRangeIdentity extends UnaryRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
-            for(Tuple tuple : r1.getMaxTupleSet()){
-                maxTupleSet.add(new Tuple(tuple.getSecond(), tuple.getSecond()));
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
+            for(Tuple tuple : r1.getMaySet()){
+                maySet.add(new Tuple(tuple.getSecond(), tuple.getSecond()));
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
-        encodeTupleSet.addAll(tuples);
+    public void addToActiveSet(TupleSet tuples){
+        activeSet.addAll(tuples);
         Set<Tuple> activeSet = new HashSet<>(tuples);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.retainAll(maySet);
         if(!activeSet.isEmpty()){
             TupleSet r1Set = new TupleSet();
             for(Tuple tuple : activeSet){
-                r1Set.addAll(r1.getMaxTupleSet().getBySecond(tuple.getFirst()));
+                r1Set.addAll(r1.getMaySet().getBySecond(tuple.getFirst()));
             }
-            r1.addEncodeTupleSet(r1Set);
+            r1.addToActiveSet(r1Set);
         }
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple1 : encodeTupleSet){
+        for(Tuple tuple1 : activeSet){
             Event e = tuple1.getFirst();
             BoolExpr opt = ctx.mkFalse();
-            for(Tuple tuple2 : r1.getMaxTupleSet().getBySecond(e)){
+            for(Tuple tuple2 : r1.getMaySet().getBySecond(e)){
                 opt = ctx.mkOr(Utils.edge(r1.getName(), tuple2.getFirst(), e, ctx));
             }
             enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e, e, ctx), opt));

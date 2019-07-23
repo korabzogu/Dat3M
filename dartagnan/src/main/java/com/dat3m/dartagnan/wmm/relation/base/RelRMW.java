@@ -46,37 +46,37 @@ public class RelRMW extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
+    public TupleSet getMaySet(){
+        if(maySet == null){
             baseMaxTupleSet = new TupleSet();
             FilterAbstract filter = FilterIntersection.get(FilterBasic.get(EType.RMW), FilterBasic.get(EType.WRITE));
             for(Event store : program.getCache().getEvents(filter)){
                 baseMaxTupleSet.add(new Tuple(((RMWStore)store).getLoadEvent(), store));
             }
 
-            maxTupleSet = new TupleSet();
-            maxTupleSet.addAll(baseMaxTupleSet);
+            maySet = new TupleSet();
+            maySet.addAll(baseMaxTupleSet);
 
             for(Thread thread : program.getThreads()){
                 for(Event load : thread.getCache().getEvents(loadFilter)){
                     for(Event store : thread.getCache().getEvents(storeFilter)){
                         if(load.getCId() < store.getCId()){
-                            maxTupleSet.add(new Tuple(load, store));
+                            maySet.add(new Tuple(load, store));
                         }
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         // Encode base (not exclusive pairs) RMW
-        TupleSet origEncodeTupleSet = encodeTupleSet;
-        encodeTupleSet = baseMaxTupleSet;
-        BoolExpr enc = super.encodeApprox();
-        encodeTupleSet = origEncodeTupleSet;
+        TupleSet origEncodeTupleSet = activeSet;
+        activeSet = baseMaxTupleSet;
+        BoolExpr enc = super.encodeKnaster();
+        activeSet = origEncodeTupleSet;
 
         // Encode RMW for exclusive pairs
         BoolExpr unpredictable = ctx.mkFalse();

@@ -23,9 +23,9 @@ public class RelRf extends Relation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
 
             List<Event> eventsLoad = program.getCache().getEvents(FilterBasic.get(EType.READ));
             List<Event> eventsInit = program.getCache().getEvents(FilterBasic.get(EType.INIT));
@@ -37,7 +37,7 @@ public class RelRf extends Relation {
             for(Event e1 : eventsInit){
                 for(Event e2 : eventsLoad){
                     if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent) e2)){
-                        maxTupleSet.add(new Tuple(e1, e2));
+                        maySet.add(new Tuple(e1, e2));
                     }
                 }
             }
@@ -45,16 +45,16 @@ public class RelRf extends Relation {
             for(Event e1 : eventsStore){
                 for(Event e2 : eventsLoad){
                     if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent) e2)){
-                        maxTupleSet.add(new Tuple(e1, e2));
+                        maySet.add(new Tuple(e1, e2));
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
         Map<MemEvent, List<BoolExpr>> edgeMap = new HashMap<>();
         Map<MemEvent, BoolExpr> memInitMap = new HashMap<>();
@@ -62,7 +62,7 @@ public class RelRf extends Relation {
         boolean canAccNonInitMem = settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY);
         boolean useSeqEncoding = settings.getFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF);
 
-        for(Tuple tuple : maxTupleSet){
+        for(Tuple tuple : maySet){
             MemEvent w = (MemEvent) tuple.getFirst();
             MemEvent r = (MemEvent) tuple.getSecond();
             BoolExpr edge = edge(term, w, r, ctx);

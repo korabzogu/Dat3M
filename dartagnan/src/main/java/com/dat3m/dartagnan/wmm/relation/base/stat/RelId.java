@@ -13,13 +13,13 @@ public class RelId extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             for(Event e : program.getCache().getEvents(FilterBasic.get(EType.VISIBLE))){
-                maxTupleSet.add(new Tuple(e, e));
+                maySet.add(new Tuple(e, e));
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 }

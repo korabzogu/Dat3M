@@ -47,15 +47,15 @@ public abstract class BinaryRelation extends Relation {
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
+    public void addToActiveSet(TupleSet tuples){
         TupleSet activeSet = new TupleSet();
         activeSet.addAll(tuples);
-        activeSet.removeAll(encodeTupleSet);
-        encodeTupleSet.addAll(activeSet);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.removeAll(this.activeSet);
+        this.activeSet.addAll(activeSet);
+        activeSet.retainAll(maySet);
         if(!activeSet.isEmpty()){
-            r1.addEncodeTupleSet(activeSet);
-            r2.addEncodeTupleSet(activeSet);
+            r1.addToActiveSet(activeSet);
+            r2.addToActiveSet(activeSet);
         }
     }
 
@@ -69,10 +69,10 @@ public abstract class BinaryRelation extends Relation {
     }
 
     @Override
-    protected BoolExpr encodeLFP() {
+    protected BoolExpr encodeKleene() {
         if(recursiveGroupId > 0){
             return ctx.mkTrue();
         }
-        return encodeApprox();
+        return encodeKnaster();
     }
 }

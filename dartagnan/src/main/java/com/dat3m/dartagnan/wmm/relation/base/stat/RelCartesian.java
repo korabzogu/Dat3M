@@ -29,17 +29,17 @@ public class RelCartesian extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             List<Event> l1 = program.getCache().getEvents(filter1);
             List<Event> l2 = program.getCache().getEvents(filter2);
             for(Event e1 : l1){
                 for(Event e2 : l2){
-                    maxTupleSet.add(new Tuple(e1, e2));
+                    maySet.add(new Tuple(e1, e2));
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 }

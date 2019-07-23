@@ -49,36 +49,36 @@ public class RelTrans extends UnaryRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            transitiveReachabilityMap = r1.getMaxTupleSet().transMap();
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            transitiveReachabilityMap = r1.getMaySet().transMap();
+            maySet = new TupleSet();
             for(Event e1 : transitiveReachabilityMap.keySet()){
                 for(Event e2 : transitiveReachabilityMap.get(e1)){
-                    maxTupleSet.add(new Tuple(e1, e2));
+                    maySet.add(new Tuple(e1, e2));
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
+    public void addToActiveSet(TupleSet tuples){
         TupleSet activeSet = new TupleSet();
         activeSet.addAll(tuples);
-        activeSet.removeAll(encodeTupleSet);
-        encodeTupleSet.addAll(activeSet);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.removeAll(this.activeSet);
+        this.activeSet.addAll(activeSet);
+        activeSet.retainAll(maySet);
 
         TupleSet fullActiveSet = getFullEncodeTupleSet(activeSet);
         if(fullEncodeTupleSet.addAll(fullActiveSet)){
-            fullActiveSet.retainAll(r1.getMaxTupleSet());
-            r1.addEncodeTupleSet(fullActiveSet);
+            fullActiveSet.retainAll(r1.getMaySet());
+            r1.addToActiveSet(fullActiveSet);
         }
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
 
         for(Tuple tuple : fullEncodeTupleSet){
@@ -87,7 +87,7 @@ public class RelTrans extends UnaryRelation {
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
 
-            if(r1.getMaxTupleSet().contains(new Tuple(e1, e2))){
+            if(r1.getMaySet().contains(new Tuple(e1, e2))){
                 orClause = ctx.mkOr(orClause, Utils.edge(r1.getName(), e1, e2, ctx));
             }
 
@@ -156,12 +156,12 @@ public class RelTrans extends UnaryRelation {
     }
 
     @Override
-    protected BoolExpr encodeLFP() {
+    protected BoolExpr encodeKleene() {
         BoolExpr enc = ctx.mkTrue();
         int iteration = 0;
 
         // Encode initial iteration
-        Set<Tuple> currentTupleSet = new HashSet<>(r1.getEncodeTupleSet());
+        Set<Tuple> currentTupleSet = new HashSet<>(r1.getActiveSet());
         for(Tuple tuple : currentTupleSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(
                     Utils.edge(r1.getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx),
@@ -221,7 +221,7 @@ public class RelTrans extends UnaryRelation {
         }
 
         // Encode that transitive relation equals the relation at the last iteration
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(
                     Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx),
                     Utils.edge(r1.getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx)
@@ -234,7 +234,7 @@ public class RelTrans extends UnaryRelation {
     private TupleSet getFullEncodeTupleSet(TupleSet tuples){
         TupleSet processNow = new TupleSet();
         processNow.addAll(tuples);
-        processNow.retainAll(getMaxTupleSet());
+        processNow.retainAll(getMaySet());
 
         TupleSet result = new TupleSet();
 

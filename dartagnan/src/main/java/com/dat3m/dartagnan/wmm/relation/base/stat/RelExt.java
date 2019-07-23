@@ -17,9 +17,9 @@ public class RelExt extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             List<Thread> threads = program.getThreads();
             ListIterator<Thread> it1 = threads.listIterator();
             while(it1.hasNext()){
@@ -29,13 +29,13 @@ public class RelExt extends StaticRelation {
                     Thread t2 = it2.next();
                     for(Event e1 : t1.getCache().getEvents(FilterBasic.get(EType.VISIBLE))){
                         for(Event e2 : t2.getCache().getEvents(FilterBasic.get(EType.VISIBLE))){
-                            maxTupleSet.add(new Tuple(e1, e2));
-                            maxTupleSet.add(new Tuple(e2, e1));
+                            maySet.add(new Tuple(e1, e2));
+                            maySet.add(new Tuple(e2, e1));
                         }
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 }

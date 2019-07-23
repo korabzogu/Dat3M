@@ -27,9 +27,9 @@ public class RelCo extends Relation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             List<Event> eventsInit = program.getCache().getEvents(FilterBasic.get(EType.INIT));
             List<Event> eventsStore = program.getCache().getEvents(FilterMinus.get(
                     FilterBasic.get(EType.WRITE),
@@ -39,7 +39,7 @@ public class RelCo extends Relation {
             for(Event e1 : eventsInit){
                 for(Event e2 : eventsStore){
                     if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent)e2)){
-                        maxTupleSet.add(new Tuple(e1, e2));
+                        maySet.add(new Tuple(e1, e2));
                     }
                 }
             }
@@ -47,16 +47,16 @@ public class RelCo extends Relation {
             for(Event e1 : eventsStore){
                 for(Event e2 : eventsStore){
                     if(e1.getCId() != e2.getCId() && MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent)e2)){
-                        maxTupleSet.add(new Tuple(e1, e2));
+                        maySet.add(new Tuple(e1, e2));
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
 
         List<Event> eventsInit = program.getCache().getEvents(FilterBasic.get(EType.INIT));
@@ -81,7 +81,7 @@ public class RelCo extends Relation {
             MemEvent w1 = (MemEvent)w;
             BoolExpr lastCo = w1.exec();
 
-            for(Tuple t : maxTupleSet.getByFirst(w1)){
+            for(Tuple t : maySet.getByFirst(w1)){
                 MemEvent w2 = (MemEvent)t.getSecond();
                 BoolExpr relation = edge("co", w1, w2, ctx);
                 lastCo = ctx.mkAnd(lastCo, ctx.mkNot(edge("co", w1, w2, ctx)));

@@ -39,28 +39,28 @@ public class RelMinus extends BinaryRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
-            maxTupleSet.addAll(r1.getMaxTupleSet());
-            r2.getMaxTupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
+            maySet.addAll(r1.getMaySet());
+            r2.getMaySet();
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public TupleSet getMaxTupleSetRecursive(){
-        if(recursiveGroupId > 0 && maxTupleSet != null){
-            maxTupleSet.addAll(r1.getMaxTupleSetRecursive());
-            return maxTupleSet;
+    public TupleSet getMaySetRecursive(){
+        if(recursiveGroupId > 0 && maySet != null){
+            maySet.addAll(r1.getMaySetRecursive());
+            return maySet;
         }
-        return getMaxTupleSet();
+        return getMaySet();
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
 
@@ -74,12 +74,12 @@ public class RelMinus extends BinaryRelation {
     @Override
     protected BoolExpr encodeIDL() {
         if(recursiveGroupId == 0){
-            return encodeApprox();
+            return encodeKnaster();
         }
 
         BoolExpr enc = ctx.mkTrue();
 
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
 
@@ -103,7 +103,7 @@ public class RelMinus extends BinaryRelation {
             String name = this.getName() + "_" + iteration;
 
             if(iteration == 0 && isRecursive){
-                for(Tuple tuple : encodeTupleSet){
+                for(Tuple tuple : activeSet){
                     enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx)));
                 }
             } else {
@@ -113,7 +113,7 @@ public class RelMinus extends BinaryRelation {
                 String r1Name = recurse ? r1.getName() + "_" + childIteration : r1.getName();
                 String r2Name = r2.getName();
 
-                for(Tuple tuple : encodeTupleSet){
+                for(Tuple tuple : activeSet){
                     BoolExpr edge = Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx);
                     BoolExpr opt1 = Utils.edge(r1Name, tuple.getFirst(), tuple.getSecond(), ctx);
                     BoolExpr opt2 = ctx.mkNot(Utils.edge(r2Name, tuple.getFirst(), tuple.getSecond(), ctx));

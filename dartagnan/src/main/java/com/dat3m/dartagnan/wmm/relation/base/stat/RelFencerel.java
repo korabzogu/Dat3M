@@ -34,9 +34,9 @@ public class RelFencerel extends Relation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             for(Thread t : program.getThreads()){
                 List<Event> fences = t.getCache().getEvents(FilterBasic.get(fenceName));
                 if(!fences.isEmpty()){
@@ -50,7 +50,7 @@ public class RelFencerel extends Relation {
                             Event e2 = it2.next();
                             for(Event f : fences) {
                                 if(f.getCId() > e1.getCId() && f.getCId() < e2.getCId()){
-                                    maxTupleSet.add(new Tuple(e1, e2));
+                                    maySet.add(new Tuple(e1, e2));
                                     break;
                                 }
                             }
@@ -59,16 +59,16 @@ public class RelFencerel extends Relation {
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
 
         List<Event> fences = program.getCache().getEvents(FilterBasic.get(fenceName));
 
-        for(Tuple tuple : encodeTupleSet){
+        for(Tuple tuple : activeSet){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
 

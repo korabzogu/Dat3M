@@ -19,13 +19,13 @@ public class Empty extends Axiom {
 
     @Override
     public TupleSet getEncodeTupleSet(){
-        return rel.getMaxTupleSet();
+        return rel.getMaySet();
     }
 
     @Override
     protected BoolExpr _consistent(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : rel.getEncodeTupleSet()){
+        for(Tuple tuple : rel.getActiveSet()){
             enc = ctx.mkAnd(enc, ctx.mkNot(Utils.edge(rel.getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
         }
         return enc;
@@ -34,7 +34,7 @@ public class Empty extends Axiom {
     @Override
     protected BoolExpr _inconsistent(Context ctx) {
         BoolExpr enc = ctx.mkFalse();
-        for(Tuple tuple : rel.getEncodeTupleSet()){
+        for(Tuple tuple : rel.getActiveSet()){
             enc = ctx.mkOr(enc, Utils.edge(rel.getName(), tuple.getFirst(), tuple.getSecond(), ctx));
         }
         return enc;

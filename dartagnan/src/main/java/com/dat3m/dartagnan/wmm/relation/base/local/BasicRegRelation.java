@@ -19,7 +19,7 @@ abstract class BasicRegRelation extends StaticRelation {
     abstract Collection<Register> getRegisters(Event regReader);
 
     void mkMaxTupleSet(Collection<Event> regReaders){
-        maxTupleSet = new TupleSet();
+        maySet = new TupleSet();
         ImmutableMap<Register, ImmutableList<Event>> regWriterMap = program.getCache().getRegWriterMap();
         for(Event regReader : regReaders){
             for(Register register : getRegisters(regReader)){
@@ -27,7 +27,7 @@ abstract class BasicRegRelation extends StaticRelation {
                     if(regWriter.getCId() >= regReader.getCId()){
                         break;
                     }
-                    maxTupleSet.add(new Tuple(regWriter, regReader));
+                    maySet.add(new Tuple(regWriter, regReader));
                 }
             }
         }

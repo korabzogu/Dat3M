@@ -17,9 +17,9 @@ public class RelInt extends StaticRelation {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            maySet = new TupleSet();
             for(Thread t : program.getThreads()) {
                 List<Event> events = t.getCache().getEvents(FilterBasic.get(EType.VISIBLE));
                 ListIterator<Event> it1 = events.listIterator();
@@ -28,12 +28,12 @@ public class RelInt extends StaticRelation {
                     ListIterator<Event> it2 = events.listIterator(it1.nextIndex());
                     while (it2.hasNext()) {
                         Event e2 = it2.next();
-                        maxTupleSet.add(new Tuple(e1, e2));
-                        maxTupleSet.add(new Tuple(e2, e1));
+                        maySet.add(new Tuple(e1, e2));
+                        maySet.add(new Tuple(e2, e1));
                     }
                 }
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 }

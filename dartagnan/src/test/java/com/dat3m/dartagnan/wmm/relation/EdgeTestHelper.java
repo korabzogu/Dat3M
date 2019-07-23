@@ -30,7 +30,7 @@ public class EdgeTestHelper {
     // Encode violation of expected event pairs in the relation
     public BoolExpr encodeIllegalEdges(int[] data, Context ctx){
         Set<Tuple> all = mkAllTuples();
-        Set<Tuple> max = relation.getMaxTupleSet();
+        Set<Tuple> max = relation.getMaySet();
         Set<Tuple> expected = mkExpectedTuples(all, data);
         BoolExpr enc = ctx.mkFalse();
 
@@ -45,7 +45,7 @@ public class EdgeTestHelper {
         return enc;
     }
 
-    // Generate set of all possible pairs (can be greater than maxTupleSet of the relation)
+    // Generate set of all possible pairs (can be greater than maySet of the relation)
     private Set<Tuple> mkAllTuples(){
         Set<Tuple> result = new HashSet<>();
         for(Event e1 : program.getCache().getEvents(filter1)){

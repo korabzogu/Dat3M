@@ -56,8 +56,8 @@ public class RecursiveGroup {
             changed = false;
             for(RecursiveRelation relation : relations){
                 relation.setDoRecurse();
-                int oldSize = relation.getMaxTupleSet().size();
-                if(oldSize != relation.getMaxTupleSetRecursive().size()){
+                int oldSize = relation.getMaySet().size();
+                if(oldSize != relation.getMaySetRecursive().size()){
                     changed = true;
                 }
             }
@@ -78,8 +78,8 @@ public class RecursiveGroup {
             changed = false;
             for(RecursiveRelation relation : relations){
                 relation.setDoRecurse();
-                relation.addEncodeTupleSet(relation.getEncodeTupleSet());
-                int newSize = relation.getEncodeTupleSet().size();
+                relation.addToActiveSet(relation.getActiveSet());
+                int newSize = relation.getActiveSet().size();
                 if(newSize != encodeSetSizes.get(relation)){
                     encodeSetSizes.put(relation, newSize);
                     changed = true;

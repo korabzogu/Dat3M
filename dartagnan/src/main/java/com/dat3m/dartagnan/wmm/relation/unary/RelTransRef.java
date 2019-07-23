@@ -49,26 +49,26 @@ public class RelTransRef extends RelTrans {
     }
 
     @Override
-    public TupleSet getMaxTupleSet(){
-        if(maxTupleSet == null){
-            super.getMaxTupleSet();
+    public TupleSet getMaySet(){
+        if(maySet == null){
+            super.getMaySet();
             for (Map.Entry<Event, Set<Event>> entry : transitiveReachabilityMap.entrySet()) {
                 entry.getValue().remove(entry.getKey());
             }
             for(Event e : program.getCache().getEvents(FilterBasic.get(EType.ANY))){
-                maxTupleSet.add(new Tuple(e, e));
+                maySet.add(new Tuple(e, e));
             }
         }
-        return maxTupleSet;
+        return maySet;
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
+    public void addToActiveSet(TupleSet tuples){
         TupleSet activeSet = new TupleSet();
         activeSet.addAll(tuples);
-        activeSet.removeAll(encodeTupleSet);
-        encodeTupleSet.addAll(activeSet);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.removeAll(this.activeSet);
+        this.activeSet.addAll(activeSet);
+        activeSet.retainAll(maySet);
 
         for(Tuple tuple : activeSet){
             if(tuple.getFirst().getCId() == tuple.getSecond().getCId()){
@@ -77,15 +77,15 @@ public class RelTransRef extends RelTrans {
         }
         activeSet.removeAll(identityEncodeTupleSet);
 
-        TupleSet temp = encodeTupleSet;
-        encodeTupleSet = transEncodeTupleSet;
-        super.addEncodeTupleSet(activeSet);
-        encodeTupleSet = temp;
+        TupleSet temp = this.activeSet;
+        this.activeSet = transEncodeTupleSet;
+        super.addToActiveSet(activeSet);
+        this.activeSet = temp;
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
-        return invokeEncode("encodeApprox");
+    protected BoolExpr encodeKnaster() {
+        return invokeEncode("encodeKnaster");
     }
 
     @Override
@@ -94,8 +94,8 @@ public class RelTransRef extends RelTrans {
     }
 
     @Override
-    protected BoolExpr encodeLFP() {
-        return invokeEncode("encodeLFP");
+    protected BoolExpr encodeKleene() {
+        return invokeEncode("encodeKleene");
     }
 
     private BoolExpr invokeEncode(String methodName){
@@ -103,10 +103,10 @@ public class RelTransRef extends RelTrans {
             MethodHandle method = MethodHandles.lookup().findSpecial(RelTrans.class, methodName,
                     MethodType.methodType(BoolExpr.class), RelTransRef.class);
 
-            TupleSet temp = encodeTupleSet;
-            encodeTupleSet = transEncodeTupleSet;
+            TupleSet temp = activeSet;
+            activeSet = transEncodeTupleSet;
             BoolExpr enc = (BoolExpr)method.invoke(this);
-            encodeTupleSet = temp;
+            activeSet = temp;
 
             for(Tuple tuple : identityEncodeTupleSet){
                 enc = ctx.mkAnd(enc, Utils.edge(this.getName(), tuple.getFirst(), tuple.getFirst(), ctx));
