@@ -146,8 +146,8 @@ public class RelTrans extends UnaryRelation {
                     ctx.mkAnd(edge(this.idlConcatName(), e1, e2, ctx), ctx.mkGt(intCount(this.getName(), e1, e2, ctx), intCount(this.idlConcatName(), e1, e2, ctx)))
             )));
 
-            enc = ctx.mkAnd(enc, ctx.mkEq(edge(this.getName(),e1,e2, ctx), ctx.mkOr(
-                    edge(r1.getName(), e1,e2, ctx),
+            enc = ctx.mkAnd(enc, ctx.mkEq(edge(this.getName(),e1, e2, ctx), ctx.mkOr(
+                    edge(r1.getName(), e1, e2, ctx),
                     edge(this.idlConcatName(), e1, e2, ctx)
             )));
         }
@@ -164,8 +164,8 @@ public class RelTrans extends UnaryRelation {
         Set<Tuple> currentTupleSet = new HashSet<>(r1.getActiveSet());
         for(Tuple tuple : currentTupleSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(
-                    Utils.edge(r1.getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx),
-                    Utils.edge(r1.getName(), tuple.getFirst(), tuple.getSecond(), ctx)
+                    Utils.edge(r1.getName() + "_" + iteration, tuple, ctx),
+                    Utils.edge(r1.getName(), tuple, ctx)
             ));
         }
 
@@ -177,7 +177,7 @@ public class RelTrans extends UnaryRelation {
             for(Tuple tuple : currentTupleSet){
                 currentTupleMap.putIfAbsent(tuple, new HashSet<>());
                 currentTupleMap.get(tuple).add(
-                        Utils.edge(r1.getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx)
+                        Utils.edge(r1.getName() + "_" + iteration, tuple, ctx)
                 );
             }
 
@@ -211,7 +211,7 @@ public class RelTrans extends UnaryRelation {
                     orClause = ctx.mkOr(orClause, expr);
                 }
 
-                BoolExpr edge = Utils.edge(r1.getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx);
+                BoolExpr edge = Utils.edge(r1.getName() + "_" + iteration, tuple, ctx);
                 enc = ctx.mkAnd(enc, ctx.mkEq(edge, orClause));
             }
 
@@ -223,8 +223,8 @@ public class RelTrans extends UnaryRelation {
         // Encode that transitive relation equals the relation at the last iteration
         for(Tuple tuple : activeSet){
             enc = ctx.mkAnd(enc, ctx.mkEq(
-                    Utils.edge(getName(), tuple.getFirst(), tuple.getSecond(), ctx),
-                    Utils.edge(r1.getName() + "_" + iteration, tuple.getFirst(), tuple.getSecond(), ctx)
+                    Utils.edge(getName(), tuple, ctx),
+                    Utils.edge(r1.getName() + "_" + iteration, tuple, ctx)
             ));
         }
 

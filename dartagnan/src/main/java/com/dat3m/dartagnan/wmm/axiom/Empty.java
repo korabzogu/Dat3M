@@ -26,7 +26,7 @@ public class Empty extends Axiom {
     protected BoolExpr _consistent(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
         for(Tuple tuple : rel.getActiveSet()){
-            enc = ctx.mkAnd(enc, ctx.mkNot(Utils.edge(rel.getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
+            enc = ctx.mkAnd(enc, ctx.mkNot(Utils.edge(rel.getName(), tuple, ctx)));
         }
         return enc;
     }
@@ -35,7 +35,7 @@ public class Empty extends Axiom {
     protected BoolExpr _inconsistent(Context ctx) {
         BoolExpr enc = ctx.mkFalse();
         for(Tuple tuple : rel.getActiveSet()){
-            enc = ctx.mkOr(enc, Utils.edge(rel.getName(), tuple.getFirst(), tuple.getSecond(), ctx));
+            enc = ctx.mkOr(enc, Utils.edge(rel.getName(), tuple, ctx));
         }
         return enc;
     }

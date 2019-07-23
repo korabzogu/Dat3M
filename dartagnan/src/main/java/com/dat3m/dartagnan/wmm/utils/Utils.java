@@ -11,11 +11,19 @@ public class Utils {
 		return ctx.mkBoolConst(relName + "(" + e1.repr() + "," + e2.repr() + ")");
 	}
 
+	public static BoolExpr edge(String relName, Tuple tuple, Context ctx) {
+		return ctx.mkBoolConst(relName + "(" + tuple.getFirst().repr() + "," + tuple.getSecond().repr() + ")");
+	}
+
 	public static IntExpr intVar(String relName, Event e, Context ctx) {
 		return ctx.mkIntConst(relName + "(" + e.repr() + ")");
 	}
 	
 	public static IntExpr intCount(String relName, Event e1, Event e2, Context ctx) {
 		return ctx.mkIntConst(relName + "(" + e1.repr() + "," + e2.repr() + ")");
+	}
+
+	public static IntExpr intCount(String relName, Tuple tuple, Context ctx) {
+		return ctx.mkIntConst(relName + "(" + tuple.getFirst().repr() + "," + tuple.getSecond().repr() + ")");
 	}
 }

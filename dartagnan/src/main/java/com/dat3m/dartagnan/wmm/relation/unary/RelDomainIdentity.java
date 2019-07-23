@@ -58,9 +58,9 @@ public class RelDomainIdentity extends UnaryRelation {
             Event e = tuple1.getFirst();
             BoolExpr opt = ctx.mkFalse();
             for(Tuple tuple2 : r1.getMaySet().getByFirst(e)){
-                opt = ctx.mkOr(Utils.edge(r1.getName(), e, tuple2.getSecond(), ctx));
+                opt = ctx.mkOr(Utils.edge(r1.getName(), tuple2, ctx));
             }
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e, e, ctx), opt));
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple1, ctx), opt));
         }
         return enc;
     }

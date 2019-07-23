@@ -163,7 +163,7 @@ public abstract class Relation {
             Set<Tuple> negations = new HashSet<>(activeSet);
             negations.removeAll(maySet);
             for(Tuple tuple : negations){
-                enc = ctx.mkAnd(enc, ctx.mkNot(edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
+                enc = ctx.mkAnd(enc, ctx.mkNot(edge(this.getName(), tuple, ctx)));
             }
             activeSet.removeAll(negations);
         }

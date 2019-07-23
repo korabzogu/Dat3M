@@ -1,7 +1,6 @@
 package com.dat3m.dartagnan.wmm.relation.binary;
 
 import com.microsoft.z3.BoolExpr;
-import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.wmm.utils.Utils;
 import com.dat3m.dartagnan.wmm.relation.Relation;
 import com.dat3m.dartagnan.wmm.utils.Tuple;
@@ -52,12 +51,9 @@ public class RelIntersection extends BinaryRelation {
         BoolExpr enc = ctx.mkTrue();
 
         for(Tuple tuple : activeSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
+            BoolExpr opt1 = Utils.edge(r1.getName(), tuple, ctx);
+            BoolExpr opt2 = Utils.edge(r2.getName(), tuple, ctx);
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
         }
         return enc;
     }
@@ -74,20 +70,17 @@ public class RelIntersection extends BinaryRelation {
         boolean recurseInR2 = (r2.getRecursiveGroupId() & recursiveGroupId) > 0;
 
         for(Tuple tuple : activeSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = Utils.edge(r2.getName(), e1, e2, ctx);
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
+            BoolExpr opt1 = Utils.edge(r1.getName(), tuple, ctx);
+            BoolExpr opt2 = Utils.edge(r2.getName(), tuple, ctx);
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
 
             if(recurseInR1){
-                opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e2, ctx)));
+                opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), tuple, ctx), Utils.intCount(r1.getName(), tuple, ctx)));
             }
             if(recurseInR2){
-                opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r2.getName(), e1, e2, ctx)));
+                opt2 = ctx.mkAnd(opt2, ctx.mkGt(Utils.intCount(this.getName(), tuple, ctx), Utils.intCount(r2.getName(), tuple, ctx)));
             }
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
+            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), tuple, ctx), ctx.mkAnd(opt1, opt2)));
         }
         return enc;
     }
@@ -103,7 +96,7 @@ public class RelIntersection extends BinaryRelation {
 
             if(iteration == 0 && isRecursive){
                 for(Tuple tuple : activeSet){
-                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx)));
+                    enc = ctx.mkAnd(ctx.mkNot(Utils.edge(name, tuple, ctx)));
                 }
             } else {
                 int childIteration = isRecursive ? iteration - 1 : iteration;
@@ -115,9 +108,9 @@ public class RelIntersection extends BinaryRelation {
                 String r2Name = recurseInR2 ? r2.getName() + "_" + childIteration : r2.getName();
 
                 for(Tuple tuple : activeSet){
-                    BoolExpr edge = Utils.edge(name, tuple.getFirst(), tuple.getSecond(), ctx);
-                    BoolExpr opt1 = Utils.edge(r1Name, tuple.getFirst(), tuple.getSecond(), ctx);
-                    BoolExpr opt2 = Utils.edge(r2Name, tuple.getFirst(), tuple.getSecond(), ctx);
+                    BoolExpr edge = Utils.edge(name, tuple, ctx);
+                    BoolExpr opt1 = Utils.edge(r1Name, tuple, ctx);
+                    BoolExpr opt2 = Utils.edge(r2Name, tuple, ctx);
                     enc = ctx.mkAnd(enc, ctx.mkEq(edge, ctx.mkAnd(opt1, opt2)));
                 }
 
