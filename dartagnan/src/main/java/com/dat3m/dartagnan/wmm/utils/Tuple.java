@@ -21,16 +21,12 @@ public class Tuple implements Comparable<Tuple> {
     }
 
     public String toString() {
-        return "(" + first + ", " + second + ")";
+        return "(" + first.getId() + ", " + second.getId() + ")";
     }
 
     @Override
     public int hashCode() {
         return (first.getCId() << 16) + second.getCId();
-    }
-
-    public static int toHashCode(int a, int b){
-        return (a << 16) + b;
     }
 
     @Override

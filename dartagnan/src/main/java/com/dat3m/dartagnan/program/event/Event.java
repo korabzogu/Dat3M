@@ -51,6 +51,14 @@ public abstract class Event implements Comparable<Event> {
 		return cId;
 	}
 
+	public int getId(){
+		if(cId > -1)
+			return cId;
+		if(uId > -1)
+			return uId;
+		return oId;
+	}
+
 	public Event getSuccessor(){
 		return successor;
 	}
