@@ -22,21 +22,21 @@ import static com.dat3m.dartagnan.wmm.utils.Utils.intCount;
  *
  * @author Florian Furbach
  */
-public class RelTrans extends UnaryRelation {
+public class RelTransitive extends UnaryRelation {
 
-    Map<Event, Set<Event>> transitiveReachabilityMap;
+    private Map<Event, Set<Event>> transitiveReachabilityMap;
     private TupleSet fullEncodeTupleSet;
 
     public static String makeTerm(Relation r1){
         return r1.getName() + "^+";
     }
 
-    public RelTrans(Relation r1) {
+    public RelTransitive(Relation r1) {
         super(r1);
         term = makeTerm(r1);
     }
 
-    public RelTrans(Relation r1, String name) {
+    public RelTransitive(Relation r1, String name) {
         super(r1, name);
         term = makeTerm(r1);
     }

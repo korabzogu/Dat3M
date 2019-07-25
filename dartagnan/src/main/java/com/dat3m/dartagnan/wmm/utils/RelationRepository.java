@@ -19,7 +19,7 @@ import com.dat3m.dartagnan.wmm.relation.binary.RelComposition;
 import com.dat3m.dartagnan.wmm.relation.binary.RelIntersection;
 import com.dat3m.dartagnan.wmm.relation.binary.RelUnion;
 import com.dat3m.dartagnan.wmm.relation.unary.RelInverse;
-import com.dat3m.dartagnan.wmm.relation.unary.RelTrans;
+import com.dat3m.dartagnan.wmm.relation.unary.RelTransitive;
 import com.dat3m.dartagnan.wmm.relation.unary.UnaryRelation;
 
 import java.lang.reflect.Constructor;
@@ -144,7 +144,7 @@ public class RelationRepository {
             case "(R*M)":
                 return getRelation(RelCartesian.class, FilterBasic.get(EType.READ), FilterBasic.get(EType.MEMORY));
             case "idd^+":
-                return getRelation(RelTrans.class, getRelation("idd"));
+                return getRelation(RelTransitive.class, getRelation("idd"));
             case "data":
                 return getRelation(RelIntersection.class, getRelation("idd^+"), getRelation("(R*W)")).setName("data");
             case "addr":
