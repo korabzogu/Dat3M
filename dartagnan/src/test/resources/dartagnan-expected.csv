@@ -13158,6 +13158,7 @@ litmus/X86/n3.litmus,0
 litmus/X86/n4.litmus,1
 litmus/X86/n4b.litmus,1
 litmus/X86/n5.litmus,1
+litmus/X86/n6.litmus,1
 litmus/X86/n7.litmus,1
 litmus/X86/n8.litmus,1
 litmus/X86/nofence.litmus,0

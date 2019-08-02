@@ -1,0 +1,7 @@
+X86 n6
+{x = 0; y = 0};
+        P0      |       P1      ;
+  mov [x], 1    |  mov [y], 2   ;
+  mov EAX, [x]  |  mov [x], 2   ;
+  mov EBX, [y]  |               ;
+exists (P0:EAX = 1 /\ P0:EBX = 0 /\ x=1);
