@@ -57,10 +57,12 @@ public class Acyclic extends Axiom {
     protected BoolExpr _consistent(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
         for(Tuple tuple : rel.getActiveSet()){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-            enc = ctx.mkAnd(enc, ctx.mkImplies(e1.exec(), ctx.mkGt(Utils.intVar(rel.getName(), e1, ctx), ctx.mkInt(0))));
-            enc = ctx.mkAnd(enc, ctx.mkImplies(Utils.edge(rel.getName(), e1, e2, ctx), ctx.mkLt(Utils.intVar(rel.getName(), e1, ctx), Utils.intVar(rel.getName(), e2, ctx))));
+            enc = ctx.mkAnd(enc, ctx.mkImplies(Utils.edge(
+                    rel.getName(), tuple, ctx),
+                    ctx.mkLt(
+                            Utils.intVar(rel.getName(), tuple.getFirst(), ctx),
+                            Utils.intVar(rel.getName(), tuple.getSecond(), ctx)
+                    )));
         }
         return enc;
     }
