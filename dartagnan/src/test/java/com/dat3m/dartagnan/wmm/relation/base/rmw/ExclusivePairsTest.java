@@ -50,6 +50,10 @@ public class ExclusivePairsTest {
         data.add(new Object[]{path + "AArch64-exclusive-13.litmus", wmm, settings, true,  false, new int[]{4, 5}});
         data.add(new Object[]{path + "AArch64-exclusive-14.litmus", wmm, settings, true,  true,  null});
         data.add(new Object[]{path + "AArch64-exclusive-15.litmus", wmm, settings, true,  true,  null});
+        data.add(new Object[]{path + "AArch64-exclusive-16.litmus", wmm, settings, false,  false,  null});
+        data.add(new Object[]{path + "AArch64-exclusive-17.litmus", wmm, settings, true,  false,  new int[]{3, 4}});
+        data.add(new Object[]{path + "AArch64-exclusive-18.litmus", wmm, settings, false,  false,  null});
+        data.add(new Object[]{path + "AArch64-exclusive-19.litmus", wmm, settings, true,  false,  new int[]{}});
         return data;
     }
 

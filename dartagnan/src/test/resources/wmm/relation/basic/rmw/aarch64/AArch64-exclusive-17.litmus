@@ -1,0 +1,10 @@
+AArch64 AArch64-exclusive-17
+{
+0:X1=x;
+}
+ P0                 ;
+ MOV W0,#1          ;
+ LDXR W2,[X1]       ;
+ STXR W3,W0,[X1]    ;
+ STXR W4,W0,[X1]    ;
+exists (0:X3=0 /\ 0:X4=1)

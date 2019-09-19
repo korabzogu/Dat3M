@@ -7,4 +7,4 @@ AArch64 AArch64-exclusive-04
  LDXR W3,[X1]       ;
  MOV W5,#1          ;
  STXR W7,W5,[X2]    ;
-exists (0:X7=0)
+exists (0:X7=1)
