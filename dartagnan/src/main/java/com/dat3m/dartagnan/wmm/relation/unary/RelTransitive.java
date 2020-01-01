@@ -24,8 +24,8 @@ import static com.dat3m.dartagnan.wmm.utils.Utils.intCount;
  */
 public class RelTransitive extends UnaryRelation {
 
-    private Map<Event, Set<Event>> transitiveReachabilityMap;
-    private TupleSet fullEncodeTupleSet;
+    private Map<Event, Set<Event>> map;
+    private TupleSet encodeSet;
 
     public static String makeTerm(Relation r1){
         return r1.getName() + "^+";
@@ -44,17 +44,17 @@ public class RelTransitive extends UnaryRelation {
     @Override
     public void initialise(Program program, Context ctx, Settings settings){
         super.initialise(program, ctx, settings);
-        fullEncodeTupleSet = new TupleSet();
-        transitiveReachabilityMap = null;
+        encodeSet = new TupleSet();
+        map = null;
     }
 
     @Override
     public TupleSet getMaySet(){
         if(maySet == null){
-            transitiveReachabilityMap = r1.getMaySet().transMap();
+            map = r1.getMaySet().transMap();
             maySet = new TupleSet();
-            for(Event e1 : transitiveReachabilityMap.keySet()){
-                for(Event e2 : transitiveReachabilityMap.get(e1)){
+            for(Event e1 : map.keySet()){
+                for(Event e2 : map.get(e1)){
                     maySet.add(new Tuple(e1, e2));
                 }
             }
@@ -71,7 +71,7 @@ public class RelTransitive extends UnaryRelation {
         activeSet.retainAll(maySet);
 
         TupleSet fullActiveSet = getFullEncodeTupleSet(activeSet);
-        if(fullEncodeTupleSet.addAll(fullActiveSet)){
+        if(encodeSet.addAll(fullActiveSet)){
             fullActiveSet.retainAll(r1.getMaySet());
             r1.addToActiveSet(fullActiveSet);
         }
@@ -81,7 +81,7 @@ public class RelTransitive extends UnaryRelation {
     protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
 
-        for(Tuple tuple : fullEncodeTupleSet){
+        for(Tuple tuple : encodeSet){
             BoolExpr orClause = ctx.mkFalse();
 
             Event e1 = tuple.getFirst();
@@ -91,8 +91,8 @@ public class RelTransitive extends UnaryRelation {
                 orClause = ctx.mkOr(orClause, Utils.edge(r1.getName(), e1, e2, ctx));
             }
 
-            for(Event e3 : transitiveReachabilityMap.get(e1)){
-                if(e3.getCId() != e1.getCId() && e3.getCId() != e2.getCId() && transitiveReachabilityMap.get(e3).contains(e2)){
+            for(Event e3 : map.get(e1)){
+                if(e3.getCId() != e1.getCId() && e3.getCId() != e2.getCId() && map.get(e3).contains(e2)){
                     orClause = ctx.mkOr(orClause, ctx.mkAnd(Utils.edge(this.getName(), e1, e3, ctx), Utils.edge(this.getName(), e3, e2, ctx)));
                 }
             }
@@ -107,15 +107,15 @@ public class RelTransitive extends UnaryRelation {
     protected BoolExpr encodeIDL() {
         BoolExpr enc = ctx.mkTrue();
 
-        for(Tuple tuple : fullEncodeTupleSet){
+        for(Tuple tuple : encodeSet){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
 
             BoolExpr orClause = ctx.mkFalse();
-            for(Tuple tuple2 : fullEncodeTupleSet.getByFirst(e1)){
+            for(Tuple tuple2 : encodeSet.getByFirst(e1)){
                 if (!tuple2.equals(tuple)) {
                     Event e3 = tuple2.getSecond();
-                    if (transitiveReachabilityMap.get(e3).contains(e2)) {
+                    if (map.get(e3).contains(e2)) {
                         orClause = ctx.mkOr(orClause, ctx.mkAnd(
                                 edge(this.getName(), e1, e3, ctx),
                                 edge(this.getName(), e3, e2, ctx),
@@ -128,10 +128,10 @@ public class RelTransitive extends UnaryRelation {
             enc = ctx.mkAnd(enc, ctx.mkEq(edge(this.idlConcatName(), e1, e2, ctx), orClause));
 
             orClause = ctx.mkFalse();
-            for(Tuple tuple2 : fullEncodeTupleSet.getByFirst(e1)){
+            for(Tuple tuple2 : encodeSet.getByFirst(e1)){
                 if (!tuple2.equals(tuple)) {
                     Event e3 = tuple2.getSecond();
-                    if (transitiveReachabilityMap.get(e3).contains(e2)) {
+                    if (map.get(e3).contains(e2)) {
                         orClause = ctx.mkOr(orClause, ctx.mkAnd(
                                 edge(this.getName(), e1, e3, ctx),
                                 edge(this.getName(), e3, e2, ctx)));
@@ -245,9 +245,9 @@ public class RelTransitive extends UnaryRelation {
             for (Tuple tuple : processNow) {
                 Event e1 = tuple.getFirst();
                 Event e2 = tuple.getSecond();
-                for (Event e3 : transitiveReachabilityMap.get(e1)) {
+                for (Event e3 : map.get(e1)) {
                     if (e3.getCId() != e1.getCId() && e3.getCId() != e2.getCId()
-                            && transitiveReachabilityMap.get(e3).contains(e2)) {
+                            && map.get(e3).contains(e2)) {
                         processNext.add(new Tuple(e1, e3));
                         processNext.add(new Tuple(e3, e2));
                     }
