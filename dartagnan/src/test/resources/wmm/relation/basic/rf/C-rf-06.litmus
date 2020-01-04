@@ -1,0 +1,11 @@
+C C-rf-06.litmus
+
+{}
+
+P0(intptr_t *x)
+{
+    WRITE_ONCE(*(x + 2), 2);
+    int r = READ_ONCE(*(x + 1));
+}
+
+exists 0:r = 777;

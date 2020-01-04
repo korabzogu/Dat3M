@@ -1,0 +1,15 @@
+C C-rf-07.litmus
+
+{}
+
+P0(intptr_t *x)
+{
+    int r0 = READ_ONCE(*(x + 1));
+}
+
+P1(intptr_t *x)
+{
+    int r1 = READ_ONCE(*(x + 1));
+}
+
+exists 0:r0 = 777 /\ 1:r1 = 888;

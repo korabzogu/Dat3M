@@ -6,6 +6,7 @@ import com.dat3m.dartagnan.parsers.program.ProgramParser;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.Graph;
 import com.dat3m.dartagnan.utils.ResourceHelper;
 import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.wmm.Wmm;
@@ -13,10 +14,12 @@ import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.Utils;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
+import com.microsoft.z3.enumerations.Z3_ast_print_mode;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,29 +33,40 @@ public class RelRfTest {
 
     @Test
     public void testUninitializedMemory() throws IOException {
+        String path = ResourceHelper.TEST_RESOURCE_PATH + "wmm/relation/basic/rf/expected.csv";
+        ImmutableMap<String, Boolean> expected = ResourceHelper.readExpectedResults(path);
+
         Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1);
         settings.setFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY, true);
 
         String programPath = ResourceHelper.TEST_RESOURCE_PATH + "wmm/relation/basic/rf/";
-        String wmmPath = ResourceHelper.CAT_RESOURCE_PATH + "cat/linux-kernel.cat";
+        Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/linux-kernel.cat"));
 
         Context ctx = new Context();
         Solver solver = ctx.mkSolver(ctx.mkTactic(Settings.TACTIC));
-        Program p1 = new ProgramParser().parse(new File(programPath + "C-rf-01.litmus"));
-        Program p2 = new ProgramParser().parse(new File(programPath + "C-rf-02.litmus"));
 
-        Wmm wmm = new ParserCat().parse(new File(wmmPath));
+        for(String test : expected.keySet()){
+            boolean result = expected.get(test);
+            Program p = new ProgramParser().parse(new File(programPath + test));
 
-        settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, false);
-        assertTrue(Dartagnan.testProgram(solver, ctx, p1, wmm, p1.getArch(), settings));
-        solver.reset();
-        assertTrue(Dartagnan.testProgram(solver, ctx, p2, wmm, p2.getArch(), settings));
-        solver.reset();
+            boolean res = Dartagnan.testProgram(solver, ctx, p, wmm, p.getArch(), settings);
+            System.out.println(p.getName() + ": " + result + " " + res);
 
-        settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, true);
-        assertTrue(Dartagnan.testProgram(solver, ctx, p1, wmm, p1.getArch(), settings));
-        solver.reset();
-        assertTrue(Dartagnan.testProgram(solver, ctx, p2, wmm, p2.getArch(), settings));
+            if(res){
+                ctx.setPrintMode(Z3_ast_print_mode.Z3_PRINT_SMTLIB_FULL);
+                Dartagnan.drawGraph(new Graph(solver.getModel(), ctx, p, settings.getGraphRelations()), "temp.dot");
+            }
+
+            settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, false);
+            assertEquals(result, Dartagnan.testProgram(solver, ctx, p, wmm, p.getArch(), settings));
+            solver.reset();
+
+            System.out.println(p.getName() + ": " + result);
+
+            settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, true);
+            assertEquals(result, Dartagnan.testProgram(solver, ctx, p, wmm, p.getArch(), settings));
+            solver.reset();
+        }
         ctx.close();
     }
 

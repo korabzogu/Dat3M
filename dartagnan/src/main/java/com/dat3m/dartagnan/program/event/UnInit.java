@@ -2,6 +2,7 @@ package com.dat3m.dartagnan.program.event;
 
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.microsoft.z3.IntExpr;
 
 public class UnInit extends MemEvent {
 
@@ -16,6 +17,16 @@ public class UnInit extends MemEvent {
     private UnInit(UnInit other){
         super(other);
         this.event = other.event;
+    }
+
+    @Override
+    public IntExpr getMemAddressExpr(){
+        return event.getMemAddressExpr();
+    }
+
+    @Override
+    public IntExpr getMemValueExpr(){
+        return event.getMemValueExpr();
     }
 
     @Override

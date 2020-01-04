@@ -31,4 +31,18 @@ public class ResourceHelper {
         }
         return expectedResults;
     }
+
+    public static ImmutableMap<String, Boolean> readExpectedResults(String path) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        ImmutableMap.Builder<String, Boolean> builder = new ImmutableMap.Builder<>();
+        String str;
+        while((str = reader.readLine()) != null){
+            String[] line = str.split(",");
+            if(line.length == 2){
+                builder.put(line[0], Integer.parseInt(line[1]) == 1);
+            }
+        }
+        reader.close();
+        return builder.build();
+    }
 }
