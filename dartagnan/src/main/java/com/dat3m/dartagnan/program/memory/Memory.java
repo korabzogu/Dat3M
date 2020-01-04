@@ -2,7 +2,6 @@ package com.dat3m.dartagnan.program.memory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
@@ -11,6 +10,8 @@ import com.dat3m.dartagnan.program.memory.utils.IllegalMemoryAccessException;
 import java.util.*;
 
 public class Memory {
+
+    public static final Address MEMORY_ADDRESS_ANY = new Address(-1);
 
     private BiMap<Location, Address> map;
     private Map<String, Location> locationIndex;
@@ -73,13 +74,5 @@ public class Memory {
             return location;
         }
         return locationIndex.get(name);
-    }
-
-    public ImmutableSet<Address> getAllAddresses(){
-        Set<Address> result = new HashSet<>(map.values());
-        for(List<Address> array : arrays.values()){
-            result.addAll(array);
-        }
-        return ImmutableSet.copyOf(result);
     }
 }

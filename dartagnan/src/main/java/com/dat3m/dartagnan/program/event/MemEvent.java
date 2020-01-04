@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.program.memory.Memory;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.microsoft.z3.Context;
@@ -74,6 +75,10 @@ public abstract class MemEvent extends Event {
     }
 
     public static boolean canAddressTheSameLocation(MemEvent e1, MemEvent e2){
+        if(e1.maxAddressSet.contains(Memory.MEMORY_ADDRESS_ANY))
+            return true;
+        if(e2.maxAddressSet.contains(Memory.MEMORY_ADDRESS_ANY))
+            return true;
         return !Sets.intersection(e1.getMaxAddressSet(), e2.getMaxAddressSet()).isEmpty();
     }
 }
