@@ -12,6 +12,9 @@ litmus/C/lockfree/aba-array.litmus
 # while loop
 litmus/C/lockfree/Michael-Scott.litmus
 
+# negative integers
+litmus/C/lockfree/safe-stack-error.litmus
+
 # For these tests, we get different results with Herd, because we allow zero addresses, but Herd does not
 litmus/C/manual/kernel/C-RomanPenyaev-list-rcu-rr-WA.litmus
 litmus/C/manual/kernel/C-RomanPenyaev-list-rcu-rr.litmus

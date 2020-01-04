@@ -1,0 +1,173 @@
+C C-safe-stack
+
+{
+    int head = 0;
+    int count = 3;
+    int values[3] = {-1, -1, -1};
+    int pointers[3] = {1, 2, -1};
+}
+
+P0(int* head, int* count, int* pointers, int* values) {
+    int idx = 0;
+    observed = -1;
+    elem = -1;
+
+    while(true){
+
+    if(elem == -1){
+
+        // pop -----------------------------------
+        mycount = READ_ONCE(*count);
+        result = 0;
+
+        if((mycount > 1) && (result == 0)){
+            head1 = READ_ONCE(*head);
+            next1 = xchg(pointers + head1, -1);
+
+            if(next1 >= 0){
+                head2 = atomic_cmpxchg(head, head1, next1);
+
+                if(head1 == head2){
+                    result = 1;
+                    temp = atomic_fetch_sub(1, count);
+                    elem = head1;
+                } else {
+                    temp = xchg(*(pointers + head1), next1);
+                    head1 = -1;
+                }
+            }
+            mycount = READ_ONCE(*count);
+        }
+
+    }
+
+    if(elem >= 0){
+
+        // update --------------------------------
+        WRITE_ONCE(*(values + elem), idx);
+        observed = READ_ONCE(*(values + elem));
+
+        // push ----------------------------------
+        head1 = READ_ONCE(*head);
+        result = 0;
+        while(result == 0){
+            WRITE_ONCE(*(pointers + elem), head1);
+            head2 = atomic_cmpxchg(head, head1, elem);
+            if(head1 == head2){
+                result = 1;
+            }
+        }
+        temp = atomic_fetch_add(1, count);
+    }
+    }
+}
+
+P1(int* head, int* count, int* pointers, int* values) {
+    int idx = 1;
+    observed = -1;
+    elem = -1;
+
+    while(true){
+
+        if(elem == -1){
+
+            // pop -----------------------------------
+            mycount = READ_ONCE(*count);
+            result = 0;
+
+            if((mycount > 1) && (result == 0)){
+                head1 = READ_ONCE(*head);
+                next1 = xchg(pointers + head1, -1);
+
+                if(next1 >= 0){
+                    head2 = atomic_cmpxchg(head, head1, next1);
+
+                    if(head1 == head2){
+                        result = 1;
+                        temp = atomic_fetch_sub(1, count);
+                        elem = head1;
+                    } else {
+                        temp = xchg(*(pointers + head1), next1);
+                        head1 = -1;
+                    }
+                }
+                mycount = READ_ONCE(*count);
+            }
+        }
+
+        if(elem >= 0){
+
+            // update --------------------------------
+            WRITE_ONCE(*(values + elem), idx);
+            observed = READ_ONCE(*(values + elem));
+
+            // push ----------------------------------
+            head1 = READ_ONCE(*head);
+            result = 0;
+            while(result == 0){
+                WRITE_ONCE(*(pointers + elem), head1);
+                head2 = atomic_cmpxchg(head, head1, elem);
+                if(head1 == head2){
+                    result = 1;
+                }
+            }
+            temp = atomic_fetch_add(1, count);
+        }
+    }
+}
+
+P2(int* head, int* count, int* pointers, int* values) {
+    int idx = 2;
+    observed = -1;
+    elem = -1;
+
+    while(true){
+
+        if(elem == -1){
+
+            // pop -----------------------------------
+            mycount = READ_ONCE(*count);
+            result = 0;
+
+            if((mycount > 1) && (result == 0)){
+                head1 = READ_ONCE(*head);
+                next1 = xchg(pointers + head1, -1);
+
+                if(next1 >= 0){
+                    head2 = atomic_cmpxchg(head, head1, next1);
+
+                    if(head1 == head2){
+                        result = 1;
+                        temp = atomic_fetch_sub(1, count);
+                        elem = head1;
+                    } else {
+                        temp = xchg(*(pointers + head1), next1);
+                        head1 = -1;
+                    }
+                }
+                mycount = READ_ONCE(*count);
+            }
+        }
+
+        if(elem >= 0){
+
+            // update --------------------------------
+            WRITE_ONCE(*(values + elem), idx);
+            observed = READ_ONCE(*(values + elem));
+
+            // push ----------------------------------
+            head1 = READ_ONCE(*head);
+            result = 0;
+            while(result == 0){
+                WRITE_ONCE(*(pointers + elem), head1);
+                head2 = atomic_cmpxchg(head, head1, elem);
+                if(head1 == head2){
+                    result = 1;
+                }
+            }
+            temp = atomic_fetch_add(1, count);
+        }
+    }
+}
+
+exists 0:observed > -1 /\ 1:observed > -1 /\ 2:observed > -1 /\ (0:observed != 0 \/ 1:observed != 1 \/ 2:observed != 2)
