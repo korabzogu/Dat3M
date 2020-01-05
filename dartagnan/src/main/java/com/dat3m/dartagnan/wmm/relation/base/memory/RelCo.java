@@ -1,5 +1,7 @@
 package com.dat3m.dartagnan.wmm.relation.base.memory;
 
+import com.dat3m.dartagnan.program.memory.Location;
+import com.dat3m.dartagnan.program.memory.Memory;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.filter.FilterMinus;
@@ -16,6 +18,7 @@ import com.dat3m.dartagnan.wmm.utils.TupleSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.dat3m.dartagnan.wmm.utils.Utils.edge;
 import static com.dat3m.dartagnan.wmm.utils.Utils.intVar;
@@ -58,6 +61,7 @@ public class RelCo extends Relation {
     protected BoolExpr encodeKnaster() {
         BoolExpr enc = encodeUninitializedMemory();
 
+        Set<Location> locations = program.getLocations();
         List<Event> eventsInit = program.getCache().getEvents(FilterBasic.get(EType.INIT));
         List<Event> eventsStore = program.getCache().getEvents(FilterMinus.get(
                 FilterBasic.get(EType.WRITE),
@@ -94,11 +98,14 @@ public class RelCo extends Relation {
             BoolExpr lastCoExpr = ctx.mkBoolConst("co_last(" + w1.repr() + ")");
             enc = ctx.mkAnd(enc, ctx.mkEq(lastCoExpr, lastCo));
 
-            for(Address address : w1.getMaxAddressSet()){
-                enc = ctx.mkAnd(enc, ctx.mkImplies(
-                        ctx.mkAnd(lastCoExpr, ctx.mkEq(w1.getMemAddressExpr(), address.toZ3Int(ctx))),
-                        ctx.mkEq(address.getLastMemValueExpr(ctx), w1.getMemValueExpr())
-                ));
+            for(Location location : locations){
+                Address address = location.getAddress();
+                if(w1.getMaxAddressSet().contains(address) || w1.getMaxAddressSet().contains(Memory.MEMORY_ADDRESS_ANY)){
+                    enc = ctx.mkAnd(enc, ctx.mkImplies(
+                            ctx.mkAnd(lastCoExpr, ctx.mkEq(w1.getMemAddressExpr(), address.toZ3Int(ctx))),
+                            ctx.mkEq(address.getLastMemValueExpr(ctx), w1.getMemValueExpr())
+                    ));
+                }
             }
         }
         return enc;
