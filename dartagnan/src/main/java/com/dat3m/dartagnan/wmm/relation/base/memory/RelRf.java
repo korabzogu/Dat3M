@@ -3,7 +3,6 @@ package com.dat3m.dartagnan.wmm.relation.base.memory;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
-import com.dat3m.dartagnan.wmm.filter.FilterMinus;
 import com.microsoft.z3.BoolExpr;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.MemEvent;
@@ -26,23 +25,8 @@ public class RelRf extends Relation {
     public TupleSet getMaySet(){
         if(maySet == null){
             maySet = new TupleSet();
-
             List<Event> eventsLoad = program.getCache().getEvents(FilterBasic.get(EType.READ));
-            List<Event> eventsInit = program.getCache().getEvents(FilterBasic.get(EType.INIT));
-            List<Event> eventsStore = program.getCache().getEvents(FilterMinus.get(
-                    FilterBasic.get(EType.WRITE),
-                    FilterBasic.get(EType.INIT)
-            ));
-
-            for(Event e1 : eventsInit){
-                for(Event e2 : eventsLoad){
-                    if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent) e2)){
-                        maySet.add(new Tuple(e1, e2));
-                    }
-                }
-            }
-
-            for(Event e1 : eventsStore){
+            for(Event e1 : program.getCache().getEvents(FilterBasic.get(EType.WRITE))){
                 for(Event e2 : eventsLoad){
                     if(MemEvent.canAddressTheSameLocation((MemEvent) e1, (MemEvent) e2)){
                         maySet.add(new Tuple(e1, e2));
@@ -57,9 +41,6 @@ public class RelRf extends Relation {
     protected BoolExpr encodeKnaster() {
         BoolExpr enc = ctx.mkTrue();
         Map<MemEvent, List<BoolExpr>> edgeMap = new HashMap<>();
-        Map<MemEvent, BoolExpr> memInitMap = new HashMap<>();
-
-        boolean canAccNonInitMem = settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY);
         boolean useSeqEncoding = settings.getFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF);
 
         for(Tuple tuple : maySet){
@@ -71,21 +52,17 @@ public class RelRf extends Relation {
 
             edgeMap.putIfAbsent(r, new ArrayList<>());
             edgeMap.get(r).add(edge);
-            if(canAccNonInitMem && w.is(EType.INIT)){
-                memInitMap.put(r, ctx.mkOr(memInitMap.getOrDefault(r, ctx.mkFalse()), sameAddress));
-            }
+
             enc = ctx.mkAnd(enc, ctx.mkImplies(edge, ctx.mkAnd(w.exec(), r.exec(), sameAddress, sameValue)));
         }
 
         for(MemEvent r : edgeMap.keySet()){
-            enc = ctx.mkAnd(enc, useSeqEncoding
-                    ? encodeEdgeSeq(r, memInitMap.get(r), edgeMap.get(r))
-                    : encodeEdgeNaive(r, memInitMap.get(r), edgeMap.get(r)));
+            enc = ctx.mkAnd(enc, useSeqEncoding ? encodeEdgeSeq(r, edgeMap.get(r)) : encodeEdgeNaive(r, edgeMap.get(r)));
         }
         return enc;
     }
 
-    private BoolExpr encodeEdgeNaive(Event read, BoolExpr isMemInit, List<BoolExpr> edges){
+    private BoolExpr encodeEdgeNaive(Event read, List<BoolExpr> edges){
         BoolExpr atMostOne = ctx.mkTrue();
         BoolExpr atLeastOne = ctx.mkFalse();
         for(int i = 0; i < edges.size(); i++){
@@ -94,14 +71,10 @@ public class RelRf extends Relation {
                 atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edges.get(i), edges.get(j))));
             }
         }
-
-        if(settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY)) {
-            return ctx.mkAnd(atMostOne, ctx.mkImplies(ctx.mkAnd(read.exec(), isMemInit), atLeastOne));
-        }
         return ctx.mkImplies(read.exec(), ctx.mkAnd(atMostOne, atLeastOne));
     }
 
-    private BoolExpr encodeEdgeSeq(Event read, BoolExpr isMemInit, List<BoolExpr> edges){
+    private BoolExpr encodeEdgeSeq(Event read, List<BoolExpr> edges){
         int num = edges.size();
         int readId = read.getCId();
         BoolExpr lastSeqVar = mkSeqVar(readId, 0);
@@ -114,10 +87,6 @@ public class RelRf extends Relation {
             atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edges.get(i), newSeqVar)));
             atLeastOne = ctx.mkOr(atLeastOne, edges.get(i));
             lastSeqVar = newSeqVar;
-        }
-
-        if(settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY)) {
-            return ctx.mkAnd(atMostOne, ctx.mkImplies(ctx.mkAnd(read.exec(), isMemInit), atLeastOne));
         }
         return ctx.mkImplies(read.exec(), ctx.mkAnd(atMostOne, atLeastOne));
     }
