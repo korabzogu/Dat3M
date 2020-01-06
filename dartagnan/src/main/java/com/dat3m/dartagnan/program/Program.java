@@ -1,5 +1,8 @@
 package com.dat3m.dartagnan.program;
 
+import com.dat3m.dartagnan.program.event.MemEvent;
+import com.dat3m.dartagnan.program.event.Skip;
+import com.dat3m.dartagnan.program.event.UnInit;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.program.utils.ThreadCache;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
@@ -110,7 +113,6 @@ public class Program {
 		return events;
 	}
 
-
     // Unrolling
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -127,11 +129,27 @@ public class Program {
     // Compilation
     // -----------------------------------------------------------------------------------------------------------------
 
-    public int compile(Arch target, int nextId) {
+    public int compile(Arch target, int nextId, boolean useUnInitMem) {
         for(Thread thread : threads){
             nextId = thread.compile(target, nextId);
         }
         isCompiled = true;
+        cache = null;
+        if(useUnInitMem){
+            nextId = prepareUninitializedMemory(target, nextId);
+        }
+        return nextId;
+    }
+
+    private int prepareUninitializedMemory(Arch target, int nextId){
+        Thread thread = new Thread(threads.size(), new Skip());
+        for(Event e : getCache().getEvents(FilterBasic.get(EType.READ))){
+            UnInit uw = new UnInit((MemEvent) e);
+            uw.setMaxAddressSet(ImmutableSet.of(Memory.MEMORY_ADDRESS_ANY));
+            thread.append(uw);
+        }
+        add(thread);
+        nextId = thread.compile(target, nextId);
         cache = null;
         return nextId;
     }

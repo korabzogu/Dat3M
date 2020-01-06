@@ -89,7 +89,7 @@ public class RelRfTest {
     private void doTestDuplicatedEdges(String programPath, Wmm wmm, Settings settings) throws IOException {
         Program program = new ProgramParser().parse(new File(programPath));
         program.unroll(settings.getBound(), 0);
-        program.compile(program.getArch(), 0);
+        program.compile(program.getArch(), 0, false);
 
         Map<Integer, Event> events = new HashMap<Integer, Event>(){{
             put(2, null); put(5, null); put(8, null);

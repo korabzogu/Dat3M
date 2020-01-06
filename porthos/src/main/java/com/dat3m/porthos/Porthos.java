@@ -77,8 +77,8 @@ public class Porthos {
         pSource.unroll(settings.getBound(), 0);
         pTarget.unroll(settings.getBound(), 0);
 
-        int nextId = pSource.compile(source, 0);
-        pTarget.compile(target, nextId);
+        int nextId = pSource.compile(source, 0, settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY));
+        pTarget.compile(target, nextId, settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY));
 
         BoolExpr sourceCF = pSource.encodeCF(ctx);
         BoolExpr sourceFV = pSource.encodeFinalRegisterValues(ctx);

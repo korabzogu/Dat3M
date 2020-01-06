@@ -78,7 +78,7 @@ public class Dartagnan {
     public static boolean testProgram(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings){
 
         program.unroll(settings.getBound(), 0);
-        program.compile(target, 0);
+        program.compile(target, 0, settings.getFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY));
 
         solver.add(program.getAss().encode(ctx));
         if(program.getAssFilter() != null){
