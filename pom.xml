@@ -74,5 +74,6 @@
     <module>porthos</module>
     <module>ui</module>
     <module>svcomp</module>
+    <module>thesis</module>
   </modules>
 </project>
