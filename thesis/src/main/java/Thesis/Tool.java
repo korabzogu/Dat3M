@@ -37,6 +37,7 @@ public class Tool {
         ArrayList<String> headers = new ArrayList<String>();
         headers.add("pthread.h");
         headers.add("stdio.h");
+        headers.add("stdatomic.h");
         String filepath = "thesis/out/tmp.c";
 
         CFileWriter cfw = new CFileWriter(filepath, p);
