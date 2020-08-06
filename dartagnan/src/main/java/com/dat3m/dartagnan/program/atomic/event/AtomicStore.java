@@ -92,4 +92,9 @@ public class AtomicStore extends MemEvent implements RegReaderData {
         }
         return compileSequence(target, nextId, predecessor, events);
     }
+
+    @Override
+    public String AsmToC() {
+        return "Called atomic";
+    }
 }

@@ -74,4 +74,9 @@ public class Local extends Event implements RegWriter, RegReaderData {
 	public Local getCopy(){
 		return new Local(this);
 	}
+
+	@Override
+	public String AsmToC() {
+		return "Local";
+	}
 }

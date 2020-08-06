@@ -59,4 +59,9 @@ public class Store extends MemEvent implements RegReaderData {
     public Store getCopy(){
         return new Store(this);
     }
+
+    @Override
+    public String AsmToC() {
+        return "atomic_store(" + this.address + ", " + this.value + ", );";
+    }
 }

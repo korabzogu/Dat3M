@@ -24,4 +24,9 @@ public class Skip extends Event {
 	public Skip getCopy(){
 		return new Skip(this);
 	}
+
+	@Override
+	public String AsmToC() {
+		return "";
+	}
 }

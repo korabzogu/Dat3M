@@ -36,9 +36,11 @@ dartagnan/target/
 porthos/target/
 ui/target/
 svcomp/target/
-thesis/out
+thesis/out/
+thesis/target/
 
 ##########
 # Boogie #
 ##########
 output/
+

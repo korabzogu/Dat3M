@@ -1,23 +1,67 @@
-package Thesis;
+package com.dat3m.thesis;
 
+import Thesis.CFileWriter;
+import com.dat3m.dartagnan.parsers.program.ProgramParser;
+import com.dat3m.dartagnan.program.Program;
+import com.dat3m.dartagnan.program.Thread;
+import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.program.event.Init;
+import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.options.DartagnanOptions;
+import com.dat3m.dartagnan.utils.printer.Printer;
+import com.dat3m.dartagnan.wmm.filter.FilterBasic;
+import org.apache.commons.cli.HelpFormatter;
+
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
-import com.dat3m.dartagnan.program.event.Event;
-
 public class Tool {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+
+        DartagnanOptions options = new DartagnanOptions();
+        try {
+            options.parse(args);
+        }
+        catch (Exception e){
+            if(e instanceof UnsupportedOperationException){
+                System.out.println(e.getMessage());
+            }
+            new HelpFormatter().printHelp("DARTAGNAN", options);
+            System.exit(1);
+            return;
+        }
+
+        Program p = new ProgramParser().parse(new File(options.getProgramFilePath()));
+
+        Printer printer = new Printer();
+        System.out.println(printer.print(p));
 
         ArrayList<String> headers = new ArrayList<String>();
         headers.add("pthread.h");
         headers.add("stdio.h");
+        headers.add("stdatomic.h");
+        String filepath = "thesis/out/tmp.c";
 
-        writeHeaders(headers);
-        writeMain();
+        CFileWriter cfw = new CFileWriter(filepath, p);
+        cfw.writeHeaders(headers);
+
+        for(Thread thread : p.getThreads()) {
+            for(Event e : thread.getCache().getEvents(FilterBasic.get(EType.ANY))) {
+                if(e instanceof Init) {
+                    cfw.writeGlobalVariables(e);
+                }
+            }
+        }
+        for(Thread thread : p.getThreads()){
+            cfw.writeFunctionDecl(thread);
+        }
+        cfw.writeMain();
 
 
     }
-    static public void writeHeaders(ArrayList<String> headers) {
+    public static void writeHeaders(ArrayList<String> headers) {
         try {
             FileWriter fw = new FileWriter("thesis/out/tmp.c");
             for(int i = 0; i < headers.size(); i++) {
@@ -26,12 +70,12 @@ public class Tool {
             fw.write("\n");
             fw.flush();
             fw.close();
-        } catch(java.io.IOException e) {
+        } catch(IOException e) {
             System.out.println("Error writing headers");
             e.printStackTrace();
         }
     }
-    static public void writeMain() {
+    public static void writeMain() {
         try {
             FileWriter fw = new FileWriter("thesis/out/tmp.c", true);
             fw.write("void *m_thread_exec() {\n");
@@ -45,7 +89,7 @@ public class Tool {
             fw.write("\n");
             fw.flush();
             fw.close();
-        } catch(java.io.IOException e) {
+        } catch(IOException e) {
             System.out.println("Error writing headers");
             e.printStackTrace();
         }

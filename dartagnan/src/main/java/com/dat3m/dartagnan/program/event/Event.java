@@ -220,4 +220,8 @@ public abstract class Event implements Comparable<Event> {
 	protected BoolExpr encodeExec(Context ctx){
 		return ctx.mkEq(execVar, cfVar);
 	}
+
+	public String AsmToC() {
+		throw new RuntimeException("Unimplemented AsmToC called " + this);
+	}
 }

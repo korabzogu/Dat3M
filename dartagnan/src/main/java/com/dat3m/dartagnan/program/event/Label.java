@@ -36,4 +36,8 @@ public class Label extends Event {
     	}
     	return copy;
     }
+    @Override
+    public String AsmToC() {
+        return "Label";
+    }
 }
