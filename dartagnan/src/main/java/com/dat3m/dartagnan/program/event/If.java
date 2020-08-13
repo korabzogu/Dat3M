@@ -144,4 +144,10 @@ public class If extends Event implements RegReaderData {
         }
         return cfEnc;
     }
+
+    @Override
+    public String AsmToC() {
+        return "if(" + cfCond.toString() +  ")\n";
+    }
+
 }

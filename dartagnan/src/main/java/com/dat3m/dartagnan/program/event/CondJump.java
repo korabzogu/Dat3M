@@ -77,4 +77,9 @@ public class CondJump extends Jump implements RegReaderData {
         }
         return cfEnc;
     }
+    
+    @Override
+    public String AsmToC() {
+        return  "if(" + this.expr.toString() + "){\n" + "goto: " + this.label.toString().replaceFirst(".$","")+ ";" + "//event.CondJump" + "\n}\n" ;
+    }
 }

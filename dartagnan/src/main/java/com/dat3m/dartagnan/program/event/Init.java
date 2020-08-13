@@ -56,6 +56,6 @@ public class Init extends MemEvent {
 
 	@Override
 	public String AsmToC() {
-		return  "atomic_init(" + this.address + ", " + this.value + ");";
+		return  "atomic_init(" + this.address + ", " + this.value + "); //event.Init";
 	}
 }

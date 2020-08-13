@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.program.arch.pts.utils.Mo;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.Context;
 import com.dat3m.dartagnan.expression.ExprInterface;
@@ -62,6 +63,6 @@ public class Store extends MemEvent implements RegReaderData {
 
     @Override
     public String AsmToC() {
-        return "atomic_store(" + this.address + ", " + this.value + ", );";
+        return "atomic_store(" + this.address + ", " + this.value + ", " + Mo.AsmToC(mo) + " );" + "//event.Store\n";
     }
 }

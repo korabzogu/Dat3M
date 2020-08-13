@@ -27,6 +27,6 @@ public class Skip extends Event {
 
 	@Override
 	public String AsmToC() {
-		return "";
+		return "" + "//event.Skip\n";
 	}
 }

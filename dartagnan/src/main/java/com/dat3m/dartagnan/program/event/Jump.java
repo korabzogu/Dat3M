@@ -97,4 +97,8 @@ public class Jump extends Event {
         }
         return cfEnc;
     }
+
+    public String AsmToC() {
+        return "goto: " + this.label.toString().replaceFirst(".$","") + ";" + "//event.Jump" + "\n";
+    }
 }

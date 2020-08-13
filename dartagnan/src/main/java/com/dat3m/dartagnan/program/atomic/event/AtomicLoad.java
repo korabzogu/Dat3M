@@ -89,4 +89,5 @@ public class AtomicLoad extends MemEvent implements RegWriter {
         }
         return compileSequence(target, nextId, predecessor, events);
     }
+    
 }

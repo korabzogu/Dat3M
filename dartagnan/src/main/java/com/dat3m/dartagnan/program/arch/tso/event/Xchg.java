@@ -78,4 +78,9 @@ public class Xchg extends MemEvent implements RegWriter, RegReaderData {
         }
         throw new RuntimeException("Compilation of xchg is not implemented for " + target);
     }
+
+    @Override
+    public String AsmToC() {
+        return "TMP = " + address + ";\n" + address + " = " + resultRegister + ";\n" + resultRegister + " = TMP;\n";
+    }
 }

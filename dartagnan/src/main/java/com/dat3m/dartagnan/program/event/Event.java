@@ -222,6 +222,6 @@ public abstract class Event implements Comparable<Event> {
 	}
 
 	public String AsmToC() {
-		throw new RuntimeException("Unimplemented AsmToC called " + this);
+		throw new RuntimeException("Unimplemented AsmToC called " + this + '\n' + this.getClass().getName());
 	}
 }
