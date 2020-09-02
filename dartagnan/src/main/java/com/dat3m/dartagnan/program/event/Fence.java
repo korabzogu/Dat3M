@@ -37,4 +37,9 @@ public class Fence extends Event {
 	public Fence getCopy(){
 		return new Fence(this);
 	}
+
+	@Override
+	public String AsmToC() {
+		return "atomic_thread_fence(memory_order_relaxed)";
+	}
 }

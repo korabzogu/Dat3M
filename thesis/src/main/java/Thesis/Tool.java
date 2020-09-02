@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.reflect.*;
 
 public class Tool {
     public static void main(String[] args) throws IOException {
@@ -47,6 +48,10 @@ public class Tool {
         CFileWriter cfw = new CFileWriter(filepath, p);
         cfw.writeHeaders(headers);
 
+        ArrayList<ArrayList<String>> registers = new ArrayList<ArrayList<String>>();
+        for(Thread thread : p.getThreads()) {
+            registers.add(getRegisterNames(thread.getEntry()));
+        }
         for(Thread thread : p.getThreads()) {
             for(Event e : thread.getCache().getEvents(FilterBasic.get(EType.ANY))) {
                 if(e instanceof Init) {
@@ -94,4 +99,20 @@ public class Tool {
             e.printStackTrace();
         }
     }
+    /*
+    public static ArrayList<String> getRegisterNames(Event entry) {
+        ArrayList<String> res = new ArrayList<String>();
+        Event cur = entry;
+        while(cur != null) {
+            try {
+                Class c = Class.forName("com.dat3m.dartagnan.program.event.Event");
+                Method meth = c.getMethod("getRegister");
+                Object retobj = meth.invoke(meth);
+                cur = cur.getSuccessor();
+            } catch (Throwable e) {
+                System.err.println(e);
+            }
+        }
+    }
+    */
 }

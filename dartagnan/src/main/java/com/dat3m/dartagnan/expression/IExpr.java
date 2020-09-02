@@ -16,4 +16,6 @@ public abstract class IExpr implements ExprInterface {
     public boolean getBoolValue(Event e, Context ctx, Model model){
         return getIntValue(e, ctx, model) > 0;
     }
+
+    public String AsmToC() { throw new RuntimeException("Unimplemented AsmToC in IExpr in " + this);}
 }

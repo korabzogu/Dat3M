@@ -65,7 +65,7 @@ public class Load extends MemEvent implements RegWriter {
 
     @Override
     public String AsmToC() {
-        return resultRegister.AsmToC() + " = " + "atomic_load(" + this.address +");" + "//event.Load" + '\n';
+        return "atomic_store(" + resultRegister.AsmToC() + ", atomic_load(" + this.address +");" + "//event.Load" + '\n';
     }
 
 }

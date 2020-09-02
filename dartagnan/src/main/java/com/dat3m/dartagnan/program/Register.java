@@ -83,5 +83,5 @@ public class Register extends IExpr implements ExprInterface {
 		throw new UnsupportedOperationException("Reduce not supported for " + this);
 	}
 
-	public String AsmToC() { return name + threadId;}
+	public String AsmToC() { return name + "_" + threadId;}
 }
