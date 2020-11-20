@@ -34,4 +34,9 @@ public class AssertBasic extends AbstractAssert {
         }
         return value.toString();
     }
+
+    @Override
+    public String AsmToC() {
+        return "(" + e1.AsmToCAssert() + " " + op.toString() + " " + e2.AsmToCAssert() + ")";
+    }
 }

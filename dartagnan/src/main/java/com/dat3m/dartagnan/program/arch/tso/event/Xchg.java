@@ -81,6 +81,9 @@ public class Xchg extends MemEvent implements RegWriter, RegReaderData {
 
     @Override
     public String AsmToC() {
-        return "TMP = " + address + ";\n" + address + " = " + resultRegister + ";\n" + resultRegister + " = TMP;\n";
+        //TODO
+        //return "__VERIFIER_TSO_XCHG(volatile A* obj, C* expected)";
+        return "__VERIFIER_TSO_XCHG(&" + address.AsmToC() + ",&" + resultRegister.AsmToC() + ");";
+        //return "TMP = " + address + ";\n" + address + " = " + resultRegister + ";\n" + resultRegister + " = TMP;\n";
     }
 }

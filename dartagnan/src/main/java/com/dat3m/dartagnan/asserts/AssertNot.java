@@ -27,4 +27,9 @@ public class AssertNot extends AbstractAssert {
     public String toString() {
         return "!" + child.toString();
     }
+
+    @Override
+    public String AsmToC() {
+        return "!(" + child.AsmToC() + ")";
+    }
 }

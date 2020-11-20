@@ -40,6 +40,6 @@ public class Fence extends Event {
 
 	@Override
 	public String AsmToC() {
-		return "atomic_thread_fence(memory_order_relaxed)";
+		return "__VERIFIER_HARDWARE(NULL);";
 	}
 }

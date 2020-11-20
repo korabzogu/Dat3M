@@ -65,4 +65,9 @@ public class RMWOpAndTest extends RMWAbstract implements RegWriter, RegReaderDat
         }
         return super.compile(target, nextId, predecessor);
     }
+
+    @Override
+    public String AsmToC() {
+        return "atomic_fetch_" + op.toLinuxName() + "(" + resultRegister + "," + value + ");\n";
+    }
 }

@@ -65,4 +65,17 @@ public class IfExpr implements ExprInterface {
 	public BExpr getGuard() {
 		return guard;
 	}
+
+	@Override
+	public String AsmToC() {
+		return "if(" + guard.toString() +  ") {\n"
+				+ tbranch.AsmToC()
+				+ "\n} else {\n"
+				+ fbranch.AsmToC() + "}\n"; }
+
+	@Override
+	public String AsmToCAssert() { return "if(" + guard.toString() +  ") {\n"
+			+ tbranch.AsmToCAssert()
+			+ "\n} else {\n"
+			+ fbranch.AsmToCAssert() + "}\n";}
 }

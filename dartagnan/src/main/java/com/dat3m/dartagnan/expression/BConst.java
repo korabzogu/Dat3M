@@ -49,4 +49,10 @@ public class BConst extends BExpr implements ExprInterface {
 	public boolean getValue() {
 		return value;
 	}
+
+	@Override
+	public String AsmToC() { return String.valueOf(value); }
+
+	@Override
+	public String AsmToCAssert() { return AsmToC();}
 }

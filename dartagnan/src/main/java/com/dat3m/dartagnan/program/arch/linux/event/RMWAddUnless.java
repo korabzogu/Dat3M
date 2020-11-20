@@ -69,4 +69,9 @@ public class RMWAddUnless extends RMWAbstract implements RegWriter, RegReaderDat
         }
         return super.compile(target, nextId, predecessor);
     }
+
+    @Override
+    public String AsmToC() {
+        return "atomic_fetch_" + "dummy" + "(" + resultRegister + "," + value + ");\n";
+    }
 }

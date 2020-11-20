@@ -86,4 +86,9 @@ public class Address extends IConst implements ExprInterface {
     public void setConstValue(Integer value) {
     	this.constValue = value;
     }
+
+    @Override
+    public String AsmToC() {
+        return "mem" + String.valueOf(index);
+    }
 }

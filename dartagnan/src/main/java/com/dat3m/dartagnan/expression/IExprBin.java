@@ -76,4 +76,12 @@ public class IExprBin extends IExpr implements ExprInterface {
 			throw new UnsupportedOperationException("Reduce not supported for " + this);
         }
 	}
+
+	@Override
+    public String AsmToC() {
+        return "(" + lhs.AsmToC() + " " + op + " " + rhs.AsmToC() + ") /* IEXPRBIN */";
+    }
+
+    @Override
+    public String AsmToCAssert() { return "(" + lhs.AsmToCAssert() + " " + op + " " + rhs.AsmToCAssert() + ") /* IEXPRBIN */";}
 }

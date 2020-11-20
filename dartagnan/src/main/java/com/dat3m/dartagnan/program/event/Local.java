@@ -77,6 +77,7 @@ public class Local extends Event implements RegWriter, RegReaderData {
 
 	@Override
 	public String AsmToC() {
-		return "atomic_store(" + register.toString() + register.getThreadId() + "," +  expr + ");" + "//event.Local\n";
+
+		return "atomic_store(&" + register.AsmToC() + ", " +  expr.AsmToC() + "/*"+expr.getClass() + "*/" + ");" + "//event.Local\n";
 	}
 }

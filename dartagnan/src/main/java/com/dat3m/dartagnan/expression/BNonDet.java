@@ -39,4 +39,10 @@ public class BNonDet extends BExpr implements ExprInterface {
 	public String toString() {
 		return "nondet_bool()";
 	}
+
+	@Override
+	public String AsmToC() { return "__SVCOMP_nondet_bool();\n";};
+
+	@Override
+	public String AsmToCAssert() { return AsmToC();}
 }

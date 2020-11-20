@@ -52,4 +52,12 @@ public class IExprUn extends IExpr {
 			throw new UnsupportedOperationException("Reduce not supported for " + this);
         }
 	}
+
+	@Override
+	public String AsmToC() {
+    	return "(" + op.toString() + " " + b.AsmToC() + ") /* IEXPRUN */";
+	}
+
+	@Override
+	public String AsmToCAssert() { return "(" + op.toString() + " " + b.AsmToCAssert() + ") /* IEXPRUN */";}
 }

@@ -49,4 +49,10 @@ public class BExprUn extends BExpr {
 	public IConst reduce() {
 		return new IConst(b.reduce().getValue());
 	}
+
+    @Override
+    public String AsmToC() { return op.toString() + "(" + b.AsmToC() + ")"; }
+
+    @Override
+    public String AsmToCAssert() { return op.toString() + "(" + b.AsmToCAssert() + ")";}
 }

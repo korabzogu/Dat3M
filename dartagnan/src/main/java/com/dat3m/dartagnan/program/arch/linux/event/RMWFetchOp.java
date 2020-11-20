@@ -72,4 +72,18 @@ public class RMWFetchOp extends RMWAbstract implements RegWriter, RegReaderData 
         }
         return super.compile(target, nextId, predecessor);
     }
+
+    @Override
+    public String AsmToC() {
+        return "/* TODO check if this is correct */ atomic_store("
+                + resultRegister.toString()
+                + ","
+                + "atomic_fetch_" + op.toLinuxName() + "_explicit("
+                + value
+                + ","
+                + address
+                + ","
+                + "memory_order_" + Mo.toText(mo)
+                + ");\n";
+    }
 }

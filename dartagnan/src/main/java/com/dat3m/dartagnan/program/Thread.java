@@ -50,6 +50,16 @@ public class Thread {
         return registers.get(name);
     }
 
+    public ArrayList<String> getRegisterNames() {
+        ArrayList<String> res = new ArrayList<String>();
+        Iterator<String> it = registers.keySet().iterator();
+        while(it.hasNext()) {
+            String name = (String) it.next();
+            res.add(name/*+ "_" + this.getId()*/);
+        }
+        return res;
+    }
+
     public Register addRegister(String name){
         if(registers.containsKey(name)){
             throw new RuntimeException("Register " + id + ":" + name + " already exists");

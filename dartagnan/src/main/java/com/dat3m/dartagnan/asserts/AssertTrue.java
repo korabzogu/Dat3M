@@ -15,4 +15,9 @@ public class AssertTrue extends AbstractAssert {
     public String toString(){
         return "true";
     }
+
+    @Override
+    public String AsmToC() {
+        return "1";
+    }
 }

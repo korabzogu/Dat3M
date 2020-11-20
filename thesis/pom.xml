@@ -17,6 +17,25 @@
             <artifactId>dartagnan</artifactId>
             <version>2.0.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.dat3m.dartagnan</groupId>
+            <artifactId>dartagnan</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+            <version>2.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

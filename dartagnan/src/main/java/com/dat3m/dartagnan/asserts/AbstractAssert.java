@@ -39,4 +39,8 @@ public abstract class AbstractAssert {
     }
 
     public abstract BoolExpr encode(Context ctx);
+
+    public String AsmToC() {
+        throw new RuntimeException("Assert AsmToC not implemented!");
+    }
 }

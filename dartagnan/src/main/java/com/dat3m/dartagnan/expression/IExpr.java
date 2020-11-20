@@ -17,5 +17,6 @@ public abstract class IExpr implements ExprInterface {
         return getIntValue(e, ctx, model) > 0;
     }
 
-    public String AsmToC() { throw new RuntimeException("Unimplemented AsmToC in IExpr in " + this);}
+    public String AsmToC() { throw new RuntimeException("Unimplemented AsmToC in IExpr in " + this + "\n" +
+            this.getClass() + "\n");}
 }

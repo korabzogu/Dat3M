@@ -98,4 +98,10 @@ public class Location implements ExprInterface {
 	public IConst reduce() {
 		throw new UnsupportedOperationException("Reduce not supported for " + this);
 	}
+
+	@Override
+	public String AsmToC() { return name; }
+
+	@Override
+	public String AsmToCAssert() { return name; }
 }

@@ -80,6 +80,6 @@ public class CondJump extends Jump implements RegReaderData {
     
     @Override
     public String AsmToC() {
-        return  "if(" + this.expr.toString() + "){\n" + "goto: " + this.label.toString().replaceFirst(".$","")+ ";" + "//event.CondJump" + "\n}\n" ;
+        return  "if(" + this.expr.toString() + "){\n" + "goto " + this.label.toString().replaceFirst(".$","")+ ";" + "//event.CondJump" + "\n}\n" ;
     }
 }

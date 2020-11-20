@@ -61,4 +61,10 @@ public class BExprBin extends BExpr {
         }
         throw new UnsupportedOperationException("Reduce not supported for " + this);
 	}
+
+    @Override
+    public String AsmToC() { return b1.AsmToC() + " " + op.toString() + " " + b2.AsmToC(); }
+
+    @Override
+    public String AsmToCAssert() { return b1.AsmToCAssert() + " " + op.toString() + " " + b2.AsmToCAssert();}
 }

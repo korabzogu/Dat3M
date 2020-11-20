@@ -1,0 +1,13 @@
+# pack-refs with: peeled fully-peeled sorted 
+d3a98bc5fb9e48c6dd992cb2b6ec16734d27700c refs/remotes/origin/2.0.5
+357adcb5e4745a8c4e6ff8a9fe2e19d60dee776d refs/remotes/origin/CAV-2019
+a2603155f4273c8a14ab3354c3e21a9320d880af refs/remotes/origin/FMCAD-2018
+0c2a2a19cb768af7d35ac364cb3c269c96f7372a refs/remotes/origin/armis
+8f5358c6306b98d17417ed5bd7330dd00331d93f refs/remotes/origin/development
+fd6d9398cf8ac37b433dc35965b42bde6d06dc35 refs/remotes/origin/grouped-tuples
+89c3e0b47d38b5d14b12fcdefeade9619fda8749 refs/remotes/origin/grouped-tuples-alternative
+030845b2f46386a48b4597734215bc5ed9f433e4 refs/remotes/origin/master
+9f4fd3a275181ec4b7c123e4b0b7e5aa33dc27af refs/remotes/origin/natalia-temp-branch
+ab8e99013a476a74df99adfdd3ad485dc718872a refs/remotes/origin/spinlocks
+3fec2711a4445c154510131811a0553867124619 refs/tags/2.0.6
+7d9daf379e8c9ae35555e717deffb6ee6a750510 refs/tags/v2.0.3

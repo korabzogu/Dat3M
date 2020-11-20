@@ -99,6 +99,6 @@ public class Jump extends Event {
     }
 
     public String AsmToC() {
-        return "goto: " + this.label.toString().replaceFirst(".$","") + ";" + "//event.Jump" + "\n";
+        return "goto " + this.label.toString().replaceFirst(".$","") + ";" + "//event.Jump" + "\n";
     }
 }

@@ -27,7 +27,7 @@ import static org.junit.Assert.fail;
 
 public abstract class AbstractDartagnanTest {
 
-    static Iterable<Object[]> buildParameters(String litmusPath, String cat, Arch target) throws IOException {
+    public static Iterable<Object[]> buildParameters(String litmusPath, String cat, Arch target) throws IOException {
         int n = ResourceHelper.LITMUS_RESOURCE_PATH.length();
         Map<String, Result> expectationMap = ResourceHelper.getExpectedResults();
         Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + cat));

@@ -72,4 +72,15 @@ public class RMWCmpXchg extends RMWAbstract implements RegWriter, RegReaderData 
         }
         return super.compile(target, nextId, predecessor);
     }
+
+    @Override
+    public String AsmToC() {
+        return "atomic_store(" + resultRegister.AsmToC()
+                + ", atomic_compare_exchange_strong(/*TODO find out if strong or weak &|| explicit is needed */ "
+                +  address.toString()
+                + ","
+                + cmp.toString()
+                + ","
+                + value.toString() + ");\n";
+    }
 }

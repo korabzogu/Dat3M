@@ -66,4 +66,10 @@ public class RMWOpReturn extends RMWAbstract implements RegWriter, RegReaderData
         }
         return super.compile(target, nextId, predecessor);
     }
+
+    //TODO atomic return?
+    @Override
+    public String AsmToC() {
+        return "atomic_fetch_" + op.toLinuxName() + "(" + resultRegister + "," + value + ");\n";
+    }
 }

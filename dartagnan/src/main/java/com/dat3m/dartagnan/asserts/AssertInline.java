@@ -22,4 +22,9 @@ public class AssertInline extends AbstractAssert {
     public String toString(){
         return "!" + e.getResultRegister();
     }
+
+    @Override
+    public String AsmToC() {
+        throw new RuntimeException("Inline AsmToC called");
+    }
 }

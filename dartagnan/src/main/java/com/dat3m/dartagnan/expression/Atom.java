@@ -83,4 +83,10 @@ public class Atom extends BExpr implements ExprInterface {
         }
         throw new UnsupportedOperationException("Reduce not supported for " + this);
 	}
+
+	@Override
+	public String AsmToC() { return "(" + lhs.AsmToC() + ")" + op.toString() + "(" +  rhs.AsmToC() + ")"; /* ATOM */ }
+
+	@Override
+	public String AsmToCAssert() { return "(" + lhs.AsmToCAssert() + ")" + op.toString() + "(" +  rhs.AsmToCAssert() + ")"; /* ATOM */}
 }

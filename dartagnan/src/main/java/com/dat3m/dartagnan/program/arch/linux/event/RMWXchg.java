@@ -66,4 +66,10 @@ public class RMWXchg extends RMWAbstract implements RegWriter, RegReaderData {
         }
         return super.compile(target, nextId, predecessor);
     }
+
+    @Override
+    public String AsmToC() {
+        // TODO use corresponding stdatomic.h function
+        throw new RuntimeException("Tried converting unwanted event, just ignore for now");
+    }
 }

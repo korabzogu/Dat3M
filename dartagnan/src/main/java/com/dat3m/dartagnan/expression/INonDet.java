@@ -108,4 +108,7 @@ public class INonDet extends IExpr implements ExprInterface {
         }
         throw new UnsupportedOperationException("getMin() not supported for " + this);
 	}
+
+	@Override
+	public String AsmToCAssert() { return "__SVCOMP_nondet_int();\n";}
 }

@@ -52,4 +52,10 @@ public class IConst extends IExpr implements ExprInterface {
 	public int getValue() {
 		return value;
 	}
+
+	@Override
+	public String AsmToC() { return String.valueOf(value); }
+
+	@Override
+	public String AsmToCAssert() { return AsmToC();}
 }

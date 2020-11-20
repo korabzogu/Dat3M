@@ -14,4 +14,5 @@ public enum IOpUn {
     public IntExpr encode(IntExpr e, Context ctx) {
         return (IntExpr)ctx.mkSub(ctx.mkInt(0),e);
     }
+
 }
