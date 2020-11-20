@@ -82,11 +82,11 @@ public class Tool {
             }
         }
         // Write variables for functions etc.
-        for(Location l : p.getLocations()) {
+        for(Address a : p.getMemory().getAllAddresses()) {
             // TODO write lines with atomic_int l.AsmToC();
             try {
                 FileWriter fw = new FileWriter(filepath, true);
-                fw.write("atomic_int " + l.AsmToC() + ";\n");
+                fw.write("atomic_int " + a.AsmToC() + ";\n");
                 fw.flush();
                 fw.close();
             }
