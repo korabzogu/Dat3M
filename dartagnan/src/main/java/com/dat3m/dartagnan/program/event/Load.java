@@ -1,6 +1,7 @@
 package com.dat3m.dartagnan.program.event;
 
 import com.dat3m.dartagnan.program.arch.pts.utils.Mo;
+import com.dat3m.dartagnan.program.memory.Address;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.dat3m.dartagnan.expression.ExprInterface;
@@ -68,17 +69,14 @@ public class Load extends MemEvent implements RegWriter {
     public String AsmToC() {
         // r = atomic_load(x)
         // TODO make MO into ENUM
-        // TODO make function simpler
+        String mem_order = "memory_order_relaxed";
+        String addressToC = this.address.AsmToC();
         if(this.mo != null) {
-            return resultRegister.AsmToC()
-                    + " = atomic_load_explicit(&"
-                    + this.address.AsmToC()
-                    + ", " + Mo.AsmToC(mo) + ");" + "//event.Load" + '\n';
-        } else {
-            return resultRegister.AsmToC()
-                    + " = atomic_load_explicit(&"
-                    + this.address.AsmToC()
-                    + ", memory_order_relaxed);" + "//event.Load" + '\n';
+            mem_order = Mo.AsmToC(mo);
         }
+        return resultRegister.AsmToC()
+                + " = atomic_load_explicit("
+                + "&" + addressToC
+                + ", " + mem_order + ");" + "//event.Load" + '\n';
     }
 }

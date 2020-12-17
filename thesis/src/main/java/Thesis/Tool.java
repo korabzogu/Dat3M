@@ -2,6 +2,7 @@ package Thesis;
 
 import Thesis.CFileWriter;
 import com.dat3m.dartagnan.parsers.program.ProgramParser;
+import com.dat3m.dartagnan.parsers.program.utils.PointerLocation;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Thread;
 import com.dat3m.dartagnan.program.event.Event;
@@ -86,7 +87,10 @@ public class Tool {
             // TODO write lines with atomic_int l.AsmToC();
             try {
                 FileWriter fw = new FileWriter(filepath, true);
-                fw.write("atomic_int " + a.AsmToC() + ";\n");
+                //
+                String memName = a.AsmToC();
+                memName = memName.substring(1);
+                fw.write("atomic_int " + memName + ";\n");
                 fw.flush();
                 fw.close();
             }
@@ -101,54 +105,14 @@ public class Tool {
         cfw.writeMain(p);
 
 
-    }
-    /*
-    public static void writeHeaders(ArrayList<String> headers) {
-        try {
-            FileWriter fw = new FileWriter("thesis/out/tmp.c");
-            for(int i = 0; i < headers.size(); i++) {
-                fw.write("#include " + "<" +  headers.get(i) + ">\n");
-            }
-            fw.write("\n");
-            fw.flush();
-            fw.close();
-        } catch(IOException e) {
-            System.out.println("Error writing headers");
-            e.printStackTrace();
+
+        // customTag regex
+        cfw.processCustomTags();
+
+        System.out.println("\n\nRegister Address 1-to-1:\n");
+        for(PointerLocation s : p.getPtrLocMap()) {
+            System.out.println(s.getThreadID() + " " + s.getLoc() + " " + s.getPtr());
         }
+
     }
-    public static void writeMain() {
-        try {
-            FileWriter fw = new FileWriter("thesis/out/tmp.c", true);
-            fw.write("void *m_thread_exec() {\n");
-            fw.write("printf(\"Main thread hello\\n \");\n");
-            fw.write("}\n\n");
-            fw.write("int main() {\n");
-            fw.write("pthread_t m_thread;\n");
-            fw.write("pthread_create(&m_thread, NULL, &m_thread_exec, NULL);\n");
-            fw.write("pthread_join(m_thread, NULL);\n");
-            fw.write("}\n");
-            fw.write("\n");
-            fw.flush();
-            fw.close();
-        } catch(IOException e) {
-            System.out.println("Error writing headers");
-            e.printStackTrace();
-        }
-    }
-    public static ArrayList<String> getRegisterNames(Event entry) {
-        ArrayList<String> res = new ArrayList<String>();
-        Event cur = entry;
-        while(cur != null) {
-            try {
-                Class c = Class.forName("com.dat3m.dartagnan.program.event.Event");
-                Method meth = c.getMethod("getRegister");
-                Object retobj = meth.invoke(meth);
-                cur = cur.getSuccessor();
-            } catch (Throwable e) {
-                System.err.println(e);
-            }
-        }
-    }
-    */
 }

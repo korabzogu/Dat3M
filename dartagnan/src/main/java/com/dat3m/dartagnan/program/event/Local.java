@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.program.memory.Address;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
@@ -77,7 +78,9 @@ public class Local extends Event implements RegWriter, RegReaderData {
 
 	@Override
 	public String AsmToC() {
-
-		return "atomic_store(&" + register.AsmToC() + ", " +  expr.AsmToC() + "/*"+expr.getClass() + "*/" + ");" + "//event.Local\n";
+		if(expr instanceof Address) {
+			return "/*§Skip§*/";
+		}
+		return register.AsmToC() + " = " + expr.AsmToC() + ";//event.Local\n";
 	}
 }

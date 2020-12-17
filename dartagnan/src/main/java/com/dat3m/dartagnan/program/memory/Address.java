@@ -89,6 +89,6 @@ public class Address extends IConst implements ExprInterface {
 
     @Override
     public String AsmToC() {
-        return "mem" + String.valueOf(index);
+        return "&mem" + String.valueOf(index);
     }
 }

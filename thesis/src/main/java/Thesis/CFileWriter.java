@@ -1,21 +1,22 @@
 package Thesis;
 
 import com.dat3m.dartagnan.asserts.AbstractAssert;
+import com.dat3m.dartagnan.parsers.program.utils.PointerLocation;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.Thread;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Init;
 import com.dat3m.dartagnan.program.memory.Address;
+import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CFileWriter {
     private String filepath;
@@ -80,8 +81,8 @@ public class CFileWriter {
                 for(Event e : thread.getCache().getEvents(FilterBasic.get(EType.ANY))) {
                     if(e instanceof Init) {
                         System.out.println("Following event " + e.toString());
-                        fw.write("atomic_init(&"
-                                + e.AsmToC()
+                        fw.write(
+                                e.AsmToC()
                                 + ", "
                                 + ((Init) e).getValue().AsmToC() + ");\n");
                     }
@@ -117,6 +118,10 @@ public class CFileWriter {
             }
 
             // create assert
+            for(Location l : p.getLocations()) {
+                fw.write("int " + l.getName()
+                        + " = atomic_load_explicit("+ l.getAddress()+", memory_order_relaxed);\n");
+            }
             fw.write("assert(" + p.getAss().AsmToC() + ")" + ";\n");
 
             // END MAIN
@@ -149,8 +154,15 @@ public class CFileWriter {
             if(!(t.getEntry() instanceof Init) && t.getRegisterNames().size() > 0) {
                 fw.write("struct " + config.getStructName(t.getId()) + " {\n");
                 ArrayList<String> regNames = t.getRegisterNames();
+
                 for(String reg : regNames) {
-                    fw.write("int " + reg + ";\n");
+                    boolean b = false;
+                    for(PointerLocation ploc : prog.getPtrLocMap()) {
+                        if(ploc.getPtr().equals(reg))
+                            b = true;
+                    }
+                    if(!b)
+                        fw.write("int " + reg + ";\n");
                 }
                 fw.write("};\n");
                 fw.flush();
@@ -171,6 +183,12 @@ public class CFileWriter {
             }
             ArrayList<String> localRegs = t.getRegisterNames();
             for(String reg : localRegs) {
+                boolean b = false;
+                for(PointerLocation ploc : prog.getPtrLocMap()) {
+                    if(ploc.getPtr().equals(reg))
+                        b = true;
+                }
+                if(!b)
                 fw.write("int " + reg + ";\n");
             }
             for(Event e : t.getCache().getEvents(FilterBasic.get(EType.ANY))) {
@@ -185,7 +203,14 @@ public class CFileWriter {
 
             // Propagate local variables
             for(String reg : localRegs) {
-                fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
+                boolean b = false;
+                for(PointerLocation ploc : prog.getPtrLocMap()) {
+                    if(ploc.getPtr().equals(reg))
+                        b = true;
+                }
+                if(!b)
+                    fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
+
             }
             if(!(t.getEntry() instanceof Init)) {
                 fw.write("}\n\n");
@@ -211,5 +236,50 @@ public class CFileWriter {
                 System.out.println("Error writing function declaration of function ");
                 ex.printStackTrace();
             }
+    }
+
+    public void processCustomTags() {
+        String content = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filepath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                // do regex check
+                Pattern pattern = Pattern.compile("<customTag>(.+?)</customTag>", Pattern.DOTALL);
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find()) {
+                    System.out.println("Matcher matched " + line);
+                    String reg = matcher.group(1);
+                    if(reg.at(0) == '&') {
+                        reg = reg.substring(1);
+                    }
+                    boolean set = false;
+                    for(PointerLocation ploc : prog.getPtrLocMap()) {
+                        System.out.println("REG: " + reg);
+                        if(ploc.getPtr().equals(reg)) {
+                            reg = ploc.getLoc();
+                            set = true;
+                            break;
+                        }
+                    }
+                    if(!set) {
+                        reg = reg;
+                    }
+
+                    content += line.replaceAll("<customTag>(.+?)</customTag>", reg);
+                } else {
+                    content += line + '\n';
+                }
+
+            }
+            FileWriter fw = new FileWriter(filepath);
+            fw.write(content);
+            fw.flush();
+            fw.close();
+        }
+        catch(java.io.IOException ex) {
+            System.out.println("Error writing function declaration of function ");
+            ex.printStackTrace();
+        }
     }
 }

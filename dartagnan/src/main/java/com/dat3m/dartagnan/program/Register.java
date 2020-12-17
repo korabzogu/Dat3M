@@ -84,7 +84,7 @@ public class Register extends IExpr implements ExprInterface {
 	}
 
 	@Override
-	public String AsmToC() { return name /*+ "_" + threadId*/;}
+	public String AsmToC() { return "<customTag>" + name + "</customTag>" /*+ "_" + threadId*/;}
 
 	@Override
 	public String AsmToCAssert() { return "thread_local_" + String.valueOf(threadId) + "." + name;}

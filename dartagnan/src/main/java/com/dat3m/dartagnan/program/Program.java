@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program;
 
+import com.dat3m.dartagnan.parsers.program.utils.PointerLocation;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.program.utils.ThreadCache;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
@@ -20,6 +21,9 @@ import com.dat3m.dartagnan.program.event.utils.RegWriter;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.memory.Memory;
 
+
+
+
 import static com.dat3m.dartagnan.wmm.utils.Utils.edge;
 
 import java.util.*;
@@ -36,6 +40,7 @@ public class Program {
     private ThreadCache cache;
     private boolean isUnrolled;
     private boolean isCompiled;
+    private ArrayList<PointerLocation> ptrLocs;
 
     public Program(Memory memory, ImmutableSet<Location> locations){
         this("", memory, locations);
@@ -139,6 +144,14 @@ public class Program {
     	}
 		return ass;
 	}
+
+	public void setPtrLocs(ArrayList<PointerLocation> ptrLocs) {
+        this.ptrLocs = ptrLocs;
+    }
+
+    public ArrayList<PointerLocation> getPtrLocMap() {
+        return this.ptrLocs;
+    }
 
     // Unrolling
     // -----------------------------------------------------------------------------------------------------------------

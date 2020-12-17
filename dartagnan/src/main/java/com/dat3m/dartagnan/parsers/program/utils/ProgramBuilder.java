@@ -25,6 +25,8 @@ public class ProgramBuilder {
 
     private Map<String, Label> labels = new HashMap<>();
 
+    private ArrayList<PointerLocation> ptrLocs = new ArrayList<PointerLocation>();
+
     private AbstractAssert ass;
     private AbstractAssert assFilter;
 
@@ -38,7 +40,11 @@ public class ProgramBuilder {
             program.add(thread);
         }
         program.setAss(ass);
+        // program.setRegAddressMap
         program.setAssFilter(assFilter);
+
+        // set ptrLocs
+        program.setPtrLocs(ptrLocs);
         return program;
     }
 
@@ -90,6 +96,9 @@ public class ProgramBuilder {
         Location loc = getOrCreateLocation(locName);
         Register reg = getOrCreateRegister(regThread, regName);
         addChild(regThread, new Local(reg, loc.getAddress()));
+
+        // litmus-to-c utility
+        ptrLocs.add(new PointerLocation(regThread, regName, locations.get(locName).getAddress().AsmToC()));
     }
 
     public void initRegEqLocVal(int regThread, String regName, String locName){
