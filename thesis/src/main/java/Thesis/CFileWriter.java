@@ -250,9 +250,6 @@ public class CFileWriter {
                 if (matcher.find()) {
                     System.out.println("Matcher matched " + line);
                     String reg = matcher.group(1);
-                    if(reg.at(0) == '&') {
-                        reg = reg.substring(1);
-                    }
                     boolean set = false;
                     for(PointerLocation ploc : prog.getPtrLocMap()) {
                         System.out.println("REG: " + reg);
@@ -283,3 +280,7 @@ public class CFileWriter {
         }
     }
 }
+
+// DS reg->addr
+// asmToC -> writeToFile <
+//

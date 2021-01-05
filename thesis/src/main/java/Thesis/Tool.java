@@ -107,7 +107,7 @@ public class Tool {
 
 
         // customTag regex
-        cfw.processCustomTags();
+        //cfw.processCustomTags();
 
         System.out.println("\n\nRegister Address 1-to-1:\n");
         for(PointerLocation s : p.getPtrLocMap()) {
