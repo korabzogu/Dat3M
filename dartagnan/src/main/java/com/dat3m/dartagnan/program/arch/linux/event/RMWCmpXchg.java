@@ -75,12 +75,15 @@ public class RMWCmpXchg extends RMWAbstract implements RegWriter, RegReaderData 
 
     @Override
     public String AsmToC() {
-        return "atomic_store(" + resultRegister.AsmToC()
+        // TODO svcomp external function: return register
+        // definition: int SV_COMP_RMWCmpXchg(int* address, int cmp, int value);
+        // resultRegister.AsmToC() = SV_COMP_RMWCmpXchg(int* address, int cmp, int value);
+        return " atomic_store(" + resultRegister.AsmToC()
                 + ", atomic_compare_exchange_strong(/*TODO find out if strong or weak &|| explicit is needed */ "
                 +  address.toString()
                 + ","
                 + cmp.toString()
                 + ","
-                + value.toString() + ");\n";
+                + value.toString() + "));\n";
     }
 }

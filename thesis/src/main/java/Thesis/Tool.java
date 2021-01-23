@@ -107,12 +107,12 @@ public class Tool {
 
 
         // customTag regex
-        //cfw.processCustomTags();
+        cfw.processCustomTags();
+        cfw.processAssertionTags();
 
         System.out.println("\n\nRegister Address 1-to-1:\n");
         for(PointerLocation s : p.getPtrLocMap()) {
             System.out.println(s.getThreadID() + " " + s.getLoc() + " " + s.getPtr());
         }
-
     }
 }

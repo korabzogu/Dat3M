@@ -84,6 +84,6 @@ public class RMWFetchOp extends RMWAbstract implements RegWriter, RegReaderData 
                 + address
                 + ","
                 + "memory_order_" + Mo.toText(mo)
-                + ");\n";
+                + "));\n";
     }
 }

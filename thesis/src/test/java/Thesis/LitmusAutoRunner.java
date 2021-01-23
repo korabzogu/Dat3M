@@ -49,6 +49,9 @@ public class LitmusAutoRunner {
     @Parameterized.Parameters(name = "{index}: {1}")
     public static Collection<String[]> data() {
         List<String[]> result = new ArrayList<>();
+
+        //result.add(new String[]{"-i", "../litmus/AARCH64/SYS/RWC+addr+dmb.sy.litmus", "-cat","cat/svcomp.cat"});
+
         List<String> blacklist = new ArrayList<>();
         blacklist.add("../litmus/C/lockfree/Michael-Scott.litmus");
         try {
@@ -60,5 +63,6 @@ public class LitmusAutoRunner {
             e.printStackTrace();
         }
         return result;
+
     }
 }

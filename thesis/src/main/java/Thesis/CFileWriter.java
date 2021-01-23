@@ -29,7 +29,6 @@ public class CFileWriter {
         this.filepath = filepath;
         this.prog = prog;
         this.config = config;
-
     }
 
     public void createOutputFile(String filepath) {
@@ -158,7 +157,7 @@ public class CFileWriter {
                 for(String reg : regNames) {
                     boolean b = false;
                     for(PointerLocation ploc : prog.getPtrLocMap()) {
-                        if(ploc.getPtr().equals(reg))
+                        if(ploc.getPtr().equals(reg) && ploc.getThreadID() == t.getId())
                             b = true;
                     }
                     if(!b)
@@ -185,7 +184,7 @@ public class CFileWriter {
             for(String reg : localRegs) {
                 boolean b = false;
                 for(PointerLocation ploc : prog.getPtrLocMap()) {
-                    if(ploc.getPtr().equals(reg))
+                    if(ploc.getPtr().equals(reg) && ploc.getThreadID() == t.getId())
                         b = true;
                 }
                 if(!b)
@@ -205,7 +204,7 @@ public class CFileWriter {
             for(String reg : localRegs) {
                 boolean b = false;
                 for(PointerLocation ploc : prog.getPtrLocMap()) {
-                    if(ploc.getPtr().equals(reg))
+                    if(ploc.getPtr().equals(reg) && ploc.getThreadID() == t.getId())
                         b = true;
                 }
                 if(!b)
@@ -238,6 +237,12 @@ public class CFileWriter {
             }
     }
 
+    /*
+    How this works: currently, xml-style tags are used to mark variables. Go through all tags
+    and check if the register is in list of pointer locations (list where a register corresponds to the
+    address of a global variable).
+    replace the register if it exists in list, otherwise remove the tag.
+     */
     public void processCustomTags() {
         String content = "";
         try {
@@ -245,29 +250,84 @@ public class CFileWriter {
             String line;
             while ((line = br.readLine()) != null) {
                 // do regex check
-                Pattern pattern = Pattern.compile("<customTag>(.+?)</customTag>", Pattern.DOTALL);
+                Pattern pattern = Pattern.compile("<customTag(.+?)>(.+?)</customTag>", Pattern.DOTALL);
                 Matcher matcher = pattern.matcher(line);
-                if (matcher.find()) {
-                    System.out.println("Matcher matched " + line);
-                    String reg = matcher.group(1);
+                int mcount = 0;
+                while(matcher.find()) {
+                    System.out.println("Matcher :" + String.valueOf(mcount) + " |" + matcher.group());
+                    mcount++;
+                    int reg_thread = Integer.parseInt(matcher.group(1));
+                    String reg = matcher.group(2);
+
                     boolean set = false;
                     for(PointerLocation ploc : prog.getPtrLocMap()) {
                         System.out.println("REG: " + reg);
-                        if(ploc.getPtr().equals(reg)) {
+                        if(ploc.getPtr().equals(reg) && ploc.getThreadID() == reg_thread) {
+                            reg = ploc.getLoc();
+                            break;
+                        }
+                    }
+
+                    if(reg.charAt(0) == '&') {
+                        reg = reg.substring(1);
+                    }
+                        System.out.println("Replacing" + line + "with " + reg);
+                        line = line.replaceFirst("<customTag(.+?)>(.+?)</customTag>", reg);
+
+                }
+                content += line + '\n';
+            }
+            FileWriter fw = new FileWriter(filepath);
+            fw.write(content);
+            fw.flush();
+            fw.close();
+        }
+        catch(java.io.IOException ex) {
+            System.out.println("Error writing function declaration of function ");
+            ex.printStackTrace();
+        }
+    }
+
+    public void processAssertionTags() {
+        String content = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filepath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                // do regex check
+                Pattern pattern = Pattern.compile("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", Pattern.DOTALL);
+                Matcher matcher = pattern.matcher(line);
+                int mcount = 0;
+                while(matcher.find()) {
+                    System.out.println("Matcher :" + String.valueOf(mcount) + " |" + matcher.group());
+                    mcount++;
+                    int reg_thread = Integer.parseInt(matcher.group(1));
+                    String reg = matcher.group(2);
+
+                    boolean set = false;
+                    for(PointerLocation ploc : prog.getPtrLocMap()) {
+                        System.out.println("REG: " + reg);
+                        if(ploc.getPtr().equals(reg) && ploc.getThreadID() == reg_thread) {
+                            System.out.println("POINTERLOC " + ploc.getPtr());
                             reg = ploc.getLoc();
                             set = true;
                             break;
                         }
                     }
-                    if(!set) {
-                        reg = reg;
+
+                    if(reg.charAt(0) == '&') {
+                        reg = reg.substring(1);
+                    }
+                    System.out.println("Replacing" + line + "with " + reg);
+                    if(set) {
+                        line = line.replaceFirst("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", reg);
+                    } else {
+                        line = line.replaceFirst("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", "thread_local_" + Integer.parseInt(matcher.group(1)) + "." + reg);
                     }
 
-                    content += line.replaceAll("<customTag>(.+?)</customTag>", reg);
-                } else {
-                    content += line + '\n';
-                }
 
+                }
+                content += line + '\n';
             }
             FileWriter fw = new FileWriter(filepath);
             fw.write(content);
