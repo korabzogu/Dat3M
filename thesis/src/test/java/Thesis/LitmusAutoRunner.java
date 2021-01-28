@@ -1,27 +1,13 @@
 package Thesis;
-import Thesis.Tool;
-import com.dat3m.dartagnan.AbstractDartagnanTest;
-import com.dat3m.dartagnan.parsers.program.ProgramParser;
-import com.dat3m.dartagnan.program.Program;
-import com.dat3m.dartagnan.utils.ResourceHelper;
-import com.dat3m.dartagnan.utils.Result;
-import com.dat3m.dartagnan.wmm.utils.Arch;
-import com.dat3m.dartagnan.wmm.Wmm;
-import com.dat3m.dartagnan.utils.Settings;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.RegexFileFilter;
+
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
