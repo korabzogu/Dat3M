@@ -38,6 +38,10 @@ public class Wmm {
         axioms.add(ax);
     }
 
+    public List<Axiom> getAxioms() {
+        return axioms;
+    }
+
     public void addFilter(FilterAbstract filter) {
         filters.put(filter.getName(), filter);
     }
@@ -117,10 +121,6 @@ public class Wmm {
         }
 
         BoolExpr enc = ctx.mkTrue();
-        for (Axiom ax : axioms) {
-            enc = ctx.mkAnd(enc, ax.getRel().encode());
-        }
-
         for(String relName : baseRelations){
             enc = ctx.mkAnd(enc, relationRepository.getRelation(relName).encode());
         }
@@ -130,7 +130,11 @@ public class Wmm {
                 enc = ctx.mkAnd(enc, group.encode(ctx));
             }
         }
-
+        
+        for (Axiom ax : axioms) {
+            enc = ctx.mkAnd(enc, ax.getRel().encode());
+        }
+        
         return enc;
     }
 

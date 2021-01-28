@@ -37,6 +37,7 @@ porthos/target/
 ui/target/
 svcomp/target/
 thesis/out
+zombmc/target/
 
 ##########
 # Boogie #
