@@ -1,4 +1,4 @@
-SC
+SVCOMP
 
 (* Define co (and fr) *)
 include "cos.cat"
@@ -7,6 +7,8 @@ include "cos.cat"
 let com = (rf | fr | co)
 
 (* Sequential consistency *)
-acyclic po | com as sc
+let hb = po | com
+acyclic hb as sc
 
-empty rmw & ( (com & ext) ; (po | com)* ; (com & ext) )
+(* Atomicity *)
+acyclic (rmw^-1 | (com & ext) | (po \ rmw))
