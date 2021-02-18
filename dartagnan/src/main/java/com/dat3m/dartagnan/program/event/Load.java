@@ -73,10 +73,15 @@ public class Load extends MemEvent implements RegWriter {
         String addressToC = this.address.AsmToC();
         if(this.mo != null) {
             mem_order = Mo.AsmToC(mo);
-        }
-        return resultRegister.AsmToC()
-                + " = atomic_load_explicit("
-                + "&" + addressToC
-                + ", " + mem_order + ");" + "//event.Load" + '\n';
+        }/*
+        if(address instanceof Register) {
+            return resultRegister.AsmToC() + " = " + this.address.AsmToC() + ";\n";
+        } else {
+        */
+            return resultRegister.AsmToC()
+                    + " = atomic_load_explicit("
+                    + "&" + addressToC + "/*" + this.address.getClass().getName() + "*/"
+                    + ", " + mem_order + ");" + "//event.Load" + '\n';
+
     }
 }

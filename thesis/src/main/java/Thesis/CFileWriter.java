@@ -124,6 +124,7 @@ public class CFileWriter {
             fw.write("assert(" + p.getAss().AsmToC() + ")" + ";\n");
 
             // END MAIN
+            fw.write("return 0;\n");
             fw.write("}\n");
             fw.write("\n");
             fw.flush();
@@ -147,6 +148,24 @@ public class CFileWriter {
             e.printStackTrace();
         }
     }
+    public void writeGlobalVars(Thread t) {
+        try {
+            FileWriter fw = new FileWriter(filepath, true);
+            if(!(t.getEntry() instanceof Init) && t.getRegisterNames().size() > 0) {
+                ArrayList<String> regNames = t.getRegisterNames();
+                for(String reg : regNames) {
+                    fw.write("int " + reg + "_" + String.valueOf(t.getId()) + ";\n");
+                }
+                fw.flush();
+                fw.close();
+            }
+        }
+        catch (java.io.IOException e) {
+            System.out.println("Error writing structs for thread " + t.getId());
+            e.printStackTrace();
+        }
+    }
+
     public void writeFunctionStruct(Thread t) {
         try {
             FileWriter fw = new FileWriter(filepath, true);
@@ -201,6 +220,7 @@ public class CFileWriter {
             }
 
             // Propagate local variables
+
             for(String reg : localRegs) {
                 boolean b = false;
                 for(PointerLocation ploc : prog.getPtrLocMap()) {
@@ -208,7 +228,9 @@ public class CFileWriter {
                         b = true;
                 }
                 if(!b)
-                    fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
+                    fw.write(reg + "_" + String.valueOf(t.getId()) + " = " + reg + ";\n");
+                    //fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
+                    //fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
 
             }
             if(!(t.getEntry() instanceof Init)) {
@@ -322,7 +344,8 @@ public class CFileWriter {
                     if(set) {
                         line = line.replaceFirst("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", reg);
                     } else {
-                        line = line.replaceFirst("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", "thread_local_" + Integer.parseInt(matcher.group(1)) + "." + reg);
+                        line = line.replaceFirst("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", reg + "_" + Integer.parseInt(matcher.group(1)));
+                        //line = line.replaceFirst("<customAssertionTag(.+?)>(.+?)</customAssertionTag>", "thread_local_" + Integer.parseInt(matcher.group(1)) + "." + reg);
                     }
 
 

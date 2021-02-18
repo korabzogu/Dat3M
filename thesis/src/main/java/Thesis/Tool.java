@@ -4,9 +4,11 @@ import Thesis.CFileWriter;
 import com.dat3m.dartagnan.parsers.program.ProgramParser;
 import com.dat3m.dartagnan.parsers.program.utils.PointerLocation;
 import com.dat3m.dartagnan.program.Program;
+import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.Thread;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Init;
+import com.dat3m.dartagnan.program.event.Load;
 import com.dat3m.dartagnan.program.memory.Address;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.utils.EType;
@@ -40,6 +42,8 @@ public class Tool {
 
         Program p = new ProgramParser().parse(new File(options.getProgramFilePath()));
 
+        System.out.println(new Printer().print(p));
+
         Printer printer = new Printer();
         System.out.println(printer.print(p));
 
@@ -68,20 +72,29 @@ public class Tool {
             registers.add(thread.getRegisterNames());
         }
 
+        for(Thread thread : p.getThreads()) {
+            if(!(thread.getEntry() instanceof Init) && thread.getRegisterNames().size() > 0) {
+                cfw.writeGlobalVars(thread);
+            }
+        }
         // DEPRECATED cfw.writeRegisterVariables(registers);
 
+        /*
         // Write struct declarations for local variables
         for(Thread thread : p.getThreads()) {
             if(!(thread.getEntry() instanceof Init) && thread.getRegisterNames().size() > 0) {
                 cfw.writeFunctionStruct(thread);
             }
         }
+
         // Write global struct variables
         for(Thread thread : p.getThreads()) {
             if(!(thread.getEntry() instanceof Init) && thread.getRegisterNames().size() > 0) {
                 cfw.writeGlobalStruct(thread);
             }
         }
+        */
+
         // Write variables for functions etc.
         for(Address a : p.getMemory().getAllAddresses()) {
             // TODO write lines with atomic_int l.AsmToC();
@@ -106,6 +119,26 @@ public class Tool {
 
 
 
+        for(Event e : p.getCache().getEvents(FilterBasic.get(EType.READ))) {
+            // load events
+            Load l = (Load) e;
+            // TODO make Map from list to map
+            // if l is not in map throw exception
+            if(l.getAddress() instanceof Register) {
+                boolean set = false;
+                for(PointerLocation ptrLoc : p.getPtrLocMap()) {
+                    Register r = (Register) l.getAddress();
+
+                    if(ptrLoc.getThreadID() == r.getThreadId() && l.getAddress().toString().equals(ptrLoc.getPtr())) {
+                        set = true;
+                        break;
+                    }
+                }
+                if(!set) {
+                    throw new RuntimeException("PointerLoc exception: " + l.getAddress().toString());
+                }
+            }
+        }
         // customTag regex
         cfw.processCustomTags();
         cfw.processAssertionTags();

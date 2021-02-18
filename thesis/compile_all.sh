@@ -7,10 +7,10 @@ NC='\033[0m'
 failcount=0
 find out/ -type f -print0 | while read -d $'\0' file; do
   if [[ $file =~ \.c$ ]]; then
-  	gcc -c $file -pthread -Wno-builtin-declaration-mismatch
+  	clang-10 -c $file -pthread -Wno-return-type
 		if [ $? -ne 0 ]; then
 		  echo -e "[     ${RED}FAILED${NC}] $file"
-		  failcount += 1
+		  $failcount += 1
 		else
 		  echo -e "[ ${GREEN}OK${NC} ] $file"
 		fi
@@ -18,4 +18,4 @@ find out/ -type f -print0 | while read -d $'\0' file; do
 
 done
 
-echo -e "${failcount} compilations ${RED}FAILED${NC}"
+echo -e "$failcount compilations ${RED}FAILED${NC}"

@@ -63,6 +63,11 @@ public class Store extends MemEvent implements RegReaderData {
 
     @Override
     public String AsmToC() {
-        return "atomic_store_explicit(&" +  address.AsmToC()  + ", " + value.AsmToC() + ", " + Mo.AsmToC(mo) + " );" + "//event.Store\n";
+        if(address instanceof Register) {
+            return address.AsmToC() + " = " + value.AsmToC() + ";\n";
+        } else {
+            return "atomic_store_explicit(&" +  address.AsmToC()  + ", " + value.AsmToC() + ", " + Mo.AsmToC(mo) + " );" + "//event.Store\n";
+        }
+
     }
 }
