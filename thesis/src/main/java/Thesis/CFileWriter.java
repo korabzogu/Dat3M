@@ -57,6 +57,17 @@ public class CFileWriter {
             System.out.println("Trying to create file " + filepath);
             FileWriter fw = new FileWriter(filepath);
             System.out.println("Created file " + filepath);
+
+            fw.write("#include <assert.h>\n");
+            fw.write("void reach_error() {\n");
+            fw.write("assert(0);\n");
+            fw.write("}\n");
+            fw.write("void __VERIFIER_assert(int cond) {\n");
+              fw.write("if(!cond) {\n");
+                fw.write("reach_error();\n");
+             fw.write("}\n");
+            fw.write("}\n");
+
             for(int i = 0; i < headers.size(); i++) {
                 fw.write("#include " + "<" +  headers.get(i) + ">\n");
             }
@@ -121,6 +132,7 @@ public class CFileWriter {
                 fw.write("int " + l.getName()
                         + " = atomic_load_explicit("+ l.getAddress()+", memory_order_relaxed);\n");
             }
+            // TODO
             fw.write("assert(" + p.getAss().AsmToC() + ")" + ";\n");
 
             // END MAIN

@@ -120,24 +120,22 @@ public class Tool {
 
         for(Event e : p.getCache().getEvents(FilterBasic.get(EType.READ))) {
             // load events
-            try {
+            if(e instanceof Load) {
                 Load l = (Load) e;
                 if(l.getAddress() instanceof Register) {
                     boolean set = false;
-                    for(PointerLocation ptrLoc : p.getPtrLocMap()) {
+                    for (PointerLocation ptrLoc : p.getPtrLocMap()) {
                         Register r = (Register) l.getAddress();
 
-                        if(ptrLoc.getThreadID() == r.getThreadId() && l.getAddress().toString().equals(ptrLoc.getPtr())) {
+                        if (ptrLoc.getThreadID() == r.getThreadId() && l.getAddress().toString().equals(ptrLoc.getPtr())) {
                             set = true;
                             break;
                         }
                     }
-                    if(!set) {
+                    if (!set) {
                         throw new RuntimeException("PointerLoc exception: " + l.getAddress().toString());
                     }
                 }
-            } catch (ClassCastException exc) {
-                break;
             }
             // TODO make Map from list to map
             // if l is not in map throw exception

@@ -1,3 +1,12 @@
+#include <assert.h>
+void reach_error() {
+assert(0);
+}
+void __VERIFIER_assert(int cond) {
+if(!cond) {
+reach_error();
+}
+}
 #include <pthread.h>
 #include <assert.h>
 #include <stdio.h>
