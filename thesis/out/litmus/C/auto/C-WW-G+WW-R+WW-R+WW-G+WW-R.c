@@ -14,11 +14,11 @@ int x3_3;
 int x4_3;
 int x0_4;
 int x4_4;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
-atomic_int em3;
-atomic_int em4;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
+atomic_int mem3;
+atomic_int mem4;
 void *func_0() {
 int x0;
 int x1;

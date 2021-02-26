@@ -7,7 +7,7 @@ extern void __VERIFIER_HARDWARE(char * str);
 int EBX_0;
 int ECX_0;
 int EAX_0;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int EBX;
 int ECX;

@@ -9,8 +9,8 @@ int x1_0;
 int r2_1;
 int x0_1;
 int x1_1;
-atomic_int em0;
-atomic_int em1;
+atomic_int mem0;
+atomic_int mem1;
 void *func_0() {
 int x0;
 int x1;

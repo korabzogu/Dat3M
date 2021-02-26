@@ -12,8 +12,8 @@ int EDX_5;
 int EBX_5;
 int ECX_5;
 int EAX_5;
-atomic_int em0;
-atomic_int em1;
+atomic_int mem0;
+atomic_int mem1;
 void *func_0() {
 //event.Skip
 

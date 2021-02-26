@@ -18,10 +18,10 @@ int r7_1;
 int r8_1;
 int r9_1;
 int r1_1;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
-atomic_int em3;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
+atomic_int mem3;
 void *func_0() {
 int r3;
 int r1;

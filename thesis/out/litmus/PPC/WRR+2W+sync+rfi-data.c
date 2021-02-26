@@ -15,8 +15,8 @@ int r3_2;
 int r4_2;
 int r5_2;
 int r1_2;
-atomic_int em0;
-atomic_int em1;
+atomic_int mem0;
+atomic_int mem1;
 void *func_0() {
 int r1;
 //event.Skip

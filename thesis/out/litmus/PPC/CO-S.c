@@ -10,7 +10,7 @@ int r1_0;
 int r2_1;
 int r0_1;
 int r1_1;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int r0;
 int r1;

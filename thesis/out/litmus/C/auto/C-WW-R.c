@@ -5,7 +5,7 @@
 
 extern void __VERIFIER_HARDWARE(char * str);
 int x0_0;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int x0;
 //event.Skip

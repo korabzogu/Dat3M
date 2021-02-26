@@ -8,8 +8,8 @@ int EBX_1;
 int EAX_1;
 int EDX_3;
 int ECX_3;
-atomic_int em0;
-atomic_int em1;
+atomic_int mem0;
+atomic_int mem1;
 void *func_0() {
 //event.Skip
 

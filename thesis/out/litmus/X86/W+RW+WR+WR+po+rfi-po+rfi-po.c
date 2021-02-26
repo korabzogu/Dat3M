@@ -9,9 +9,9 @@ int EBX_2;
 int EAX_2;
 int EBX_3;
 int EAX_3;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
 void *func_0() {
 //event.Skip
 

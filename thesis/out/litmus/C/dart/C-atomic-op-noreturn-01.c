@@ -8,7 +8,7 @@ int x_0;
 int DUMMY_REG_3488_0;
 int x_1;
 int DUMMY_REG_3489_1;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int x;
 int DUMMY_REG_3488;

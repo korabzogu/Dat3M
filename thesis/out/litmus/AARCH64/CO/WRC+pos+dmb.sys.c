@@ -12,7 +12,7 @@ int X2_1;
 int X0_2;
 int X1_2;
 int X2_2;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int X0;
 //event.Skip

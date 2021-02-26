@@ -7,9 +7,9 @@ extern void __VERIFIER_HARDWARE(char * str);
 int EAX_0;
 int EBX_1;
 int EAX_1;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
 void *func_0() {
 int EAX;
 //event.Skip

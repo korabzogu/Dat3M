@@ -16,8 +16,8 @@ int X4_1;
 int X5_1;
 int X6_1;
 int X7_1;
-atomic_int em0;
-atomic_int em1;
+atomic_int mem0;
+atomic_int mem1;
 void *func_0() {
 int X0;
 int X2;

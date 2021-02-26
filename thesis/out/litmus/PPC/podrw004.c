@@ -24,11 +24,11 @@ int r2_4;
 int r3_4;
 int r4_4;
 int r1_4;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
-atomic_int em3;
-atomic_int em4;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
+atomic_int mem3;
+atomic_int mem4;
 void *func_0() {
 int r3;
 int r1;

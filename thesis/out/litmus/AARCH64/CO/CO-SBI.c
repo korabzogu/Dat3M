@@ -12,7 +12,7 @@ int X0_1;
 int X1_1;
 int X2_1;
 int X3_1;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int X0;
 int X2;

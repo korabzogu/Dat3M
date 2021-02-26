@@ -8,7 +8,7 @@ int EBX_0;
 int EAX_0;
 int EDX_1;
 int ECX_1;
-atomic_int em0;
+atomic_int mem0;
 void *func_0() {
 int EBX;
 int EAX;

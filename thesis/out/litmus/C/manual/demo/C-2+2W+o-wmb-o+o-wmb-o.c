@@ -8,8 +8,8 @@ int a_0;
 int b_0;
 int a_1;
 int b_1;
-atomic_int em0;
-atomic_int em1;
+atomic_int mem0;
+atomic_int mem1;
 void *func_0() {
 int a;
 int b;

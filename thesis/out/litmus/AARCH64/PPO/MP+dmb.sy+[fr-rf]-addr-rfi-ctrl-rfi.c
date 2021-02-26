@@ -21,9 +21,9 @@ int DUMMY_REG_946_1;
 int X7_1;
 int X0_2;
 int X1_2;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
 void *func_0() {
 int X0;
 int X2;

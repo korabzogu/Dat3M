@@ -102,7 +102,6 @@ public class Tool {
                 FileWriter fw = new FileWriter(filepath, true);
                 //
                 String memName = a.AsmToC();
-                memName = memName.substring(1);
                 fw.write("atomic_int " + memName + ";\n");
                 fw.flush();
                 fw.close();

@@ -30,10 +30,10 @@ int X4_2;
 int X5_2;
 int X6_2;
 int X7_2;
-atomic_int em0;
-atomic_int em1;
-atomic_int em2;
-atomic_int em3;
+atomic_int mem0;
+atomic_int mem1;
+atomic_int mem2;
+atomic_int mem3;
 void *func_0() {
 int X1;
 int X2;
