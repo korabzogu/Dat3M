@@ -40,6 +40,6 @@ public class Fence extends Event {
 
 	@Override
 	public String AsmToC() {
-		return "__VERIFIER_HARDWARE(NULL);";
+		return "__VERIFIER_HARDWARE(" + name + ");";
 	}
 }

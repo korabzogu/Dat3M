@@ -26,12 +26,12 @@ int y;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-lock);
 x = 1;
 
 y = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x_0 = x;
 y_0 = y;
@@ -46,7 +46,7 @@ int y;
 /*§Skip§*/
 y = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync-rcu);
 x = 2;
 
 atomic_thread_fence(memory_order_seq_cst);

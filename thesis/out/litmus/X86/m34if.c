@@ -27,7 +27,7 @@ atomic_store_explicit(&mem0, 1, memory_order_relaxed );//event.Store
 
 EAX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 EBX = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -41,7 +41,7 @@ int ECX;
 
 atomic_store_explicit(&mem1, 1, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 ECX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

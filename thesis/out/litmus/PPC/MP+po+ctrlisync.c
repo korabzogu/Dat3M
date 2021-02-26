@@ -60,7 +60,7 @@ goto LC00;//event.CondJump
 
 LC00://event.Label
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Isync);
 r3 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

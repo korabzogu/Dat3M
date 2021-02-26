@@ -75,7 +75,7 @@ r4 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 r5 = 1;//event.Local
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync);
 mem0 = r5;
 
 mem1 = r5;

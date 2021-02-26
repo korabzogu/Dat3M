@@ -40,7 +40,7 @@ int x1;
 /*§Skip§*/
 x0 = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync-rcu);
 x1 = 1;
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -57,7 +57,7 @@ int x2;
 /*§Skip§*/
 x1 = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync-rcu);
 x2 = 1;
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -74,7 +74,7 @@ int x3;
 /*§Skip§*/
 x2 = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mb);
 x3 = 1;
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -89,12 +89,12 @@ int x4;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-lock);
 x3 = 2;
 
 x4 = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x3_3 = x3;
 x4_3 = x4;
@@ -107,12 +107,12 @@ int x5;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-lock);
 x4 = 2;
 
 x5 = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x4_4 = x4;
 x5_4 = x5;
@@ -125,12 +125,12 @@ int x5;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-lock);
 x5 = 2;
 
 x0 = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x0_5 = x0;
 x5_5 = x5;

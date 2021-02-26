@@ -50,7 +50,7 @@ int r1;
 /*§Skip§*/
 r1 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Lwsync);
 r2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -71,7 +71,7 @@ r2 = 2;//event.Local
 
 mem1 = r1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Lwsync);
 mem0 = r2;
 
 atomic_thread_fence(memory_order_seq_cst);

@@ -52,7 +52,7 @@ EBX = 0;//event.Local
 
 EAX = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 EBX = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -71,7 +71,7 @@ EDX = 0;//event.Local
 
 ECX = atomic_load_explicit(&mem3, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 EDX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

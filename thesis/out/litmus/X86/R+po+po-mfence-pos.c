@@ -37,7 +37,7 @@ atomic_store_explicit(&mem1, 2, memory_order_relaxed );//event.Store
 
 atomic_store_explicit(&mem2, 1, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 EAX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 EBX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load

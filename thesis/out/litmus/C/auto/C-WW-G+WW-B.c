@@ -28,7 +28,7 @@ int x1;
 /*§Skip§*/
 x0 = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync-rcu);
 x1 = 1;
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -45,7 +45,7 @@ int x1;
 /*§Skip§*/
 x1 = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mb);
 x0 = 1;
 
 atomic_thread_fence(memory_order_seq_cst);

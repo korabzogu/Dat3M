@@ -22,7 +22,7 @@ int x0;
 /*§Skip§*/
 x0 = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mb);
 x0 = 1;
 
 atomic_thread_fence(memory_order_seq_cst);

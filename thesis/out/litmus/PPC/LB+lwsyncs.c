@@ -32,7 +32,7 @@ int r1;
 /*§Skip§*/
 r1 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Lwsync);
 r3 = 1;//event.Local
 
 mem1 = r3;
@@ -51,7 +51,7 @@ int r1;
 /*§Skip§*/
 r1 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Lwsync);
 r3 = 1;//event.Local
 
 mem0 = r3;

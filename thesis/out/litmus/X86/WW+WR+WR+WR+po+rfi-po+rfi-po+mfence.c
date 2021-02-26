@@ -70,7 +70,7 @@ int EAX;
 
 atomic_store_explicit(&mem3, 1, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 EAX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

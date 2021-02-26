@@ -84,7 +84,7 @@ int r1;
 /*§Skip§*/
 r1 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Lwsync);
 r3 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

@@ -80,7 +80,7 @@ r3 = (r3 + 1) /* IEXPRBIN */;//event.Local
 
 mem0 = r3;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync);
 r5 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

@@ -28,7 +28,7 @@ int b;
 /*§Skip§*/
 a = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Wmb);
 b = 1;
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -45,7 +45,7 @@ int b;
 /*§Skip§*/
 b = 2;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Wmb);
 a = 1;
 
 atomic_thread_fence(memory_order_seq_cst);

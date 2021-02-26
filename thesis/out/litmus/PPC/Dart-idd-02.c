@@ -73,7 +73,7 @@ int r0;
 /*§Skip§*/
 r0 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Lwsync);
 r2 = 1;//event.Local
 
 mem1 = r2;

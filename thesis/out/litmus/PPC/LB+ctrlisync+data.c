@@ -40,7 +40,7 @@ goto LC00;//event.CondJump
 
 LC00://event.Label
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Isync);
 r3 = 1;//event.Local
 
 mem1 = r3;

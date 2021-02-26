@@ -26,7 +26,7 @@ void *func_0() {
 
 atomic_store_explicit(&mem0, 1, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 atomic_store_explicit(&mem1, 1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -37,7 +37,7 @@ void *func_1() {
 
 atomic_store_explicit(&mem2, 1, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Mfence);
 atomic_store_explicit(&mem3, 1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);

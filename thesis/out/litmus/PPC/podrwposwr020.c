@@ -46,7 +46,7 @@ r1 = 2;//event.Local
 
 mem0 = r1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync);
 r3 = 1;//event.Local
 
 mem1 = r3;
@@ -89,7 +89,7 @@ r1 = 2;//event.Local
 
 mem2 = r1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync);
 r3 = 1;//event.Local
 
 mem3 = r3;

@@ -31,11 +31,11 @@ int x1;
 /*§Skip§*/
 x0 = 2;
 
-__VERIFIER_HARDWARE(NULL);
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Sync-rcu);
+__VERIFIER_HARDWARE(Rcu-lock);
 x1 = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x0_0 = x0;
 x1_0 = x1;
@@ -48,12 +48,12 @@ int x2;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-lock);
 x1 = 2;
 
 x2 = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x1_1 = x1;
 x2_1 = x2;
@@ -66,12 +66,12 @@ int x2;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-lock);
 x2 = 2;
 
 x0 = 1;
 
-__VERIFIER_HARDWARE(NULL);
+__VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x0_2 = x0;
 x2_2 = x2;
