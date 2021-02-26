@@ -36,7 +36,9 @@ public class LitmusAutoRunner {
     public static Collection<String[]> data() {
         List<String[]> result = new ArrayList<>();
 
-        //result.add(new String[]{"-i", "../litmus/AARCH64/SYS/RWC+addr+dmb.sy.litmus", "-cat","cat/svcomp.cat"});
+
+        //result.add(new String[]{"-i", "../litmus/X86/RR+WR+rmw-mfence+mfence.litmus", "-cat","cat/svcomp.cat"});
+
         List<String> blacklist = new ArrayList<>();
         blacklist.add("../litmus/C/lockfree/Michael-Scott.litmus");
         try {
@@ -47,6 +49,10 @@ public class LitmusAutoRunner {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
         return result;
+
+
     }
 }

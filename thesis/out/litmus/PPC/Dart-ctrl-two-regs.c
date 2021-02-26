@@ -16,9 +16,9 @@ int r3_1;
 int r4_1;
 int r5_1;
 int r1_1;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
-atomic_int mem2/* Address */;
+atomic_int em0;
+atomic_int em1;
+atomic_int em2;
 void *func_0() {
 int r4;
 int r5;
@@ -29,9 +29,9 @@ int r9;
 /*§Skip§*/
 /*§Skip§*/
 /*§Skip§*/
-r4 = atomic_load_explicit(&mem0/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r4 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-r5 = atomic_load_explicit(&mem1/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r5 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 r7 = (r4 + 1) /* IEXPRBIN */;//event.Local
 
@@ -43,7 +43,7 @@ goto LC00;//event.CondJump
 
 r9 = (r7 ^ r5) /* IEXPRBIN */;//event.Local
 
-mem2/* Address */ = r9;
+mem2 = r9;
 
 LC00://event.Label
 
@@ -62,13 +62,13 @@ int r5;
 /*§Skip§*/
 /*§Skip§*/
 /*§Skip§*/
-r4 = atomic_load_explicit(&mem2/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r4 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 r5 = 1;//event.Local
 
-mem0/* Address */ = r5;
+mem0 = r5;
 
-mem1/* Address */ = r5;
+mem1 = r5;
 
 atomic_thread_fence(memory_order_seq_cst);
 r4_1 = r4;

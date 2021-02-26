@@ -12,9 +12,9 @@ int X0_1;
 int X1_1;
 int X3_1;
 int X4_1;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
-atomic_int mem2/* Address */;
+atomic_int em0;
+atomic_int em1;
+atomic_int em2;
 void *func_0() {
 int X2;
 int X3;
@@ -22,9 +22,9 @@ int X3;
 
 /*§Skip§*/
 /*§Skip§*/
-mem0/* Address */ = mem2/* Address */;
+mem0 = mem2;
 
-X2 = atomic_load_explicit(&mem0/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+X2 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 X3 = 1;//event.Local
 
@@ -42,11 +42,11 @@ int X4;
 
 /*§Skip§*/
 /*§Skip§*/
-X0 = atomic_load_explicit(&mem2/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+X0 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 // TODO: atomic_thread_fence(memory_order_release); DMB event.FenceOpt
 
-X4 = atomic_load_explicit(&mem0/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+X4 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_1 = X0;
@@ -54,7 +54,7 @@ X4_1 = X4;
 }
 
 int main() {
-atomic_init(&mem0, &mem1); //event.Init, &mem1/* Address */);
+atomic_init(&mem0, &mem1); //event.Init, mem1);
 atomic_init(&mem1, 0); //event.Init, 0);
 atomic_init(&mem2, 0); //event.Init, 0);
 pthread_t thread_0;
@@ -66,7 +66,7 @@ pthread_join(thread_1, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem2, memory_order_relaxed);
 int z = atomic_load_explicit(&mem1, memory_order_relaxed);
-assert((((X0_1 == 1) && (X4_1 == &mem1/* Address */)) && (X2_0 == &mem2/* Address */)));
+assert((((X0_1 == 1) && (X4_1 == mem1)) && (X2_0 == mem2)));
 return 0;
 }
 

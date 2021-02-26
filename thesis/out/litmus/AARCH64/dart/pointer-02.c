@@ -7,15 +7,15 @@ extern void __VERIFIER_HARDWARE(char * str);
 int X0_0;
 int X1_0;
 int X2_0;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
+atomic_int em0;
+atomic_int em1;
 void *func_0() {
 int X0;
 int X2;
 //event.Skip
 
 /*§Skip§*/
-X2 = atomic_load_explicit(&mem0/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+X2 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 X0 = 1;//event.Local
 
@@ -27,7 +27,7 @@ X2_0 = X2;
 }
 
 int main() {
-atomic_init(&mem0, &mem1); //event.Init, &mem1/* Address */);
+atomic_init(&mem0, &mem1); //event.Init, mem1);
 atomic_init(&mem1, 0); //event.Init, 0);
 pthread_t thread_0;
 pthread_create(&thread_0, NULL, &func_0, NULL);

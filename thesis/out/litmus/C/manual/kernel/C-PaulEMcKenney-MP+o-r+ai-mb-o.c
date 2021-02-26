@@ -11,5 +11,5 @@ int DUMMY_REG_3461_1;
 int x_1;
 int y_1;
 int r1_1;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
+atomic_int em0;
+atomic_int em1;

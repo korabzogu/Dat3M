@@ -12,10 +12,10 @@ int x2_2;
 int x3_2;
 int x0_3;
 int x3_3;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
-atomic_int mem2/* Address */;
-atomic_int mem3/* Address */;
+atomic_int em0;
+atomic_int em1;
+atomic_int em2;
+atomic_int em3;
 void *func_0() {
 int x0;
 int x1;

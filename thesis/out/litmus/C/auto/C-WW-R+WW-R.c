@@ -8,8 +8,8 @@ int x0_0;
 int x1_0;
 int x0_1;
 int x1_1;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
+atomic_int em0;
+atomic_int em1;
 void *func_0() {
 int x0;
 int x1;

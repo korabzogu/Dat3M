@@ -16,12 +16,12 @@ int x4_4;
 int x5_4;
 int x0_5;
 int x5_5;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
-atomic_int mem2/* Address */;
-atomic_int mem3/* Address */;
-atomic_int mem4/* Address */;
-atomic_int mem5/* Address */;
+atomic_int em0;
+atomic_int em1;
+atomic_int em2;
+atomic_int em3;
+atomic_int em4;
+atomic_int em5;
 void *func_0() {
 int x0;
 int x1;

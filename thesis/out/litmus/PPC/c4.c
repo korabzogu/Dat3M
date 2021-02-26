@@ -12,8 +12,8 @@ int r2_1;
 int r4_1;
 int r5_1;
 int r1_1;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
+atomic_int em0;
+atomic_int em1;
 void *func_0() {
 int r2;
 int r1;
@@ -23,10 +23,10 @@ r1 = 1;//event.Local
 
 /*§Skip§*/
 /*§Skip§*/
-mem0/* Address */ = r1;
+mem0 = r1;
 
 __VERIFIER_HARDWARE(NULL);
-r2 = atomic_load_explicit(&mem1/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 r2_0 = r2;
@@ -42,10 +42,10 @@ r1 = 1;//event.Local
 
 /*§Skip§*/
 /*§Skip§*/
-mem1/* Address */ = r1;
+mem1 = r1;
 
 __VERIFIER_HARDWARE(NULL);
-r2 = atomic_load_explicit(&mem0/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r2 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 r2_1 = r2;

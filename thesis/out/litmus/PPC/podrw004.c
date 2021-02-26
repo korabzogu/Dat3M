@@ -24,11 +24,11 @@ int r2_4;
 int r3_4;
 int r4_4;
 int r1_4;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
-atomic_int mem2/* Address */;
-atomic_int mem3/* Address */;
-atomic_int mem4/* Address */;
+atomic_int em0;
+atomic_int em1;
+atomic_int em2;
+atomic_int em3;
+atomic_int em4;
 void *func_0() {
 int r3;
 int r1;
@@ -38,12 +38,12 @@ int r1;
 /*§Skip§*/
 r1 = 2;//event.Local
 
-mem0/* Address */ = r1;
+mem0 = r1;
 
 __VERIFIER_HARDWARE(NULL);
 r3 = 1;//event.Local
 
-mem1/* Address */ = r3;
+mem1 = r3;
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_0 = r3;
@@ -57,12 +57,12 @@ int r1;
 
 /*§Skip§*/
 /*§Skip§*/
-r1 = atomic_load_explicit(&mem1/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r1 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 __VERIFIER_HARDWARE(NULL);
 r3 = 1;//event.Local
 
-mem2/* Address */ = r3;
+mem2 = r3;
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_1 = r3;
@@ -76,12 +76,12 @@ int r1;
 
 /*§Skip§*/
 /*§Skip§*/
-r1 = atomic_load_explicit(&mem2/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r1 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 __VERIFIER_HARDWARE(NULL);
 r3 = 1;//event.Local
 
-mem3/* Address */ = r3;
+mem3 = r3;
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_2 = r3;
@@ -95,12 +95,12 @@ int r1;
 
 /*§Skip§*/
 /*§Skip§*/
-r1 = atomic_load_explicit(&mem3/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r1 = atomic_load_explicit(&mem3, memory_order_relaxed);//event.Load
 
 __VERIFIER_HARDWARE(NULL);
 r3 = 1;//event.Local
 
-mem4/* Address */ = r3;
+mem4 = r3;
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_3 = r3;
@@ -114,11 +114,11 @@ int r1;
 
 /*§Skip§*/
 /*§Skip§*/
-r1 = atomic_load_explicit(&mem4/* Address *//*com.dat3m.dartagnan.program.Register*/, memory_order_relaxed);//event.Load
+r1 = atomic_load_explicit(&mem4, memory_order_relaxed);//event.Load
 
 r3 = 1;//event.Local
 
-mem0/* Address */ = r3;
+mem0 = r3;
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_4 = r3;

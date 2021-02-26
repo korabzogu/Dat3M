@@ -10,19 +10,19 @@ int EAX_2;
 int EAX_3;
 int EAX_4;
 int EAX_5;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
-atomic_int mem2/* Address */;
-atomic_int mem3/* Address */;
-atomic_int mem4/* Address */;
-atomic_int mem5/* Address */;
+atomic_int em0;
+atomic_int em1;
+atomic_int em2;
+atomic_int em3;
+atomic_int em4;
+atomic_int em5;
 void *func_0() {
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem0/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem0, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem1/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EAX_0 = EAX;
@@ -32,9 +32,9 @@ void *func_1() {
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem1/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem1, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem2/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EAX_1 = EAX;
@@ -44,9 +44,9 @@ void *func_2() {
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem2/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem2, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem3/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem3, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EAX_2 = EAX;
@@ -56,9 +56,9 @@ void *func_3() {
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem3/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem3, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem4/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem4, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EAX_3 = EAX;
@@ -68,9 +68,9 @@ void *func_4() {
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem4/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem4, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem5/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem5, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EAX_4 = EAX;
@@ -80,9 +80,9 @@ void *func_5() {
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem5/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem5, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem0/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EAX_5 = EAX;

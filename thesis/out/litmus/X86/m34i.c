@@ -7,18 +7,18 @@ extern void __VERIFIER_HARDWARE(char * str);
 int EBX_0;
 int EAX_0;
 int ECX_1;
-atomic_int mem0/* Address */;
-atomic_int mem1/* Address */;
+atomic_int em0;
+atomic_int em1;
 void *func_0() {
 int EBX;
 int EAX;
 //event.Skip
 
-atomic_store_explicit(&&mem0/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem0, 1, memory_order_relaxed );//event.Store
 
-EAX = atomic_load_explicit(&&mem0/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EAX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-EBX = atomic_load_explicit(&&mem1/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+EBX = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 EBX_0 = EBX;
@@ -29,9 +29,9 @@ void *func_1() {
 int ECX;
 //event.Skip
 
-atomic_store_explicit(&&mem1/* Address */, 1, memory_order_relaxed );//event.Store
+atomic_store_explicit(&mem1, 1, memory_order_relaxed );//event.Store
 
-ECX = atomic_load_explicit(&&mem0/* Address *//*com.dat3m.dartagnan.program.memory.Address*/, memory_order_relaxed);//event.Load
+ECX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
 ECX_1 = ECX;

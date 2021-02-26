@@ -9,7 +9,7 @@ int r0_0;
 int r2_1;
 int x_1;
 int r1_1;
-atomic_int mem0/* Address */;
+atomic_int em0;
 void *func_0() {
 int x;
 int r0;
@@ -49,7 +49,7 @@ pthread_create(&thread_1, NULL, &func_1, NULL);
 pthread_join(thread_0, NULL);
 pthread_join(thread_1, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
-assert(!(((((((<customAssertionTag0>r0</customAssertionTag> == 0) && (<customAssertionTag1>r1</customAssertionTag> == 1)) && (<customAssertionTag1>r2</customAssertionTag> == 1)) && (x == 10)) || ((((<customAssertionTag0>r0</customAssertionTag> == 1) && (<customAssertionTag1>r1</customAssertionTag> == 0)) && (<customAssertionTag1>r2</customAssertionTag> == 0)) && (x == 10))) || ((((<customAssertionTag0>r0</customAssertionTag> == 1) && (<customAssertionTag1>r1</customAssertionTag> == 1)) && (<customAssertionTag1>r2</customAssertionTag> == 1)) && (x == 20)))));
+assert(!(((((((r0_0 == 0) && (r1_1 == 1)) && (r2_1 == 1)) && (x == 10)) || ((((r0_0 == 1) && (r1_1 == 0)) && (r2_1 == 0)) && (x == 10))) || ((((r0_0 == 1) && (r1_1 == 1)) && (r2_1 == 1)) && (x == 20)))));
 return 0;
 }
 
