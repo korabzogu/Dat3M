@@ -1,4 +1,8 @@
+#include <pthread.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdatomic.h>
+
 void reach_error() {
 assert(0);
 }
@@ -7,10 +11,6 @@ if(!cond) {
 reach_error();
 }
 }
-#include <pthread.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdatomic.h>
 
 extern void __VERIFIER_HARDWARE(char * str);
 int X8_0;
