@@ -35,10 +35,10 @@ int x1;
 
 /*§Skip§*/
 /*§Skip§*/
-x0 = 2;
+atomic_store_explicit(&x0, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Sync-rcu);
-x1 = 1;
+atomic_store_explicit(&x1, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x0_0 = x0;
@@ -52,10 +52,10 @@ int x2;
 
 /*§Skip§*/
 /*§Skip§*/
-x1 = 2;
+atomic_store_explicit(&x1, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Mb);
-x2 = 1;
+atomic_store_explicit(&x2, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x1_1 = x1;
@@ -70,9 +70,9 @@ int x3;
 /*§Skip§*/
 /*§Skip§*/
 __VERIFIER_HARDWARE(Rcu-lock);
-x2 = 2;
+atomic_store_explicit(&x2, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
-x3 = 1;
+atomic_store_explicit(&x3, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
@@ -87,10 +87,10 @@ int x4;
 
 /*§Skip§*/
 /*§Skip§*/
-x3 = 2;
+atomic_store_explicit(&x3, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Sync-rcu);
-x4 = 1;
+atomic_store_explicit(&x4, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x3_3 = x3;
@@ -105,9 +105,9 @@ int x4;
 /*§Skip§*/
 /*§Skip§*/
 __VERIFIER_HARDWARE(Rcu-lock);
-x4 = 2;
+atomic_store_explicit(&x4, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
-x0 = 1;
+atomic_store_explicit(&x0, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);

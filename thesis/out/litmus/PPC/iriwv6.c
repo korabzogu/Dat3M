@@ -70,9 +70,9 @@ r1 = 1;//event.Local
 
 r2 = 2;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
-mem1 = r2;
+atomic_store_explicit(&mem1, r2, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r2_2 = r2;

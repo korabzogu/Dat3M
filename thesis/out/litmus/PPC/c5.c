@@ -32,7 +32,7 @@ int r1;
 /*§Skip§*/
 r2 = 2;//event.Local
 
-mem1 = r2;
+atomic_store_explicit(&mem1, r2, memory_order_relaxed );//event.Store
 
 r2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
@@ -53,7 +53,7 @@ int r1;
 /*§Skip§*/
 r1 = 1;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 __VERIFIER_HARDWARE(Sync);
 r2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load

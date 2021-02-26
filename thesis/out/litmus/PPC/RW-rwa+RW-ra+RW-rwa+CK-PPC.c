@@ -51,10 +51,10 @@ r1 = 1;//event.Local
 /*§Skip§*/
 /*§Skip§*/
 /*§Skip§*/
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 __VERIFIER_HARDWARE(Lwsync);
-mem1 = r1;
+atomic_store_explicit(&mem1, r1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r1_0 = r1;
@@ -74,7 +74,7 @@ r1 = 1;//event.Local
 r10 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 __VERIFIER_HARDWARE(Lwsync);
-mem2 = r1;
+atomic_store_explicit(&mem2, r1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r10_1 = r10;
@@ -95,7 +95,7 @@ r1 = 1;//event.Local
 r10 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 __VERIFIER_HARDWARE(Lwsync);
-mem3 = r1;
+atomic_store_explicit(&mem3, r1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r10_2 = r10;

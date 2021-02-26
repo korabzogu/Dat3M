@@ -25,7 +25,7 @@ int X2;
 /*§Skip§*/
 X0 = 1;//event.Local
 
-mem0 = X0;
+atomic_store_explicit(&mem0, X0, memory_order_relaxed );//event.Store
 
 X2 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 

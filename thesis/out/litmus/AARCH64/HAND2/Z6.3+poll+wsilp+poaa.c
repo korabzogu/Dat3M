@@ -37,11 +37,11 @@ int X4;
 /*§Skip§*/
 X0 = 1;//event.Local
 
-mem0 = X0;
+atomic_store_explicit(&mem0, X0, memory_order_release );//event.Store
 
 X2 = 1;//event.Local
 
-mem1 = X2;
+atomic_store_explicit(&mem1, X2, memory_order_release );//event.Store
 
 X4 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
@@ -59,11 +59,11 @@ int X2;
 /*§Skip§*/
 X0 = 2;//event.Local
 
-mem1 = X0;
+atomic_store_explicit(&mem1, X0, memory_order_release );//event.Store
 
 X2 = 3;//event.Local
 
-mem1 = X2;
+atomic_store_explicit(&mem1, X2, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_1 = X0;

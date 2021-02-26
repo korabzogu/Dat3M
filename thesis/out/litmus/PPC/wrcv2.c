@@ -32,7 +32,7 @@ int r9;
 /*§Skip§*/
 r9 = 1;//event.Local
 
-mem0 = r9;
+atomic_store_explicit(&mem0, r9, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r9_0 = r9;
@@ -50,7 +50,7 @@ r9 = 1;//event.Local
 r5 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 __VERIFIER_HARDWARE(Lwsync);
-mem1 = r9;
+atomic_store_explicit(&mem1, r9, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r5_1 = r5;

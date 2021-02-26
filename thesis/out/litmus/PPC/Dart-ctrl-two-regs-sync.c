@@ -52,7 +52,7 @@ goto LC00;//event.CondJump
 
 r9 = (r7 ^ r5) /* IEXPRBIN */;//event.Local
 
-mem2 = r9;
+atomic_store_explicit(&mem2, r9, memory_order_relaxed );//event.Store
 
 LC00://event.Label
 
@@ -76,9 +76,9 @@ r4 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 r5 = 1;//event.Local
 
 __VERIFIER_HARDWARE(Sync);
-mem0 = r5;
+atomic_store_explicit(&mem0, r5, memory_order_relaxed );//event.Store
 
-mem1 = r5;
+atomic_store_explicit(&mem1, r5, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r4_1 = r4;

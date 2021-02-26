@@ -32,11 +32,11 @@ int r1;
 /*§Skip§*/
 r1 = 2;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 r3 = 1;//event.Local
 
-mem1 = r3;
+atomic_store_explicit(&mem1, r3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_0 = r3;
@@ -62,7 +62,7 @@ LC00://event.Label
 
 r3 = 1;//event.Local
 
-mem0 = r3;
+atomic_store_explicit(&mem0, r3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_1 = r3;

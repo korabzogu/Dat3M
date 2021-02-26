@@ -31,13 +31,13 @@ int X3;
 
 /*§Skip§*/
 /*§Skip§*/
-mem0 = mem2;
+atomic_store_explicit(&mem0, mem2, memory_order_relaxed );//event.Store
 
 X2 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 X3 = 1;//event.Local
 
-X2 = X3;
+atomic_store_explicit(&X2, X3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X2_0 = X2;

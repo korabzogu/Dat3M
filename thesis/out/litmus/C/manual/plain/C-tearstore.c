@@ -21,7 +21,7 @@ int x;
 //event.Skip
 
 /*§Skip§*/
-x = 6;
+atomic_store_explicit(&x, 6, memory_order_seq_cst /* TODO use usual C assign */ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x_0 = x;
@@ -32,7 +32,7 @@ int x;
 //event.Skip
 
 /*§Skip§*/
-x = 12;
+atomic_store_explicit(&x, 12, memory_order_seq_cst /* TODO use usual C assign */ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x_1 = x;

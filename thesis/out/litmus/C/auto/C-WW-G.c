@@ -20,10 +20,10 @@ int x0;
 //event.Skip
 
 /*§Skip§*/
-x0 = 2;
+atomic_store_explicit(&x0, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Sync-rcu);
-x0 = 1;
+atomic_store_explicit(&x0, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x0_0 = x0;

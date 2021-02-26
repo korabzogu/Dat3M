@@ -32,7 +32,7 @@ int r1;
 /*§Skip§*/
 r1 = 1;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 r3 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
@@ -50,7 +50,7 @@ int r1;
 /*§Skip§*/
 r1 = 1;//event.Local
 
-mem1 = r1;
+atomic_store_explicit(&mem1, r1, memory_order_relaxed );//event.Store
 
 r3 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 

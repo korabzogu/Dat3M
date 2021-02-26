@@ -40,7 +40,7 @@ LC00://event.Label
 
 X2 = 1;//event.Local
 
-mem1 = X2;
+atomic_store_explicit(&mem1, X2, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_0 = X0;
@@ -64,7 +64,7 @@ LC01://event.Label
 
 X2 = 1;//event.Local
 
-mem0 = X2;
+atomic_store_explicit(&mem0, X2, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_1 = X0;

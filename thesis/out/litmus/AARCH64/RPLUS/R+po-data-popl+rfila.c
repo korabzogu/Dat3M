@@ -41,7 +41,7 @@ int X7;
 /*§Skip§*/
 X0 = 3;//event.Local
 
-mem0 = X0;
+atomic_store_explicit(&mem0, X0, memory_order_relaxed );//event.Store
 
 X2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
@@ -49,11 +49,11 @@ X4 = (X2 ^ X2) /* IEXPRBIN */;//event.Local
 
 X4 = (X4 + 1) /* IEXPRBIN */;//event.Local
 
-mem2 = X4;
+atomic_store_explicit(&mem2, X4, memory_order_relaxed );//event.Store
 
 X6 = 1;//event.Local
 
-mem0 = X6;
+atomic_store_explicit(&mem0, X6, memory_order_release );//event.Store
 
 X7 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
@@ -74,7 +74,7 @@ int X3;
 /*§Skip§*/
 X0 = 2;//event.Local
 
-mem0 = X0;
+atomic_store_explicit(&mem0, X0, memory_order_release );//event.Store
 
 X2 = atomic_load_explicit(&mem0, memory_order_acquire);//event.Load
 

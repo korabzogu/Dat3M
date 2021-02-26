@@ -52,11 +52,11 @@ X3 = 1;//event.Local
 
 DUMMY_REG_2138 = (mem1 + X2) /* IEXPRBIN */;//event.Local
 
-DUMMY_REG_2138 = X3;
+atomic_store_explicit(&DUMMY_REG_2138, X3, memory_order_relaxed );//event.Store
 
 X5 = 1;//event.Local
 
-mem2 = X5;
+atomic_store_explicit(&mem2, X5, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_0 = X0;
@@ -85,11 +85,11 @@ X3 = 1;//event.Local
 
 DUMMY_REG_2139 = (mem3 + X2) /* IEXPRBIN */;//event.Local
 
-DUMMY_REG_2139 = X3;
+atomic_store_explicit(&DUMMY_REG_2139, X3, memory_order_relaxed );//event.Store
 
 X5 = 1;//event.Local
 
-mem0 = X5;
+atomic_store_explicit(&mem0, X5, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_1 = X0;

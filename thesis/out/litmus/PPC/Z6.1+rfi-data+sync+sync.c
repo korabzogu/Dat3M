@@ -39,7 +39,7 @@ int r1;
 /*§Skip§*/
 r1 = 2;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 r3 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
@@ -47,7 +47,7 @@ r4 = (r3 ^ r3) /* IEXPRBIN */;//event.Local
 
 r4 = (r4 + 1) /* IEXPRBIN */;//event.Local
 
-mem1 = r4;
+atomic_store_explicit(&mem1, r4, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_0 = r3;
@@ -64,12 +64,12 @@ int r1;
 /*§Skip§*/
 r1 = 2;//event.Local
 
-mem1 = r1;
+atomic_store_explicit(&mem1, r1, memory_order_relaxed );//event.Store
 
 __VERIFIER_HARDWARE(Sync);
 r3 = 1;//event.Local
 
-mem2 = r3;
+atomic_store_explicit(&mem2, r3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_1 = r3;
@@ -88,7 +88,7 @@ r1 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 __VERIFIER_HARDWARE(Sync);
 r3 = 1;//event.Local
 
-mem0 = r3;
+atomic_store_explicit(&mem0, r3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_2 = r3;

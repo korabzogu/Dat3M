@@ -44,7 +44,7 @@ X3 = 1;//event.Local
 
 DUMMY_REG_2148 = (mem1 + X2) /* IEXPRBIN */;//event.Local
 
-DUMMY_REG_2148 = X3;
+atomic_store_explicit(&DUMMY_REG_2148, X3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_0 = X0;
@@ -70,7 +70,7 @@ X3 = 1;//event.Local
 
 DUMMY_REG_2149 = (mem0 + X2) /* IEXPRBIN */;//event.Local
 
-DUMMY_REG_2149 = X3;
+atomic_store_explicit(&DUMMY_REG_2149, X3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_1 = X0;

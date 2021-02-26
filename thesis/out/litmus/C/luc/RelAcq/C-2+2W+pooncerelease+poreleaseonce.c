@@ -26,9 +26,9 @@ int y;
 
 /*§Skip§*/
 /*§Skip§*/
-x = 2;
+atomic_store_explicit(&x, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
-y = 1;
+atomic_store_explicit(&y, 1, memory_order_release );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x_0 = x;
@@ -42,9 +42,9 @@ int y;
 
 /*§Skip§*/
 /*§Skip§*/
-y = 2;
+atomic_store_explicit(&y, 2, memory_order_release );//event.Store
 
-x = 1;
+atomic_store_explicit(&x, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x_1 = x;

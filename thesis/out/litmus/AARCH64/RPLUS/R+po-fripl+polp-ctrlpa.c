@@ -39,13 +39,13 @@ int X5;
 /*§Skip§*/
 X0 = 1;//event.Local
 
-mem0 = X0;
+atomic_store_explicit(&mem0, X0, memory_order_relaxed );//event.Store
 
 X2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 X4 = 1;//event.Local
 
-mem1 = X4;
+atomic_store_explicit(&mem1, X4, memory_order_release );//event.Store
 
 X5 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
@@ -67,7 +67,7 @@ int X4;
 /*§Skip§*/
 X0 = 2;//event.Local
 
-mem1 = X0;
+atomic_store_explicit(&mem1, X0, memory_order_release );//event.Store
 
 X2 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 

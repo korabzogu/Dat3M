@@ -42,13 +42,13 @@ int X2;
 /*§Skip§*/
 X0 = 2;//event.Local
 
-mem0 = X0;
+atomic_store_explicit(&mem0, X0, memory_order_relaxed );//event.Store
 
 // TODO: atomic_thread_fence(memory_order_release); DMB event.FenceOpt
 
 X2 = 1;//event.Local
 
-mem1 = X2;
+atomic_store_explicit(&mem1, X2, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_0 = X0;
@@ -86,7 +86,7 @@ X5 = 1;//event.Local
 
 DUMMY_REG_413 = (mem3 + X4) /* IEXPRBIN */;//event.Local
 
-DUMMY_REG_413 = X5;
+atomic_store_explicit(&DUMMY_REG_413, X5, memory_order_relaxed );//event.Store
 
 X7 = atomic_load_explicit(&mem3, memory_order_relaxed);//event.Load
 
@@ -98,7 +98,7 @@ LC01://event.Label
 
 X8 = 1;//event.Local
 
-mem0 = X8;
+atomic_store_explicit(&mem0, X8, memory_order_relaxed );//event.Store
 
 X10 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 

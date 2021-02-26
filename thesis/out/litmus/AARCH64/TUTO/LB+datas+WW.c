@@ -44,11 +44,11 @@ X2 = (X0 ^ X0) /* IEXPRBIN */;//event.Local
 
 X2 = (X2 + 1) /* IEXPRBIN */;//event.Local
 
-mem1 = X2;
+atomic_store_explicit(&mem1, X2, memory_order_relaxed );//event.Store
 
 X4 = 1;//event.Local
 
-mem2 = X4;
+atomic_store_explicit(&mem2, X4, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_0 = X0;
@@ -71,11 +71,11 @@ X2 = (X0 ^ X0) /* IEXPRBIN */;//event.Local
 
 X2 = (X2 + 1) /* IEXPRBIN */;//event.Local
 
-mem3 = X2;
+atomic_store_explicit(&mem3, X2, memory_order_relaxed );//event.Store
 
 X4 = 1;//event.Local
 
-mem0 = X4;
+atomic_store_explicit(&mem0, X4, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 X0_1 = X0;

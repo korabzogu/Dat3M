@@ -38,7 +38,7 @@ r3 = (r1 ^ r1) /* IEXPRBIN */;//event.Local
 
 r3 = (r3 + 1) /* IEXPRBIN */;//event.Local
 
-mem1 = r3;
+atomic_store_explicit(&mem1, r3, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_0 = r3;
@@ -62,11 +62,11 @@ r4 = (r3 ^ r3) /* IEXPRBIN */;//event.Local
 
 r4 = (r4 + 1) /* IEXPRBIN */;//event.Local
 
-mem0 = r4;
+atomic_store_explicit(&mem0, r4, memory_order_relaxed );//event.Store
 
 r6 = 2;//event.Local
 
-mem0 = r6;
+atomic_store_explicit(&mem0, r6, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r3_1 = r3;

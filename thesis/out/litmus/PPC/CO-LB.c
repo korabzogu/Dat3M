@@ -30,7 +30,7 @@ r0 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 r1 = 1;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r0_0 = r0;
@@ -47,7 +47,7 @@ r0 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 r1 = 2;//event.Local
 
-mem0 = r1;
+atomic_store_explicit(&mem0, r1, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 r0_1 = r0;

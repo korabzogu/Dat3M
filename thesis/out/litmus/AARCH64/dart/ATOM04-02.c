@@ -45,13 +45,13 @@ int X6;
 /*§Skip§*/
 X0 = 1;//event.Local
 
-mem1 = X0;
+atomic_store_explicit(&mem1, X0, memory_order_relaxed );//event.Store
 
 X3 = 1;//event.Local
 
 X4 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
-mem2 = X3;
+atomic_store_explicit(&mem2, X3, memory_order_relaxed );//event.Store
 
 if(X5 == 0){
 goto Exit0;//event.CondJump
@@ -59,7 +59,7 @@ goto Exit0;//event.CondJump
 
 X6 = 0;//event.Local
 
-mem0 = X6;
+atomic_store_explicit(&mem0, X6, memory_order_relaxed );//event.Store
 
 Exit0://event.Label
 
@@ -86,7 +86,7 @@ X1 = 2;//event.Local
 
 X2 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
-mem2 = X1;
+atomic_store_explicit(&mem2, X1, memory_order_relaxed );//event.Store
 
 if(X3 == 0){
 goto Exit1;//event.CondJump
@@ -96,7 +96,7 @@ X4 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 X6 = 0;//event.Local
 
-mem0 = X6;
+atomic_store_explicit(&mem0, X6, memory_order_relaxed );//event.Store
 
 Exit1://event.Label
 

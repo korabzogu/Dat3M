@@ -26,10 +26,10 @@ int b;
 
 /*§Skip§*/
 /*§Skip§*/
-a = 2;
+atomic_store_explicit(&a, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Wmb);
-b = 1;
+atomic_store_explicit(&b, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 a_0 = a;
@@ -43,10 +43,10 @@ int b;
 
 /*§Skip§*/
 /*§Skip§*/
-b = 2;
+atomic_store_explicit(&b, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Wmb);
-a = 1;
+atomic_store_explicit(&a, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 a_1 = a;

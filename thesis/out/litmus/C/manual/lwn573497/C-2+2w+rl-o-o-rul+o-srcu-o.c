@@ -27,9 +27,9 @@ int y;
 /*§Skip§*/
 /*§Skip§*/
 __VERIFIER_HARDWARE(Rcu-lock);
-x = 1;
+atomic_store_explicit(&x, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
-y = 2;
+atomic_store_explicit(&y, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Rcu-unlock);
 atomic_thread_fence(memory_order_seq_cst);
@@ -44,10 +44,10 @@ int y;
 
 /*§Skip§*/
 /*§Skip§*/
-y = 1;
+atomic_store_explicit(&y, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 __VERIFIER_HARDWARE(Sync-rcu);
-x = 2;
+atomic_store_explicit(&x, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);
 x_1 = x;

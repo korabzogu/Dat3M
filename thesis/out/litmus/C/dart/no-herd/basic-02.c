@@ -29,11 +29,11 @@ r0 = 1;//event.Local
 r1 = 1;//event.Local
 
 if(r0 && r1) {
-x = 1;
+atomic_store_explicit(&x, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 } else {}
 
-x = 1;
+atomic_store_explicit(&x, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
 
 //event.Skip
 
