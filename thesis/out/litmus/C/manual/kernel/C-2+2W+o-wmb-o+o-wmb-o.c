@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int x0_0;
 int x1_0;
 int r2_1;
@@ -27,11 +28,9 @@ int x1;
 
 /*§Skip§*/
 /*§Skip§*/
-atomic_store_explicit(&x0, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
-
-__VERIFIER_HARDWARE(Wmb);
-atomic_store_explicit(&x1, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
-
+WRITE_ONCE(&x0, 1);
+__VERIFIER_fence(Wmb);
+WRITE_ONCE(&x1, 2);
 atomic_thread_fence(memory_order_seq_cst);
 x0_0 = x0;
 x1_0 = x1;
@@ -45,11 +44,9 @@ int x1;
 
 /*§Skip§*/
 /*§Skip§*/
-atomic_store_explicit(&x1, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
-
-__VERIFIER_HARDWARE(Wmb);
-atomic_store_explicit(&x0, 2, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
-
+WRITE_ONCE(&x1, 1);
+__VERIFIER_fence(Wmb);
+WRITE_ONCE(&x0, 2);
 atomic_thread_fence(memory_order_seq_cst);
 r2_1 = r2;
 x0_1 = x0;

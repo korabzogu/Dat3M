@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r3_0;
 int r4_0;
 int r5_0;

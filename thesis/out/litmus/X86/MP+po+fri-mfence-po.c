@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int EBX_1;
 int ECX_1;
 int EAX_1;
@@ -39,7 +40,7 @@ EAX = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem1, 2, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(Mfence);
+__VERIFIER_fence(Mfence);
 EBX = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 ECX = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load

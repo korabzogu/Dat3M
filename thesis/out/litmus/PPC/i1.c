@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r2_0;
 int r5_0;
 int r6_0;
@@ -57,7 +58,7 @@ r3 = 2;//event.Local
 
 atomic_store_explicit(&mem1, r3, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(Sync);
+__VERIFIER_fence(Sync);
 r4 = 1;//event.Local
 
 atomic_store_explicit(&mem0, r4, memory_order_relaxed );//event.Store

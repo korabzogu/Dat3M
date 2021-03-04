@@ -32,24 +32,24 @@ public class CFileWriter {
     }
 
     public void createOutputFile(String filepath) {
-            File directory = new File(filepath.substring(0, filepath.lastIndexOf("/")));
-            if (!directory.exists()){
-                directory.mkdirs();
-                // If you require it to make the entire directory path including parents,
-                // use directory.mkdirs(); here instead.
-            }
+        File directory = new File(filepath.substring(0, filepath.lastIndexOf("/")));
+        if (!directory.exists()){
+            directory.mkdirs();
+            // If you require it to make the entire directory path including parents,
+            // use directory.mkdirs(); here instead.
+        }
 
-            File file = new File(filepath);
-            try{
-                FileWriter fw = new FileWriter(file.getAbsoluteFile());
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write("//File Creation test");
-                bw.close();
-            }
-            catch (IOException e){
-                e.printStackTrace();
-                System.exit(-1);
-            }
+        File file = new File(filepath);
+        try{
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("//File Creation test");
+            bw.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
     }
     public void writeHeaders(ArrayList<String> headers) {
@@ -74,6 +74,21 @@ public class CFileWriter {
             fw.write("}\n");
             fw.write("\n");
             fw.write("extern void __VERIFIER_HARDWARE(char * str);\n");
+
+            fw.write("enum fence{After_atomic," +
+                    "Before_atomic," +
+                    "Isync," +
+                    "Lwsync," +
+                    "Mb," +
+                    "Mfence," +
+                    "Rcu_lock," +
+                    "Rcu_unlock," +
+                    "Rmb," +
+                    "Sync," +
+                    "Sync_rcu," +
+                    "Wmb," +
+                    "Ish };\n"
+            );
             fw.flush();
             fw.close();
         } catch(java.io.IOException e) {
@@ -94,8 +109,8 @@ public class CFileWriter {
                         System.out.println("Following event " + e.toString());
                         fw.write(
                                 e.AsmToC()
-                                + ", "
-                                + ((Init) e).getValue().AsmToC() + ");\n");
+                                        + ", "
+                                        + ((Init) e).getValue().AsmToC() + ");\n");
                     }
                 }
             }
@@ -220,7 +235,7 @@ public class CFileWriter {
                         b = true;
                 }
                 if(!b)
-                fw.write("int " + reg + ";\n");
+                    fw.write("int " + reg + ";\n");
             }
             for(Event e : t.getCache().getEvents(FilterBasic.get(EType.ANY))) {
                 if(!(e instanceof Init) && e != null) {
@@ -242,8 +257,8 @@ public class CFileWriter {
                 }
                 if(!b)
                     fw.write(reg + "_" + String.valueOf(t.getId()) + " = " + reg + ";\n");
-                    //fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
-                    //fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
+                //fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
+                //fw.write( config.getStructVarName(t.getId()) + "." + reg + " = " + reg + ";\n");
 
             }
             if(!(t.getEntry() instanceof Init)) {
@@ -265,11 +280,11 @@ public class CFileWriter {
             fw.write("atomic_int " + p.getMemory().getLocationForAddress((Address) e.getAddress()) + ";\n");
             fw.flush();
             fw.close();
-            }
-            catch(java.io.IOException ex) {
-                System.out.println("Error writing function declaration of function ");
-                ex.printStackTrace();
-            }
+        }
+        catch(java.io.IOException ex) {
+            System.out.println("Error writing function declaration of function ");
+            ex.printStackTrace();
+        }
     }
 
     /*
@@ -306,8 +321,8 @@ public class CFileWriter {
                     if(reg.charAt(0) == '&') {
                         reg = reg.substring(1);
                     }
-                        System.out.println("Replacing" + line + "with " + reg);
-                        line = line.replaceFirst("<customTag(.+?)>(.+?)</customTag>", reg);
+                    System.out.println("Replacing" + line + "with " + reg);
+                    line = line.replaceFirst("<customTag(.+?)>(.+?)</customTag>", reg);
 
                 }
                 content += line + '\n';

@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r2_0;
 int r3_0;
 int r4_0;
@@ -51,7 +52,7 @@ r5 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 //event.Skip
 
-if(r5 == r5){
+if((r5)==(r5)){
 goto LC00;//event.CondJump
 }
 
@@ -85,7 +86,7 @@ r3 = (r3 + 1) /* IEXPRBIN */;//event.Local
 
 atomic_store_explicit(&mem0, r3, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(Sync);
+__VERIFIER_fence(Sync);
 r5 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);

@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int X8_0;
 int X0_0;
 int X1_0;
@@ -60,7 +61,7 @@ X2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem1, X1, memory_order_relaxed );//event.Store
 
-if(X3 != 0){
+if((X3)!=(0)){
 goto Fail0;//event.CondJump
 }
 
@@ -70,11 +71,11 @@ X6 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem2, X5, memory_order_relaxed );//event.Store
 
-if(X3 != 0){
+if((X3)!=(0)){
 goto Fail0;//event.CondJump
 }
 
-if(True){
+if(true/* BConst */){
 goto Exit0;//event.CondJump
 }
 
@@ -110,7 +111,7 @@ X1 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem2, X1, memory_order_relaxed );//event.Store
 
-if(X2 != 0){
+if((X2)!=(0)){
 goto Fail1;//event.CondJump
 }
 
@@ -120,11 +121,11 @@ X5 = atomic_load_explicit(&mem3, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem3, X4, memory_order_relaxed );//event.Store
 
-if(X2 != 0){
+if((X2)!=(0)){
 goto Fail1;//event.CondJump
 }
 
-if(True){
+if(true/* BConst */){
 goto Exit1;//event.CondJump
 }
 
@@ -161,7 +162,7 @@ X2 = atomic_load_explicit(&mem3, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem3, X1, memory_order_relaxed );//event.Store
 
-if(X3 != 0){
+if((X3)!=(0)){
 goto Fail2;//event.CondJump
 }
 
@@ -169,11 +170,11 @@ X5 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_store_explicit(&mem1, X5, memory_order_relaxed );//event.Store
 
-if(X3 != 0){
+if((X3)!=(0)){
 goto Fail2;//event.CondJump
 }
 
-if(True){
+if(true/* BConst */){
 goto Exit2;//event.CondJump
 }
 

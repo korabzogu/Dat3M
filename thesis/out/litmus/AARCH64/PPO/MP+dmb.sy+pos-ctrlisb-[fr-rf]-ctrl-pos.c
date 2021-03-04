@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int X0_0;
 int X1_0;
 int X2_0;
@@ -69,7 +70,7 @@ X0 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 X2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
-if(X2 != 0){
+if((X2)!=(0)){
 goto LC00;//event.CondJump
 }
 
@@ -81,7 +82,7 @@ X3 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
 X5 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
-if(X5 != 0){
+if((X5)!=(0)){
 goto LC01;//event.CondJump
 }
 

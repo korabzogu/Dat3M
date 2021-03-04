@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r5_0;
 int r1_0;
 int r2_1;
@@ -50,7 +51,7 @@ int r1;
 /*§Skip§*/
 r1 = atomic_load_explicit(&mem0, memory_order_relaxed);//event.Load
 
-__VERIFIER_HARDWARE(Lwsync);
+__VERIFIER_fence(Lwsync);
 r2 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 atomic_thread_fence(memory_order_seq_cst);
@@ -71,7 +72,7 @@ r2 = 2;//event.Local
 
 atomic_store_explicit(&mem1, r1, memory_order_relaxed );//event.Store
 
-__VERIFIER_HARDWARE(Lwsync);
+__VERIFIER_fence(Lwsync);
 atomic_store_explicit(&mem0, r2, memory_order_relaxed );//event.Store
 
 atomic_thread_fence(memory_order_seq_cst);

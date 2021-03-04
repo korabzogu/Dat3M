@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r2_0;
 int r3_0;
 int r4_0;
@@ -68,7 +69,7 @@ r5 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
 //event.Skip
 
-if(r5 == r5){
+if((r5)==(r5)){
 goto LC00;//event.CondJump
 }
 

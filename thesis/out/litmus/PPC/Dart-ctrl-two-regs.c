@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r2_0;
 int r3_0;
 int r4_0;
@@ -46,7 +47,7 @@ r7 = (r4 + 1) /* IEXPRBIN */;//event.Local
 
 //event.Skip
 
-if(r4 != r5){
+if((r4)!=(r5)){
 goto LC00;//event.CondJump
 }
 

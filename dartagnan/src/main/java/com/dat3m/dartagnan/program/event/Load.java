@@ -68,10 +68,12 @@ public class Load extends MemEvent implements RegWriter {
     @Override
     public String AsmToC() {
         // r = atomic_load(x)
-        // TODO make MO into ENUM
         String mem_order = "memory_order_relaxed";
         String addressToC = this.address.AsmToC();
         if(this.mo != null) {
+            if (this.mo.equals("Once")) {
+                return resultRegister.AsmToC() + " = READ_ONCE(" + addressToC +");\n";
+            }
             mem_order = Mo.AsmToC(mo);
         }/*
         if(address instanceof Register) {

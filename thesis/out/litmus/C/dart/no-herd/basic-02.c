@@ -13,6 +13,7 @@ reach_error();
 }
 
 extern void __VERIFIER_HARDWARE(char * str);
+enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int x_0;
 int r0_0;
 int r1_0;
@@ -29,12 +30,10 @@ r0 = 1;//event.Local
 r1 = 1;//event.Local
 
 if(r0 && r1) {
-atomic_store_explicit(&x, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
-
+WRITE_ONCE(&x, 1);
 } else {}
 
-atomic_store_explicit(&x, 1, memory_order_seq_cst /* TODO use macro WRITE_ONCE*/ );//event.Store
-
+WRITE_ONCE(&x, 1);
 //event.Skip
 
 //event.Skip
