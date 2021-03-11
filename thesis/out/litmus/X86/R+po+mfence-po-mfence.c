@@ -65,7 +65,7 @@ int a = atomic_load_explicit(&mem3, memory_order_relaxed);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
 int z = atomic_load_explicit(&mem2, memory_order_relaxed);
-assert(((((a == 1) && (x == 1)) && (y == 2)) && (EBX_1 == 0)));
+assert(!((((a == 1) && (x == 1)) && (y == 2)) && (EBX_1 == 0)));
 return 0;
 }
 

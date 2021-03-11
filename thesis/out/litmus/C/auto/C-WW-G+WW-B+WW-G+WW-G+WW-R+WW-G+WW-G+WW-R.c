@@ -201,7 +201,7 @@ int x4 = atomic_load_explicit(&mem4, memory_order_relaxed);
 int x5 = atomic_load_explicit(&mem5, memory_order_relaxed);
 int x6 = atomic_load_explicit(&mem6, memory_order_relaxed);
 int x7 = atomic_load_explicit(&mem7, memory_order_relaxed);
-assert(((((((((x0 == 2) && (x1 == 2)) && (x2 == 2)) && (x3 == 2)) && (x4 == 2)) && (x5 == 2)) && (x6 == 2)) && (x7 == 2)));
+assert(!((((((((x0 == 2) && (x1 == 2)) && (x2 == 2)) && (x3 == 2)) && (x4 == 2)) && (x5 == 2)) && (x6 == 2)) && (x7 == 2)));
 return 0;
 }
 

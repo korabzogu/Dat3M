@@ -40,6 +40,6 @@ public class Fence extends Event {
 
 	@Override
 	public String AsmToC() {
-		return "__VERIFIER_fence(" + name + ");";
+		return "__VERIFIER_fence(" + name.replace('-', '_') + ");";
 	}
 }

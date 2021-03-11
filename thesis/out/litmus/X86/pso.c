@@ -123,7 +123,7 @@ pthread_join(thread_4, NULL);
 pthread_join(thread_5, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
-assert(((((((((EAX_4 == 1) && (EBX_4 == 2)) && (ECX_4 == 0)) && (EDX_4 == 1)) && (EAX_5 == 1)) && (EBX_5 == 2)) && (ECX_5 == 0)) && (EDX_5 == 1)));
+assert(!((((((((EAX_4 == 1) && (EBX_4 == 2)) && (ECX_4 == 0)) && (EDX_4 == 1)) && (EAX_5 == 1)) && (EBX_5 == 2)) && (ECX_5 == 0)) && (EDX_5 == 1)));
 return 0;
 }
 

@@ -55,7 +55,7 @@ pthread_join(thread_0, NULL);
 pthread_join(thread_1, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
-assert(((EAX_0 == 0) && (EBX_1 == 0)));
+assert(!((EAX_0 == 0) && (EBX_1 == 0)));
 return 0;
 }
 

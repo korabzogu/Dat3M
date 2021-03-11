@@ -68,7 +68,7 @@ pthread_create(&thread_1, NULL, &func_1, NULL);
 pthread_join(thread_0, NULL);
 pthread_join(thread_1, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
-assert(!((((X2_0 == 1) && (((X2_1 == 2) && ((x == 1) || (x == 2))) || ((X2_1 == 1) && (x == 1)))) || (((X2_0 == 2) && (X2_1 == 2)) && (x == 2)))));
+assert(!!((((X2_0 == 1) && (((X2_1 == 2) && ((x == 1) || (x == 2))) || ((X2_1 == 1) && (x == 1)))) || (((X2_0 == 2) && (X2_1 == 2)) && (x == 2)))));
 return 0;
 }
 

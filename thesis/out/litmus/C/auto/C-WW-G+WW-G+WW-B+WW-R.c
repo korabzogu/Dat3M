@@ -108,7 +108,7 @@ int x0 = atomic_load_explicit(&mem0, memory_order_relaxed);
 int x1 = atomic_load_explicit(&mem1, memory_order_relaxed);
 int x2 = atomic_load_explicit(&mem2, memory_order_relaxed);
 int x3 = atomic_load_explicit(&mem3, memory_order_relaxed);
-assert(((((x0 == 2) && (x1 == 2)) && (x2 == 2)) && (x3 == 2)));
+assert(!((((x0 == 2) && (x1 == 2)) && (x2 == 2)) && (x3 == 2)));
 return 0;
 }
 

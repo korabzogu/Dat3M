@@ -26,6 +26,7 @@ public class Mo {
         } else if (ShortMo.equals("NA")) {
             result = "memory_order_seq_cst /* TODO use usual C assign */";
         } else {
+
             throw new RuntimeException("Invalid Memory Order in Mo.AsmToC(" + ShortMo + ") : " + ShortMo + " does not exist");
         }
         return result;

@@ -96,7 +96,7 @@ pthread_join(thread_3, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
 int z = atomic_load_explicit(&mem2, memory_order_relaxed);
-assert(((((EAX_2 == 1) && (EBX_2 == 2)) && (ECX_3 == 1)) && (EDX_3 == 0)));
+assert(!((((EAX_2 == 1) && (EBX_2 == 2)) && (ECX_3 == 1)) && (EDX_3 == 0)));
 return 0;
 }
 

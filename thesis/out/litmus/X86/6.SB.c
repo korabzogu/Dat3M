@@ -129,7 +129,7 @@ int c = atomic_load_explicit(&mem5, memory_order_relaxed);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
 int z = atomic_load_explicit(&mem2, memory_order_relaxed);
-assert(((((((EAX_0 == 0) && (EAX_1 == 0)) && (EAX_2 == 0)) && (EAX_3 == 0)) && (EAX_4 == 0)) && (EAX_5 == 0)));
+assert(!((((((EAX_0 == 0) && (EAX_1 == 0)) && (EAX_2 == 0)) && (EAX_3 == 0)) && (EAX_4 == 0)) && (EAX_5 == 0)));
 return 0;
 }
 

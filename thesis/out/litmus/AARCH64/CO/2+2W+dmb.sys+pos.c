@@ -70,7 +70,7 @@ pthread_create(&thread_1, NULL, &func_1, NULL);
 pthread_join(thread_0, NULL);
 pthread_join(thread_1, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
-assert(!(((x == 2) || (x == 4))));
+assert(!!(((x == 2) || (x == 4))));
 return 0;
 }
 

@@ -137,7 +137,7 @@ int a = atomic_load_explicit(&mem3, memory_order_relaxed);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
 int z = atomic_load_explicit(&mem2, memory_order_relaxed);
-assert((((((((a == 1) && (x == 1)) && (y == 2)) && (X0_1 == 1)) && (X2_1 == 2)) && (X7_1 == 1)) && (X8_1 == 0)));
+assert(!(((((((a == 1) && (x == 1)) && (y == 2)) && (X0_1 == 1)) && (X2_1 == 2)) && (X7_1 == 1)) && (X8_1 == 0)));
 return 0;
 }
 
