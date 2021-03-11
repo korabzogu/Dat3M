@@ -12,7 +12,7 @@ reach_error();
 }
 }
 
-extern void __VERIFIER_HARDWARE(char * str);
+extern void __VERIFIER_fence(char * str);
 enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int x_0;
 int y_0;
@@ -27,10 +27,10 @@ int y;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_fence(Rcu-lock);
+__VERIFIER_fence(Rcu_lock);
 WRITE_ONCE(&x, 1);
 WRITE_ONCE(&y, 2);
-__VERIFIER_fence(Rcu-unlock);
+__VERIFIER_fence(Rcu_unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x_0 = x;
 y_0 = y;
@@ -44,7 +44,7 @@ int y;
 /*§Skip§*/
 /*§Skip§*/
 WRITE_ONCE(&y, 1);
-__VERIFIER_fence(Sync-rcu);
+__VERIFIER_fence(Sync_rcu);
 WRITE_ONCE(&x, 2);
 atomic_thread_fence(memory_order_seq_cst);
 x_1 = x;

@@ -12,7 +12,7 @@ reach_error();
 }
 }
 
-extern void __VERIFIER_HARDWARE(char * str);
+extern void __VERIFIER_fence(char * str);
 enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int x0_0;
 atomic_int mem0;
@@ -22,7 +22,7 @@ int x0;
 
 /*§Skip§*/
 WRITE_ONCE(&x0, 2);
-__VERIFIER_fence(Sync-rcu);
+__VERIFIER_fence(Sync_rcu);
 WRITE_ONCE(&x0, 1);
 atomic_thread_fence(memory_order_seq_cst);
 x0_0 = x0;

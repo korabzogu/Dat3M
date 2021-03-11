@@ -73,7 +73,7 @@ public class CFileWriter {
             fw.write("}\n");
             fw.write("}\n");
             fw.write("\n");
-            fw.write("extern void __VERIFIER_HARDWARE(char * str);\n");
+            fw.write("extern void __VERIFIER_fence(char * str);\n");
 
             fw.write("enum fence{After_atomic," +
                     "Before_atomic," +

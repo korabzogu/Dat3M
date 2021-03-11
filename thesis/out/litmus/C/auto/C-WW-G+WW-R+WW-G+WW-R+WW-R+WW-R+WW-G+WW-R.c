@@ -12,7 +12,7 @@ reach_error();
 }
 }
 
-extern void __VERIFIER_HARDWARE(char * str);
+extern void __VERIFIER_fence(char * str);
 enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int x0_0;
 int x1_0;
@@ -46,7 +46,7 @@ int x1;
 /*§Skip§*/
 /*§Skip§*/
 WRITE_ONCE(&x0, 2);
-__VERIFIER_fence(Sync-rcu);
+__VERIFIER_fence(Sync_rcu);
 WRITE_ONCE(&x1, 1);
 atomic_thread_fence(memory_order_seq_cst);
 x0_0 = x0;
@@ -60,10 +60,10 @@ int x2;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_fence(Rcu-lock);
+__VERIFIER_fence(Rcu_lock);
 WRITE_ONCE(&x1, 2);
 WRITE_ONCE(&x2, 1);
-__VERIFIER_fence(Rcu-unlock);
+__VERIFIER_fence(Rcu_unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x1_1 = x1;
 x2_1 = x2;
@@ -77,7 +77,7 @@ int x3;
 /*§Skip§*/
 /*§Skip§*/
 WRITE_ONCE(&x2, 2);
-__VERIFIER_fence(Sync-rcu);
+__VERIFIER_fence(Sync_rcu);
 WRITE_ONCE(&x3, 1);
 atomic_thread_fence(memory_order_seq_cst);
 x2_2 = x2;
@@ -91,10 +91,10 @@ int x4;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_fence(Rcu-lock);
+__VERIFIER_fence(Rcu_lock);
 WRITE_ONCE(&x3, 2);
 WRITE_ONCE(&x4, 1);
-__VERIFIER_fence(Rcu-unlock);
+__VERIFIER_fence(Rcu_unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x3_3 = x3;
 x4_3 = x4;
@@ -107,10 +107,10 @@ int x5;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_fence(Rcu-lock);
+__VERIFIER_fence(Rcu_lock);
 WRITE_ONCE(&x4, 2);
 WRITE_ONCE(&x5, 1);
-__VERIFIER_fence(Rcu-unlock);
+__VERIFIER_fence(Rcu_unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x4_4 = x4;
 x5_4 = x5;
@@ -123,10 +123,10 @@ int x6;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_fence(Rcu-lock);
+__VERIFIER_fence(Rcu_lock);
 WRITE_ONCE(&x5, 2);
 WRITE_ONCE(&x6, 1);
-__VERIFIER_fence(Rcu-unlock);
+__VERIFIER_fence(Rcu_unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x5_5 = x5;
 x6_5 = x6;
@@ -140,7 +140,7 @@ int x7;
 /*§Skip§*/
 /*§Skip§*/
 WRITE_ONCE(&x6, 2);
-__VERIFIER_fence(Sync-rcu);
+__VERIFIER_fence(Sync_rcu);
 WRITE_ONCE(&x7, 1);
 atomic_thread_fence(memory_order_seq_cst);
 x6_6 = x6;
@@ -154,10 +154,10 @@ int x7;
 
 /*§Skip§*/
 /*§Skip§*/
-__VERIFIER_fence(Rcu-lock);
+__VERIFIER_fence(Rcu_lock);
 WRITE_ONCE(&x7, 2);
 WRITE_ONCE(&x0, 1);
-__VERIFIER_fence(Rcu-unlock);
+__VERIFIER_fence(Rcu_unlock);
 atomic_thread_fence(memory_order_seq_cst);
 x0_7 = x0;
 x7_7 = x7;

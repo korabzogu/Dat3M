@@ -12,7 +12,7 @@ reach_error();
 }
 }
 
-extern void __VERIFIER_HARDWARE(char * str);
+extern void __VERIFIER_fence(char * str);
 enum fence{After_atomic,Before_atomic,Isync,Lwsync,Mb,Mfence,Rcu_lock,Rcu_unlock,Rmb,Sync,Sync_rcu,Wmb,Ish };
 int r2_0;
 int x_0;
