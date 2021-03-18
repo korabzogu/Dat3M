@@ -60,7 +60,7 @@ public class CFileWriter {
 
 
 
-            fw.write("<customTag>/* File converted to C from litmus */</customTag>");
+            fw.write("/*<customTag0> File converted to C from litmus </customTag>*/\n");
             for(int i = 0; i < headers.size(); i++) {
                 fw.write("#include " + "<" +  headers.get(i) + ">\n");
             }

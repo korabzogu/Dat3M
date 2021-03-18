@@ -149,5 +149,6 @@ public class Tool {
         for(PointerLocation s : p.getPtrLocMap()) {
             System.out.println(s.getThreadID() + " " + s.getLoc() + " " + s.getPtr());
         }
+
     }
 }
