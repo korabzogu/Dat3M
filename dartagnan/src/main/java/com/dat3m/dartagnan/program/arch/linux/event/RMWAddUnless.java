@@ -72,6 +72,7 @@ public class RMWAddUnless extends RMWAbstract implements RegWriter, RegReaderDat
 
     @Override
     public String AsmToC() {
-        return "atomic_fetch_" + "dummy" + "(" + resultRegister + "," + value + ");\n";
+        /*return "atomic_fetch_" + "dummy" + "(" + resultRegister + "," + value + ");\n";*/
+        throw new RuntimeException("Unclear RMW Function");
     }
 }

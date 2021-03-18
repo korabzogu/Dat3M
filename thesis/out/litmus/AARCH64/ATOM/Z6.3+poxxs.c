@@ -75,7 +75,7 @@ if((X3)!=(0)){
 goto Fail0;//event.CondJump
 }
 
-if(true/* BConst */){
+if(1){
 goto Exit0;//event.CondJump
 }
 
@@ -128,7 +128,7 @@ if((X3)!=(0)){
 goto Fail1;//event.CondJump
 }
 
-if(true/* BConst */){
+if(1){
 goto Exit1;//event.CondJump
 }
 
@@ -175,7 +175,7 @@ if((X2)!=(0)){
 goto Fail2;//event.CondJump
 }
 
-if(true/* BConst */){
+if(1){
 goto Exit2;//event.CondJump
 }
 

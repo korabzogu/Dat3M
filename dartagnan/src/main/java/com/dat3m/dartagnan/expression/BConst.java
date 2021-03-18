@@ -52,7 +52,7 @@ public class BConst extends BExpr implements ExprInterface {
 	}
 
 	@Override
-	public String AsmToC() { return String.valueOf(value).toLowerCase() + "/* BConst */"; }
+	public String AsmToC() { return toString().equals("True") ? "1" : "0"  + " /* BConst */"; }
 
 	@Override
 	public String AsmToCAssert() { return AsmToC();}

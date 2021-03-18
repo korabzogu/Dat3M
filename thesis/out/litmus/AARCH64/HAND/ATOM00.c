@@ -56,7 +56,7 @@ if((X3)!=(0)){
 goto Fail1;//event.CondJump
 }
 
-if(true/* BConst */){
+if(1){
 goto Exit1;//event.CondJump
 }
 

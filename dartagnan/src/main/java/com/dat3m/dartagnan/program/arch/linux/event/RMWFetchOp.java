@@ -75,7 +75,9 @@ public class RMWFetchOp extends RMWAbstract implements RegWriter, RegReaderData 
 
     @Override
     public String AsmToC() {
-        return "/* TODO check if this is correct */ atomic_store("
+        throw new RuntimeException("Error in register handling");
+        /*
+        return " atomic_store("
                 + resultRegister.toString()
                 + ","
                 + "atomic_fetch_" + op.toLinuxName() + "_explicit("
@@ -85,5 +87,7 @@ public class RMWFetchOp extends RMWAbstract implements RegWriter, RegReaderData 
                 + ","
                 + "memory_order_" + Mo.toText(mo)
                 + "));\n";
+    }
+    */
     }
 }

@@ -21,7 +21,7 @@ int r0;
 
 r0 = 0;//event.Local
 
-if(false/* BConst */) {
+if(0 /* BConst */) {
 r0 = 1;//event.Local
 
 } else {}

@@ -56,7 +56,7 @@ goto Fail0;//event.CondJump
 
 X4 = atomic_load_explicit(&mem2, memory_order_relaxed);//event.Load
 
-if(true/* BConst */){
+if(1){
 goto Exit0;//event.CondJump
 }
 
@@ -99,7 +99,7 @@ goto Fail1;//event.CondJump
 
 X4 = atomic_load_explicit(&mem1, memory_order_relaxed);//event.Load
 
-if(true/* BConst */){
+if(1){
 goto Exit1;//event.CondJump
 }
 

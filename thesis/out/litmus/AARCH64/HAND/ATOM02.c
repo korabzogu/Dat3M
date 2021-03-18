@@ -53,7 +53,7 @@ if((X4)!=(0)){
 goto Fail0;//event.CondJump
 }
 
-if(true/* BConst */){
+if(1){
 goto Exit0;//event.CondJump
 }
 
@@ -94,7 +94,7 @@ if((X4)!=(0)){
 goto Fail1;//event.CondJump
 }
 
-if(true/* BConst */){
+if(1){
 goto Exit1;//event.CondJump
 }
 
