@@ -47,11 +47,48 @@ public class Tool {
         Printer printer = new Printer();
         System.out.println(printer.print(p));
 
+        // Write headerfile
+        try {
+            FileWriter fw = new FileWriter("litmus.h");
+            fw.write("\n");
+            fw.write("void reach_error() {\n");
+            fw.write("assert(0);\n");
+            fw.write("}\n");
+            fw.write("void __VERIFIER_assert(int cond) {\n");
+            fw.write("if(!cond) {\n");
+            fw.write("reach_error();\n");
+            fw.write("}\n");
+            fw.write("}\n");
+            fw.write("\n");
+            fw.write("extern void __VERIFIER_fence(char * str);\n");
+
+            fw.write("enum fence{After_atomic," +
+                    "Before_atomic," +
+                    "Isync," +
+                    "Lwsync," +
+                    "Mb," +
+                    "Mfence," +
+                    "Rcu_lock," +
+                    "Rcu_unlock," +
+                    "Rmb," +
+                    "Sync," +
+                    "Sync_rcu," +
+                    "Wmb," +
+                    "Ish };\n"
+            );
+            fw.flush();
+            fw.close();
+        } catch(java.io.IOException e) {
+            System.out.println("Error writing headers");
+            e.printStackTrace();
+        }
+
         ArrayList<String> headers = new ArrayList<String>();
         headers.add("pthread.h");
         headers.add("assert.h");
         headers.add("stdio.h");
         headers.add("stdatomic.h");
+        headers.add("litmus.h");
         String filepath = "out/" + options
                 .getProgramFilePath()
                 .substring(3, options.getProgramFilePath().length() - 6) + "c";
@@ -77,24 +114,6 @@ public class Tool {
                 cfw.writeGlobalVars(thread);
             }
         }
-        // DEPRECATED cfw.writeRegisterVariables(registers);
-
-        /*
-        // Write struct declarations for local variables
-        for(Thread thread : p.getThreads()) {
-            if(!(thread.getEntry() instanceof Init) && thread.getRegisterNames().size() > 0) {
-                cfw.writeFunctionStruct(thread);
-            }
-        }
-
-        // Write global struct variables
-        for(Thread thread : p.getThreads()) {
-            if(!(thread.getEntry() instanceof Init) && thread.getRegisterNames().size() > 0) {
-                cfw.writeGlobalStruct(thread);
-            }
-        }
-        */
-
         // Write variables for functions etc.
         for(Address a : p.getMemory().getAllAddresses()) {
             // TODO write lines with atomic_int l.AsmToC();

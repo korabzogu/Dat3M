@@ -61,17 +61,23 @@ public class Dartagnan {
         Solver s = ctx.mkSolver();
 
         Result result = selectAndRunAnalysis(options, mcm, p, target, settings, ctx, s);
- 
+
+        System.out.println(result);
+        /*
         if(options.getProgramFilePath().endsWith(".litmus")) {
+
             System.out.println("Settings: " + options.getSettings());
             if(p.getAssFilter() != null){
                 System.out.println("Filter " + (p.getAssFilter()));
             }
             System.out.println("Condition " + p.getAss().toStringWithType());
-            System.out.println(result == Result.FAIL ? "Ok" : "No");        	
+            System.out.println(result == Result.FAIL ? "Ok" : "No");
+
+
         } else {
         	System.out.println(result);
         }
+        */
 
         if(options.createWitness() != null) {
         	new Witness(p, options.createWitness()).write(ctx, s, result);
