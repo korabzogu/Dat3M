@@ -1,0 +1,9 @@
+format_version: '2.0'
+input_files: 'C-IRRWIW+poacquireonce+pooncerelease+OnceRelease.c'
+
+properties:
+  - property_file: /home/gwinrond/Thesis/Dat3M/unreach-call.prp
+    expected_verdict: true
+
+language: C
+data_model: ILP32
