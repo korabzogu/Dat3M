@@ -1,0 +1,9 @@
+format_version: '2.0'
+input_files: 'C-RW-G+RW-G+RW-r+RW-a+RW-G+RW-G+RW-B+RW-B.c'
+
+properties:
+  - property_file: /home/gwinrond/Thesis/Dat3M/unreach-call.prp
+    expected_verdict: true
+
+language: C
+data_model: ILP32
