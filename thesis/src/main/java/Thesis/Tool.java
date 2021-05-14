@@ -17,6 +17,7 @@ import com.dat3m.dartagnan.utils.printer.Printer;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import org.apache.commons.cli.HelpFormatter;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -83,12 +84,13 @@ public class Tool {
             e.printStackTrace();
         }
 
+        
         ArrayList<String> headers = new ArrayList<String>();
         headers.add("pthread.h");
         headers.add("assert.h");
         headers.add("stdio.h");
         headers.add("stdatomic.h");
-        headers.add("litmus.h");
+        //headers.add("litmus.h");
         String filepath = "out/" + options
                 .getProgramFilePath()
                 .substring(3, options.getProgramFilePath().length() - 6) + "c";
@@ -103,6 +105,7 @@ public class Tool {
         cfw.createOutputFile(filepath);
         cfw.writeHeaders(headers);
 
+        // Write headerfile
         ArrayList<ArrayList<String>> registers = new ArrayList<ArrayList<String>>();
         // Write registers
         for(Thread thread : p.getThreads()) {
@@ -169,5 +172,29 @@ public class Tool {
             System.out.println(s.getThreadID() + " " + s.getLoc() + " " + s.getPtr());
         }
 
+        // write yml file
+        try{
+            String verdict;
+
+            String yml = filepath.substring(0, filepath.lastIndexOf('.')) + ".yml";
+            FileWriter fw = new FileWriter(yml);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("format_version: '2.0'\n");
+            bw.write("\n");
+            bw.write("input_files: '" + filepath + "'\n");
+            bw.write("\n");
+            bw.write("properties:\n");
+            bw.write("  - property_file: ../properties/unreach-call.prp\n");
+            bw.write("    expected_verdict: true\n");
+            bw.write("\n");
+            bw.write("options:\n");
+            bw.write("    language: C");
+            bw.write("     ILP32");
+            bw.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 }

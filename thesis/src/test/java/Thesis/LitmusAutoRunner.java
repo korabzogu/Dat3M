@@ -1,8 +1,8 @@
 package Thesis;
 
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,8 +49,6 @@ public class LitmusAutoRunner {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         return result;
 
 

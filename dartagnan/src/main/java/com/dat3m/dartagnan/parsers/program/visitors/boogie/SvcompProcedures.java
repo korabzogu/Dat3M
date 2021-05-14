@@ -13,6 +13,7 @@ import com.dat3m.dartagnan.parsers.BoogieParser.Call_cmdContext;
 import com.dat3m.dartagnan.parsers.program.utils.ParsingException;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.Assume;
+import com.dat3m.dartagnan.program.event.Fence;
 import com.dat3m.dartagnan.program.event.Label;
 import com.dat3m.dartagnan.program.event.Local;
 import com.dat3m.dartagnan.program.svcomp.event.BeginAtomic;
@@ -21,8 +22,13 @@ import com.dat3m.dartagnan.program.utils.EType;
 
 public class SvcompProcedures {
 
+
+	static List<String> FENCES = Arrays.asList("After_atomic", "Before_atomic", "Isync" ," Lwsync" ," Mb", "Mfence",
+			"Rcu_lock" , "Rcu_unlock", "Rmb", "Sync", "Sync_rcu","Wmb", "Ish");
+
 	public static List<String> SVCOMPPROCEDURES = Arrays.asList(
-			"__VERIFIER_assume", 
+			"__VERIFIER_assume",
+			"__VERIFIER_fence",
 			"__VERIFIER_error", 
 			"__VERIFIER_assert",
 			"__VERIFIER_atomic_begin",
@@ -43,6 +49,10 @@ public class SvcompProcedures {
 		String name = ctx.call_params().Define() == null ? ctx.call_params().Ident(0).getText() : ctx.call_params().Ident(1).getText();
 		if(name.contains("__VERIFIER_assume")) {
 			__VERIFIER_assume(visitor, ctx);
+			return;
+		}
+		if(name.contains("__VERIFIER_fence")) {
+			__VERIFIER_fence(visitor, ctx);
 			return;
 		}
 		if(name.contains("__VERIFIER_error")) {
@@ -75,6 +85,13 @@ public class SvcompProcedures {
 		throw new UnsupportedOperationException(name + " procedure is not part of SVCOMPPROCEDURES");
 	}
 
+	private static void __VERIFIER_fence(VisitorBoogie visitor, Call_cmdContext ctx) {
+		int index = ((IConst)ctx.call_params().exprs().accept(visitor)).getValue();
+		if(index >= FENCES.size()) {
+			throw new UnsupportedOperationException(ctx.getText() + " cannot be handled");
+		}
+		visitor.programBuilder.addChild(visitor.threadCount, new Fence(FENCES.get(index)));
+	}
 	//TODO: seems to be obsolete after SVCOMP 2020
 	private static void __VERIFIER_assume(VisitorBoogie visitor, Call_cmdContext ctx) {
        	Label label = visitor.programBuilder.getOrCreateLabel("END_OF_T" + visitor.threadCount);

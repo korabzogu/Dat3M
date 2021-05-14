@@ -63,7 +63,6 @@ public class CFileWriter {
             for(int i = 0; i < headers.size(); i++) {
                 fw.write("#include " + "<" +  headers.get(i) + ">\n");
             }
-            /*
             fw.write("\n");
             fw.write("void reach_error() {\n");
             fw.write("assert(0);\n");
@@ -92,7 +91,6 @@ public class CFileWriter {
             );
             fw.flush();
             fw.close();
-            */
         } catch(java.io.IOException e) {
             System.out.println("Error writing headers");
             e.printStackTrace();
