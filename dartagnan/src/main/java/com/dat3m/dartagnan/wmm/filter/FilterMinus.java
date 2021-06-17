@@ -11,8 +11,7 @@ public class FilterMinus extends FilterAbstract {
 
     public static FilterMinus get(FilterAbstract filter1, FilterAbstract filter2){
         String key = mkName(filter1, filter2);
-        instances.putIfAbsent(key, new FilterMinus(filter1, filter2));
-        return instances.get(key);
+        return instances.computeIfAbsent(key, k -> new FilterMinus(filter1, filter2));
     }
 
     private static String mkName(FilterAbstract filter1, FilterAbstract filter2){
@@ -20,8 +19,8 @@ public class FilterMinus extends FilterAbstract {
                 + " \\ " + ((filter2 instanceof FilterBasic) ? filter2 : "( " + filter2 + " )");
     }
 
-    private FilterAbstract filter1;
-    private FilterAbstract filter2;
+    private final FilterAbstract filter1;
+    private final FilterAbstract filter2;
 
     private FilterMinus(FilterAbstract filterPresent, FilterAbstract filterAbsent){
         this.filter1 = filterPresent;

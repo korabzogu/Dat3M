@@ -1,22 +1,19 @@
 package com.dat3m.dartagnan.wmm.relation.unary;
 
 import com.dat3m.dartagnan.program.utils.EType;
-import com.dat3m.dartagnan.utils.Settings;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
+import com.google.common.collect.Sets;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.event.Event;
-import com.dat3m.dartagnan.wmm.utils.Utils;
 import com.dat3m.dartagnan.wmm.relation.Relation;
 import com.dat3m.dartagnan.wmm.utils.Tuple;
 import com.dat3m.dartagnan.wmm.utils.TupleSet;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  *
@@ -42,10 +39,21 @@ public class RelTransRef extends RelTrans {
     }
 
     @Override
-    public void initialise(Program program, Context ctx, Settings settings){
-        super.initialise(program, ctx, settings);
+    public void initialise(VerificationTask task, Context ctx){
+        super.initialise(task, ctx);
         identityEncodeTupleSet = new TupleSet();
         transEncodeTupleSet = new TupleSet();
+    }
+
+    @Override
+    public TupleSet getMinTupleSet(){
+        if(minTupleSet == null){
+            super.getMinTupleSet();
+            for(Event e : task.getProgram().getCache().getEvents(FilterBasic.get(EType.VISIBLE))){
+                minTupleSet.add(new Tuple(e, e));
+            }
+        }
+        return minTupleSet;
     }
 
     @Override
@@ -55,7 +63,7 @@ public class RelTransRef extends RelTrans {
             for (Map.Entry<Event, Set<Event>> entry : transitiveReachabilityMap.entrySet()) {
                 entry.getValue().remove(entry.getKey());
             }
-            for(Event e : program.getCache().getEvents(FilterBasic.get(EType.ANY))){
+            for(Event e : task.getProgram().getCache().getEvents(FilterBasic.get(EType.VISIBLE))){
                 maxTupleSet.add(new Tuple(e, e));
             }
         }
@@ -64,14 +72,11 @@ public class RelTransRef extends RelTrans {
 
     @Override
     public void addEncodeTupleSet(TupleSet tuples){
-        TupleSet activeSet = new TupleSet();
-        activeSet.addAll(tuples);
-        activeSet.removeAll(encodeTupleSet);
+        TupleSet activeSet = new TupleSet(Sets.intersection(Sets.difference(tuples, encodeTupleSet), maxTupleSet));
         encodeTupleSet.addAll(activeSet);
-        activeSet.retainAll(maxTupleSet);
 
         for(Tuple tuple : activeSet){
-            if(tuple.getFirst().getCId() == tuple.getSecond().getCId()){
+            if(tuple.isLoop()){
                 identityEncodeTupleSet.add(tuple);
             }
         }
@@ -84,37 +89,19 @@ public class RelTransRef extends RelTrans {
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
-        return invokeEncode("encodeApprox");
+    protected BoolExpr encodeApprox(Context ctx) {
+    	return invokeEncode(super::encodeApprox, ctx);
     }
 
-    @Override
-    protected BoolExpr encodeIDL() {
-        return invokeEncode("encodeIDL");
-    }
-
-    @Override
-    protected BoolExpr encodeLFP() {
-        return invokeEncode("encodeLFP");
-    }
-
-    private BoolExpr invokeEncode(String methodName){
-        try{
-            MethodHandle method = MethodHandles.lookup().findSpecial(RelTrans.class, methodName,
-                    MethodType.methodType(BoolExpr.class), RelTransRef.class);
-
+    private BoolExpr invokeEncode(Function<Context, BoolExpr> originalMethod, Context ctx) {
             TupleSet temp = encodeTupleSet;
             encodeTupleSet = transEncodeTupleSet;
-            BoolExpr enc = (BoolExpr)method.invoke(this);
+            BoolExpr enc = originalMethod.apply(ctx);
             encodeTupleSet = temp;
 
             for(Tuple tuple : identityEncodeTupleSet){
-                enc = ctx.mkAnd(enc, Utils.edge(this.getName(), tuple.getFirst(), tuple.getFirst(), ctx));
+                enc = ctx.mkAnd(enc, ctx.mkEq(tuple.getFirst().exec(), this.getSMTVar(tuple, ctx)));
             }
             return enc;
-        } catch (Throwable e){
-            e.printStackTrace();
-            throw new RuntimeException("Failed to encode relation " + this.getName());
-        }
     }
 }

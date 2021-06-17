@@ -95,7 +95,7 @@ int a = atomic_load_explicit(&mem3, memory_order_relaxed);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
 int z = atomic_load_explicit(&mem2, memory_order_relaxed);
-assert(!(((EAX_3 == 1) && (((EAX_1 == 0) && (((EAX_2 == 0) && (((EBX_3 == 0) && ((z == 1) || (z == 2))) || ((EBX_3 == 1) && ((z == 2) || (z == 1))))) || ((EAX_2 == 1) && (((EBX_3 == 0) && ((z == 2) || (z == 1))) || ((EBX_3 == 1) && ((z == 1) || (z == 2))))))) || ((EAX_1 == 1) && (((EAX_2 == 0) && (((EBX_3 == 0) && ((z == 2) || (z == 1))) || ((EBX_3 == 1) && ((z == 1) || (z == 2))))) || ((EAX_2 == 1) && (((EBX_3 == 0) && ((z == 1) || (z == 2))) || ((EBX_3 == 1) && ((z == 2) || (z == 1)))))))))));
+assert(!!(((EAX_3 == 1) && (((EAX_1 == 0) && (((EAX_2 == 0) && (((EBX_3 == 0) && ((z == 1) || (z == 2))) || ((EBX_3 == 1) && ((z == 2) || (z == 1))))) || ((EAX_2 == 1) && (((EBX_3 == 0) && ((z == 2) || (z == 1))) || ((EBX_3 == 1) && ((z == 1) || (z == 2))))))) || ((EAX_1 == 1) && (((EAX_2 == 0) && (((EBX_3 == 0) && ((z == 2) || (z == 1))) || ((EBX_3 == 1) && ((z == 1) || (z == 2))))) || ((EAX_2 == 1) && (((EBX_3 == 0) && ((z == 1) || (z == 2))) || ((EBX_3 == 1) && ((z == 2) || (z == 1)))))))))));
 return 0;
 }
 

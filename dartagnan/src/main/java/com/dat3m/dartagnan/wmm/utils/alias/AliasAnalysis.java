@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.wmm.utils.alias;
 
+import com.dat3m.dartagnan.GlobalSettings;
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.program.Thread;
 import com.dat3m.dartagnan.program.event.utils.RegReaderData;
@@ -7,6 +8,7 @@ import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.google.common.collect.ImmutableSet;
 import com.dat3m.dartagnan.expression.IExpr;
+import com.dat3m.dartagnan.expression.IExprBin;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.*;
@@ -41,7 +43,11 @@ public class AliasAnalysis {
         } else {
             maxAddressSet = program.getMemory().getAllAddresses();
             processLocs(program);
-            processRegs(program);
+            //TODO this is broken because it assumes that if e1:r1 <- &mem1 and e3:r2 <- r1, then r2 points to mem1.
+            // But we can have later r2 <- &mem2 with a back jump to e2 (between e1 and e3) and thus r2 points to mem1 or mem2
+            if(GlobalSettings.USE_BUGGY_ALIAS_ANALYSIS) {
+                processRegs(program);            	
+            }
             algorithm(program);
             processResults(program);
         }
@@ -137,7 +143,7 @@ public class AliasAnalysis {
 
                 if (expr instanceof Register) {
                     // r1 = r2 -> add edge r2 --> r1
-                    graph.addEdge((Register) expr, register);
+                    graph.addEdge(expr, register);
 
                 } else if (expr instanceof Address) {
                     // r = &a
@@ -256,20 +262,52 @@ public class AliasAnalysis {
     }
 
     private void processResults(Program program) {
+    	// Used to have pointer analysis when having arrays and structures
+    	Map<Register, Address> bases = new HashMap<>();
+    	for (Event ev : program.getCache().getEvents(FilterBasic.get(EType.LOCAL))) {
+    		// Not only Local events have EType.LOCAL tag
+    		if(!(ev instanceof Local)) {
+    			continue;
+    		}
+    		Local l = (Local)ev;
+    		ExprInterface exp = l.getExpr();
+    		Register reg = l.getResultRegister();
+			if(exp instanceof Address) {
+    			bases.put(reg, (Address)exp);
+    		} else if(exp instanceof IExprBin) {
+    			IExpr base = exp.getBase();
+    			if(base instanceof Address) {
+    				bases.put(reg, (Address)base);	
+    			} else if(base instanceof Register && bases.containsKey(base)) {
+    				bases.put(reg, bases.get(base));
+    			}
+    		}
+    	}
+
         for (Event e : program.getCache().getEvents(FilterBasic.get(EType.MEMORY))) {
             IExpr address = ((MemEvent) e).getAddress();
-            Set<Address> adresses;
+            Set<Address> addresses;
             if (address instanceof Register) {
-                adresses = graph.getAddresses(((Register) address));
+            	if(bases.containsKey(address) && program.getMemory().isArrayPointer(bases.get(address))) {
+            		addresses = new HashSet<>(program.getMemory().getArrayfromPointer(bases.get(address)));
+            	} else {
+            	    addresses = maxAddressSet;
+            	    //TODO: This line of code is buggy. It causes many WMM benchmarks to fail
+            	    if(GlobalSettings.USE_BUGGY_ALIAS_ANALYSIS) {
+            	    	addresses = graph.getAddresses(((Register) address));	
+            	    } else {
+            	    	addresses = maxAddressSet;
+            	    }
+            	}
             } else if (address instanceof Address) {
-                    adresses = ImmutableSet.of(((Address) address));
+                    addresses = ImmutableSet.of(((Address) address));
             } else {
-                adresses = maxAddressSet;
+                addresses = maxAddressSet;
             }
-            if (adresses.size() == 0) {
-                adresses = maxAddressSet;
+            if (addresses.size() == 0) {
+                addresses = maxAddressSet;
             }
-            ImmutableSet<Address> addr = ImmutableSet.copyOf(adresses);
+            ImmutableSet<Address> addr = ImmutableSet.copyOf(addresses);
             ((MemEvent) e).setMaxAddressSet(addr);
         }
     }

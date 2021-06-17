@@ -11,6 +11,7 @@ import com.dat3m.dartagnan.program.event.Load;
 import com.dat3m.dartagnan.program.event.MemEvent;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.recursion.RecursiveFunction;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 
 import static com.dat3m.dartagnan.expression.op.COpBin.EQ;
@@ -60,23 +61,21 @@ public class AtomicLoad extends MemEvent implements RegWriter {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Override
-    public int compile(Arch target, int nextId, Event predecessor) {
+    protected RecursiveFunction<Integer> compileRecursive(Arch target, int nextId, Event predecessor, int depth) {
         LinkedList<Event> events = new LinkedList<>();
         Load load = new Load(resultRegister, address, mo);
-        load.setCLine(cLine);
-		events.add(load);
-
+        events.add(load);
 
         switch (target) {
             case NONE: case TSO:
                 break;
             case POWER:
                 if(SC.equals(mo) || ACQUIRE.equals(mo) || CONSUME.equals(mo)){
-                	Label label = new Label("Jump_" + oId);
-                	CondJump jump = new CondJump(new Atom(resultRegister, EQ, resultRegister), label);
-                	events.addLast(jump);
-                	events.addLast(label);
-                	events.addLast(new Fence("Isync"));
+                    Label label = new Label("Jump_" + oId);
+                    CondJump jump = new CondJump(new Atom(resultRegister, EQ, resultRegister), label);
+                    events.addLast(jump);
+                    events.addLast(label);
+                    events.addLast(new Fence("Isync"));
                     if(SC.equals(mo)){
                         events.addFirst(new Fence("Sync"));
                     }
@@ -88,9 +87,9 @@ public class AtomicLoad extends MemEvent implements RegWriter {
                 }
                 break;
             default:
-            	throw new UnsupportedOperationException("Compilation to " + target + " is not supported for " + this);
+                throw new UnsupportedOperationException("Compilation to " + target + " is not supported for " + this);
         }
-        return compileSequence(target, nextId, predecessor, events);
+        return compileSequenceRecursive(target, nextId, predecessor, events, depth + 1);
     }
     
 }

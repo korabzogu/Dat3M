@@ -4,7 +4,6 @@ import com.dat3m.dartagnan.parsers.cat.ParserCat;
 import com.dat3m.dartagnan.utils.ResourceHelper;
 import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.wmm.Wmm;
-import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
 
 import org.junit.runner.RunWith;
@@ -21,13 +20,14 @@ public class SvCompTestConcurrency extends AbstractSvCompTest {
 
 	@Parameterized.Parameters(name = "{index}: {0} bound={2}")
     public static Iterable<Object[]> data() throws IOException {
-        Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/svcomp.cat"));
+    	String cat_file = GlobalSettings.ATOMIC_AS_LOCK ? "cat/svcomp-locks.cat" : "cat/svcomp.cat";
+        Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + cat_file));
 
-        Settings s1 = new Settings(Mode.KNASTER, Alias.CFIS, 1, false);
-        Settings s2 = new Settings(Mode.KNASTER, Alias.CFIS, 2, false);
-        Settings s3 = new Settings(Mode.KNASTER, Alias.CFIS, 3, false);
-        Settings s6 = new Settings(Mode.KNASTER, Alias.CFIS, 6, false);
-        Settings s7 = new Settings(Mode.KNASTER, Alias.CFIS, 7, false);
+        Settings s1 = new Settings(Alias.CFIS, 1, TIMEOUT);
+        Settings s2 = new Settings(Alias.CFIS, 2, TIMEOUT);
+        Settings s3 = new Settings(Alias.CFIS, 3, TIMEOUT);
+        Settings s6 = new Settings(Alias.CFIS, 6, TIMEOUT);
+        Settings s7 = new Settings(Alias.CFIS, 7, TIMEOUT);
         
         List<Object[]> data = new ArrayList<>();
 
@@ -39,6 +39,7 @@ public class SvCompTestConcurrency extends AbstractSvCompTest {
         data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/singleton-O0.bpl", wmm, s1});
         data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/singleton_with-uninit-problems-O0.bpl", wmm, s2});
         data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/stack-2-O0.bpl", wmm, s2});
+        data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/stack-1-O0.bpl", wmm, s6});
         data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/stack_longer-1-O0.bpl", wmm, s2});
         data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/stack_longest-1-O0.bpl", wmm, s2});
         data.add(new Object[]{TEST_RESOURCE_PATH + "boogie/concurrency/stateful01-1-O0.bpl", wmm, s1});

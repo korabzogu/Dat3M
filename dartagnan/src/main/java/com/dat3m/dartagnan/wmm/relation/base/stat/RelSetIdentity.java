@@ -5,6 +5,7 @@ import com.dat3m.dartagnan.wmm.filter.FilterAbstract;
 import com.dat3m.dartagnan.wmm.utils.Tuple;
 import com.dat3m.dartagnan.wmm.utils.TupleSet;
 
+//TODO: This relation may contain non-visible events. Is this reasonable?
 public class RelSetIdentity extends StaticRelation {
 
     protected FilterAbstract filter;
@@ -28,7 +29,7 @@ public class RelSetIdentity extends StaticRelation {
     public TupleSet getMaxTupleSet(){
         if(maxTupleSet == null){
             maxTupleSet = new TupleSet();
-            for(Event e : program.getCache().getEvents(filter)){
+            for(Event e : task.getProgram().getCache().getEvents(filter)){
                 maxTupleSet.add(new Tuple(e, e));
             }
         }

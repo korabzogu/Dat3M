@@ -41,7 +41,7 @@ int main() {
 pthread_t thread_0;
 pthread_create(&thread_0, NULL, &func_0, NULL);
 pthread_join(thread_0, NULL);
-assert(!((r0_0 == 1)));
+assert(!!((r0_0 == 1)));
 return 0;
 }
 

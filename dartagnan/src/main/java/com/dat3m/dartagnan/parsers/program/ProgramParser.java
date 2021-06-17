@@ -26,12 +26,11 @@ public class ProgramParser {
     }
 
     public Program parse(String raw, String format) {
-    	if(format.equals("pts")){
-            return new ParserPorthos().parse(CharStreams.fromString(raw));
-        } else if(format.equals("bpl")){
-            return new ParserBoogie().parse(CharStreams.fromString(raw));
-        } else if(format.equals("litmus")){
-            return getConcreteLitmusParser(raw.toUpperCase()).parse(CharStreams.fromString(raw));
+        switch (format) {
+            case "bpl":
+                return new ParserBoogie().parse(CharStreams.fromString(raw));
+            case "litmus":
+                return getConcreteLitmusParser(raw.toUpperCase()).parse(CharStreams.fromString(raw));
         }
         throw new ParsingException("Unknown input file type");
     }
@@ -39,12 +38,11 @@ public class ProgramParser {
     private ParserInterface getConcreteParser(File file) throws IOException {
         String name = file.getName();
         String format = name.substring(name.lastIndexOf(".") + 1);
-        if(format.equals("pts")){
-            return new ParserPorthos();
-        } else if(format.equals("bpl")){
-            return new ParserBoogie();
-        } else if(format.equals("litmus")){
-            return getConcreteLitmusParser(readFirstLine(file).toUpperCase());
+        switch (format) {
+            case "bpl":
+                return new ParserBoogie();
+            case "litmus":
+                return getConcreteLitmusParser(readFirstLine(file).toUpperCase());
         }
         throw new ParsingException("Unknown input file type");
     }

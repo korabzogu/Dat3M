@@ -1,11 +1,16 @@
 package com.dat3m.dartagnan.expression;
 
+import com.dat3m.dartagnan.expression.processing.ExpressionVisitor;
+import com.dat3m.dartagnan.program.memory.Location;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.Model;
+
+import java.math.BigInteger;
+
 import com.dat3m.dartagnan.expression.op.BOpBin;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.Event;
@@ -20,6 +25,18 @@ public class BExprBin extends BExpr {
         this.b1 = b1;
         this.b2 = b2;
         this.op = op;
+    }
+
+    public ExprInterface getLHS() {
+    	return b1;
+    }
+    
+    public ExprInterface getRHS() {
+    	return b2;
+    }
+    
+    public BOpBin getOp() {
+    	return op;
     }
 
     @Override
@@ -40,6 +57,11 @@ public class BExprBin extends BExpr {
     }
 
     @Override
+    public ImmutableSet<Location> getLocs() {
+        return new ImmutableSet.Builder<Location>().addAll(b1.getLocs()).addAll(b2.getLocs()).build();
+    }
+
+    @Override
     public String toString() {
         return "(" + b1 + " " + op + " " + b2 + ")";
     }
@@ -51,20 +73,41 @@ public class BExprBin extends BExpr {
 
     @Override
 	public IConst reduce() {
-		int v1 = b1.reduce().getValue();
-		int v2 = b2.reduce().getValue();
+    	BigInteger v1 = b1.reduce().getIntValue();
+    	BigInteger v2 = b2.reduce().getIntValue();
 		switch(op) {
         case AND:
-        	return new IConst(v1 == 1 ? v2 : 0, -1);
+        	return new IConst(v1.compareTo(BigInteger.ONE) == 0 ? v2 : BigInteger.ZERO, -1);
         case OR:
-        	return new IConst(v1 == 1 ? 1 : v2, -1);
+        	return new IConst(v1.compareTo(BigInteger.ONE) == 0 ? BigInteger.ONE : v2, -1);
         }
         throw new UnsupportedOperationException("Reduce not supported for " + this);
 	}
 
     @Override
+    public <T> T visit(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     public String AsmToC() { return b1.AsmToC() + " " + op.toString() + " " + b2.AsmToC(); }
 
     @Override
     public String AsmToCAssert() { return b1.AsmToCAssert() + " " + op.toString() + " " + b2.AsmToCAssert();}
+    @Override
+    public int hashCode() {
+        return b1.hashCode() + b2.hashCode() + op.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != getClass())
+            return false;
+        BExprBin expr = (BExprBin) obj;
+        return expr.op == op && expr.b1.equals(b1) && expr.b2.equals(b2);
+    }
+    
+    
 }

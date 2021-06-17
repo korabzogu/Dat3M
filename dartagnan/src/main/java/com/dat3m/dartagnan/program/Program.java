@@ -1,8 +1,11 @@
 package com.dat3m.dartagnan.program;
 
+
 import com.dat3m.dartagnan.parsers.program.utils.PointerLocation;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.program.utils.ThreadCache;
+import com.dat3m.dartagnan.utils.equivalence.BranchEquivalence;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.google.common.collect.ImmutableSet;
@@ -17,6 +20,8 @@ import com.dat3m.dartagnan.program.event.Local;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.memory.Memory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 
@@ -25,17 +30,21 @@ import java.util.*;
 
 public class Program {
 
+    private final static Logger logger = LogManager.getLogger(Program.class);
+
     private String name;
 	private AbstractAssert ass;
     private AbstractAssert assFilter;
-	private List<Thread> threads;
+	private final List<Thread> threads;
 	private final ImmutableSet<Location> locations;
-	private Memory memory;
+	private final Memory memory;
 	private Arch arch;
     private ThreadCache cache;
     private boolean isUnrolled;
     private boolean isCompiled;
+    private VerificationTask task;
     private ArrayList<PointerLocation> ptrLocs;
+    private BranchEquivalence branchEquivalence;
 
     public Program(Memory memory, ImmutableSet<Location> locations){
         this("", memory, locations);
@@ -107,6 +116,7 @@ public class Program {
     	for(Thread t : threads){
     		t.clearCache();
     	}
+    	cache = null;
     }
 
     public List<Thread> getThreads() {
@@ -118,12 +128,20 @@ public class Program {
     }
 
 	public List<Event> getEvents(){
+        // TODO: Why don't we use the cache if available?
         List<Event> events = new ArrayList<>();
 		for(Thread t : threads){
 			events.addAll(t.getCache().getEvents(FilterBasic.get(EType.ANY)));
 		}
 		return events;
 	}
+
+    public BranchEquivalence getBranchEquivalence() {
+        if (branchEquivalence == null) {
+            branchEquivalence = new BranchEquivalence(this);
+        }
+        return branchEquivalence;
+    }
 
 	public void updateAssertion() {
 		if(ass != null) {
@@ -150,6 +168,7 @@ public class Program {
         return this.ptrLocs;
     }
 
+
     // Unrolling
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -167,6 +186,10 @@ public class Program {
     // -----------------------------------------------------------------------------------------------------------------
 
     public int compile(Arch target, int nextId) {
+        if (!isUnrolled()) {
+            throw new IllegalStateException("The program needs to be unrolled first.");
+        }
+
         for(Thread thread : threads){
             nextId = thread.compile(target, nextId);
         }
@@ -179,10 +202,21 @@ public class Program {
     // Encoding
     // -----------------------------------------------------------------------------------------------------------------
 
-    public BoolExpr encodeCF(Context ctx) {
-        for(Event e : getEvents()){
-            e.initialise(ctx);
+    public void initialise(VerificationTask task, Context ctx) {
+        if (!isCompiled) {
+            throw new IllegalStateException("The program needs to be compiled first.");
         }
+        this.task = task;
+        for(Event e : getEvents()){
+            e.initialise(task, ctx);
+        }
+    }
+
+    public BoolExpr encodeCF(Context ctx) {
+        if (this.task == null) {
+            throw new RuntimeException("The program needs to get initialised first.");
+        }
+
         BoolExpr enc = memory.encode(ctx);
         for(Thread t : threads){
             enc = ctx.mkAnd(enc, t.encodeCF(ctx));
@@ -191,6 +225,10 @@ public class Program {
     }
 
     public BoolExpr encodeFinalRegisterValues(Context ctx){
+        if (this.task == null) {
+            throw new RuntimeException("The program needs to get initialised first.");
+        }
+
         Map<Register, List<Event>> eMap = new HashMap<>();
         for(Event e : getCache().getEvents(FilterBasic.get(EType.REG_WRITER))){
             Register reg = ((RegWriter)e).getResultRegister();
@@ -198,27 +236,100 @@ public class Program {
             eMap.get(reg).add(e);
         }
 
+        BranchEquivalence eq = getBranchEquivalence();
         BoolExpr enc = ctx.mkTrue();
         for (Register reg : eMap.keySet()) {
+            Thread thread = threads.get(reg.getThreadId());
+
             List<Event> events = eMap.get(reg);
             events.sort(Collections.reverseOrder());
+
+            // =======================================================
+            // Optimizations that remove registers which are guaranteed to get overwritten
+            //TODO: Make sure that this is correct even for EXCL events
+            for (int i = 0; i < events.size(); i++) {
+                if (eq.isImplied(thread.getExit(), events.get(i))) {
+                    events = events.subList(0, i + 1);
+                    break;
+                }
+            }
+            final List<Event> events2 = events;
+            events.removeIf(x -> events2.stream().anyMatch(y -> y.getCId() > x.getCId() && eq.isImplied(x, y)));
+            // ========================================================
+
+
             for(int i = 0; i <  events.size(); i++){
-                BoolExpr lastModReg = eMap.get(reg).get(i).exec();
+                Event w1 = events.get(i);
+                BoolExpr lastModReg = w1.exec();
                 for(int j = 0; j < i; j++){
-                    lastModReg = ctx.mkAnd(lastModReg, ctx.mkNot(events.get(j).exec()));
+                    Event w2 = events.get(j);
+                    if (!eq.areMutuallyExclusive(w1, w2)) {
+                        lastModReg = ctx.mkAnd(lastModReg, ctx.mkNot(w2.exec()));
+                    }
                 }
                 enc = ctx.mkAnd(enc, ctx.mkImplies(lastModReg,
-                        ctx.mkEq(reg.getLastValueExpr(ctx), ((RegWriter)events.get(i)).getResultRegisterExpr())));
+                        ctx.mkEq(reg.getLastValueExpr(ctx), ((RegWriter)w1).getResultRegisterExpr())));
             }
         }
         return enc;
     }
     
     public BoolExpr encodeNoBoundEventExec(Context ctx){
+        if (this.task == null) {
+            throw new RuntimeException("The program needs to get initialised first.");
+        }
+
     	BoolExpr enc = ctx.mkTrue();
         for(Event e : getCache().getEvents(FilterBasic.get(EType.BOUND))){
         	enc = ctx.mkAnd(enc, ctx.mkNot(e.exec()));
         }
         return enc;
     }
+
+
+
+    // ----------------------------- Preprocessing -----------------------------------
+
+    public void reorder() {
+        if (isUnrolled) {
+            throw new IllegalStateException("Reordering should be performed before unrolling.");
+        }
+
+        for (Thread t : getThreads()) {
+            t.reorderBranches();
+        }
+    }
+
+    public void eliminateDeadCode() {
+        if (isUnrolled) {
+            throw new IllegalStateException("Dead code elimination should be performed before unrolling.");
+        }
+        int id = 0;
+        for (Thread t : getThreads()) {
+            id = t.eliminateDeadCode(id);
+        }
+        cache = null;
+    }
+
+    public void simplify() {
+        // Some simplification are only applicable after others.
+        // Thus we apply them iteratively until we reach a fixpoint.
+        int size = getEvents().size();
+        logger.info("pre-simplification: " + size + " events");
+        one_step_simplify();
+        while(getEvents().size() != size) {
+            size = getEvents().size();
+            one_step_simplify();
+        }
+        logger.info("post-simplification: " + size + " events");
+    }
+
+    private void one_step_simplify() {
+        for(Thread thread : threads){
+            thread.simplify();
+        }
+        cache = null;
+    }
+
+
 }

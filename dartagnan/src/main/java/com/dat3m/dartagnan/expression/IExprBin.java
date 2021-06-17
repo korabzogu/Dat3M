@@ -1,9 +1,14 @@
 package com.dat3m.dartagnan.expression;
 
+import com.dat3m.dartagnan.expression.processing.ExpressionVisitor;
+import com.dat3m.dartagnan.program.memory.Location;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Model;
+
+import java.math.BigInteger;
+
 import com.dat3m.dartagnan.expression.op.IOpBin;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.Event;
@@ -36,19 +41,24 @@ public class IExprBin extends IExpr implements ExprInterface {
     }
 
     @Override
+    public ImmutableSet<Location> getLocs() {
+        return new ImmutableSet.Builder<Location>().addAll(lhs.getLocs()).addAll(rhs.getLocs()).build();
+    }
+
+    @Override
     public String toString() {
         return "(" + lhs + " " + op + " " + rhs + ")";
     }
 
     @Override
-    public int getIntValue(Event e, Model model, Context ctx){
+    public BigInteger getIntValue(Event e, Model model, Context ctx){
         return op.combine(lhs.getIntValue(e, model, ctx), rhs.getIntValue(e, model, ctx));
     }
     
     @Override
 	public IConst reduce() {
-		int v1 = lhs.reduce().getValue();
-		int v2 = rhs.reduce().getValue();
+    	BigInteger v1 = lhs.reduce().getIntValue();
+    	BigInteger v2 = rhs.reduce().getIntValue();
 		return new IConst(op.combine(v1, v2), lhs.getPrecision());
 	}
 
@@ -59,12 +69,50 @@ public class IExprBin extends IExpr implements ExprInterface {
 		}
 		return lhs.getPrecision();
 	}
-
+	
 	@Override
+	public IExpr getBase() {
+		return lhs.getBase();
+	}
+	
+	public IOpBin getOp() {
+		return op;
+	}
+	
+	public ExprInterface getRHS() {
+		return rhs;
+	}
+
+	public ExprInterface getLHS() {
+		return lhs;
+	}
+
+    @Override
+    public <T> T visit(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return (op.combine(BigInteger.valueOf(lhs.hashCode()), BigInteger.valueOf(rhs.hashCode()))).intValue();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != getClass())
+            return false;
+        IExprBin expr = (IExprBin) obj;
+        return expr.op == op && expr.lhs.equals(lhs) && expr.rhs.equals(rhs);
+    }
+    
     public String AsmToC() {
         return "(" + lhs.AsmToC() + " " + op + " " + rhs.AsmToC() + ") /* IEXPRBIN */";
     }
 
     @Override
     public String AsmToCAssert() { return "(" + lhs.AsmToCAssert() + " " + op + " " + rhs.AsmToCAssert() + ") /* IEXPRBIN */";}
+
 }

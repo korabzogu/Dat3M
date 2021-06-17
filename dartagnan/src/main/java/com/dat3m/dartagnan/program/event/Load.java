@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.program.arch.pts.utils.Mo;
 import com.dat3m.dartagnan.program.memory.Address;
 import com.microsoft.z3.Context;
@@ -14,20 +15,24 @@ public class Load extends MemEvent implements RegWriter {
 
     protected final Register resultRegister;
 
-    public Load(Register register, IExpr address, String mo) {
-        super(address, mo);
+    public Load(Register register, IExpr address, String mo, int cLine) {
+        super(address, mo, cLine);
         this.resultRegister = register;
         addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.READ, EType.REG_WRITER);
     }
 
+    public Load(Register register, IExpr address, String mo) {
+    	this(register, address, mo, -1);
+    }
+    
     protected Load(Load other){
         super(other);
         this.resultRegister = other.resultRegister;
     }
 
     @Override
-    public void initialise(Context ctx) {
-        super.initialise(ctx);
+    public void initialise(VerificationTask task, Context ctx) {
+        super.initialise(task, ctx);
         memValueExpr = resultRegister.toZ3IntResult(this, ctx);
     }
 

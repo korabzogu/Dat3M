@@ -10,7 +10,7 @@ import java.util.*;
 public class RecursiveGroup {
 
     private final int id;
-    private List<RecursiveRelation> relations;
+    private final List<RecursiveRelation> relations;
     private int encodeIterations = 0;
 
     public RecursiveGroup(int id, Collection<RecursiveRelation> relations){
@@ -37,12 +37,12 @@ public class RecursiveGroup {
         for(int i = 0; i < encodeIterations; i++){
             for(RecursiveRelation relation : relations){
                 relation.setDoRecurse();
-                enc = ctx.mkAnd(enc, relation.encodeIteration(id, i));
+                enc = ctx.mkAnd(enc, relation.encodeIteration(id, i, ctx));
             }
         }
 
         for(RecursiveRelation relation : relations){
-            enc = ctx.mkAnd(enc, relation.encodeFinalIteration(encodeIterations - 1));
+            enc = ctx.mkAnd(enc, relation.encodeFinalIteration(encodeIterations - 1, ctx));
         }
 
         return enc;
@@ -58,6 +58,25 @@ public class RecursiveGroup {
                 relation.setDoRecurse();
                 int oldSize = relation.getMaxTupleSet().size();
                 if(oldSize != relation.getMaxTupleSetRecursive().size()){
+                    changed = true;
+                }
+            }
+            iterationCounter++;
+        }
+        // iterationCounter + zero iteration + 1
+        encodeIterations = iterationCounter + 2;
+    }
+
+    public void initMinTupleSets(){
+        int iterationCounter = 0;
+        boolean changed = true;
+
+        while(changed){
+            changed = false;
+            for(RecursiveRelation relation : relations){
+                relation.setDoRecurse();
+                int oldSize = relation.getMinTupleSet().size();
+                if(oldSize != relation.getMinTupleSetRecursive().size()){
                     changed = true;
                 }
             }

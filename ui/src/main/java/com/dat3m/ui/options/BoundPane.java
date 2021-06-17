@@ -11,6 +11,6 @@ public class BoundPane extends JPanel {
 
 	public BoundPane() {
         super(new FlowLayout(LEFT));
-        add(new JLabel("Unrolling Bound: "));
+        add(new JLabel("Unrolling: "));
 	}
 }

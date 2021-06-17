@@ -13,7 +13,7 @@ import java.util.ListIterator;
 
 public class RelPo extends StaticRelation {
 
-    private FilterAbstract filter;
+    private final FilterAbstract filter;
 
     public RelPo(){
         this(false);
@@ -33,7 +33,7 @@ public class RelPo extends StaticRelation {
     public TupleSet getMaxTupleSet(){
         if(maxTupleSet == null){
             maxTupleSet = new TupleSet();
-            for(Thread t : program.getThreads()){
+            for(Thread t : task.getProgram().getThreads()){
                 List<Event> events = t.getCache().getEvents(filter);
 
                 ListIterator<Event> it1 = events.listIterator();
@@ -45,6 +45,7 @@ public class RelPo extends StaticRelation {
                     }
                 }
             }
+            removeMutuallyExclusiveTuples(maxTupleSet);
         }
         return maxTupleSet;
     }

@@ -2,8 +2,8 @@ format_version: '2.0'
 input_files: 'Z6.1+po+sync+lwsync.c'
 
 properties:
-  - property_file: /home/gwinrond/Thesis/Dat3M/unreach-call.prp
-    expected_verdict: true
+  - property_file: /home/gwinrond/Abgabe/Dat3M/unreach-call.prp
+    expected_verdict: false
 
 language: C
 data_model: ILP32

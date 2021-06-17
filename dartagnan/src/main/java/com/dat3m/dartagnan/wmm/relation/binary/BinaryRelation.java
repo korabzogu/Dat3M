@@ -1,11 +1,14 @@
 package com.dat3m.dartagnan.wmm.relation.binary;
 
-import com.dat3m.dartagnan.utils.Settings;
+import com.dat3m.dartagnan.verification.VerificationTask;
+import com.google.common.collect.Sets;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.wmm.relation.Relation;
 import com.dat3m.dartagnan.wmm.utils.TupleSet;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -29,6 +32,19 @@ public abstract class BinaryRelation extends Relation {
         this.r2 = r2;
     }
 
+    public Relation getFirst() {
+        return r1;
+    }
+
+    public Relation getSecond() {
+        return r2;
+    }
+
+    @Override
+    public List<Relation> getDependencies() {
+        return Arrays.asList(r1 ,r2);
+    }
+
     @Override
     public int updateRecursiveGroupId(int parentId){
         if(recursiveGroupId == 0 || forceUpdateRecursiveGroupId){
@@ -41,18 +57,17 @@ public abstract class BinaryRelation extends Relation {
     }
 
     @Override
-    public void initialise(Program program, Context ctx, Settings settings){
-        super.initialise(program, ctx, settings);
+    public void initialise(VerificationTask task, Context ctx){
+        super.initialise(task, ctx);
         lastEncodedIteration = -1;
     }
 
     @Override
-    public void addEncodeTupleSet(TupleSet tuples){
-        TupleSet activeSet = new TupleSet();
-        activeSet.addAll(tuples);
-        activeSet.removeAll(encodeTupleSet);
+    public void addEncodeTupleSet(TupleSet tuples){ // Not valid for composition
+        TupleSet activeSet = new TupleSet(Sets.intersection(Sets.difference(tuples, encodeTupleSet), maxTupleSet));
         encodeTupleSet.addAll(activeSet);
-        activeSet.retainAll(maxTupleSet);
+        activeSet.removeAll(getMinTupleSet());
+
         if(!activeSet.isEmpty()){
             r1.addEncodeTupleSet(activeSet);
             r2.addEncodeTupleSet(activeSet);
@@ -60,19 +75,11 @@ public abstract class BinaryRelation extends Relation {
     }
 
     @Override
-    public BoolExpr encode() {
+    public BoolExpr encode(Context ctx) {
         if(isEncoded){
             return ctx.mkTrue();
         }
         isEncoded = true;
-        return ctx.mkAnd(r1.encode(), r2.encode(), doEncode());
-    }
-
-    @Override
-    protected BoolExpr encodeLFP() {
-        if(recursiveGroupId > 0){
-            return ctx.mkTrue();
-        }
-        return encodeApprox();
+        return ctx.mkAnd(r1.encode(ctx), r2.encode(ctx), doEncode(ctx));
     }
 }

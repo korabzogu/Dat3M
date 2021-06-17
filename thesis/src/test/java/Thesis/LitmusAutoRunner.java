@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class LitmusAutoRunner {
+public class  LitmusAutoRunner {
     private String iflag;
     private String path;
     private String catflag;

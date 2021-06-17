@@ -1,14 +1,12 @@
 package com.dat3m.dartagnan.wmm.relation.unary;
 
 import com.dat3m.dartagnan.program.event.Event;
-import com.dat3m.dartagnan.wmm.utils.Utils;
 import com.dat3m.dartagnan.wmm.relation.Relation;
 import com.dat3m.dartagnan.wmm.utils.Tuple;
 import com.dat3m.dartagnan.wmm.utils.TupleSet;
+import com.google.common.collect.Sets;
 import com.microsoft.z3.BoolExpr;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.microsoft.z3.Context;
 
 public class RelDomainIdentity extends UnaryRelation {
 
@@ -27,40 +25,48 @@ public class RelDomainIdentity extends UnaryRelation {
     }
 
     @Override
+    public TupleSet getMinTupleSet(){
+        if(minTupleSet == null){
+            minTupleSet = r1.getMinTupleSet().mapped(t -> new Tuple(t.getFirst(), t.getFirst()));
+        }
+        return minTupleSet;
+    }
+
+    @Override
     public TupleSet getMaxTupleSet(){
         if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
-            for(Tuple tuple : r1.getMaxTupleSet()){
-                maxTupleSet.add(new Tuple(tuple.getFirst(), tuple.getFirst()));
-            }
+            maxTupleSet = r1.getMaxTupleSet().mapped(t -> new Tuple(t.getFirst(), t.getFirst()));
         }
         return maxTupleSet;
     }
 
     @Override
     public void addEncodeTupleSet(TupleSet tuples){
-        encodeTupleSet.addAll(tuples);
-        Set<Tuple> activeSet = new HashSet<>(tuples);
-        activeSet.retainAll(maxTupleSet);
+        TupleSet activeSet = new TupleSet(Sets.intersection(Sets.difference(tuples, encodeTupleSet), maxTupleSet));
+        encodeTupleSet.addAll(activeSet);
+
+        //TODO: Optimize using minSets (but no CAT uses this anyway)
         if(!activeSet.isEmpty()){
             TupleSet r1Set = new TupleSet();
             for(Tuple tuple : activeSet){
                 r1Set.addAll(r1.getMaxTupleSet().getByFirst(tuple.getFirst()));
+
             }
             r1.addEncodeTupleSet(r1Set);
         }
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeApprox(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
         for(Tuple tuple1 : encodeTupleSet){
             Event e = tuple1.getFirst();
             BoolExpr opt = ctx.mkFalse();
+            //TODO: Optimize using minSets (but no CAT uses this anyway)
             for(Tuple tuple2 : r1.getMaxTupleSet().getByFirst(e)){
-                opt = ctx.mkOr(Utils.edge(r1.getName(), e, tuple2.getSecond(), ctx));
+                opt = ctx.mkOr(r1.getSMTVar(e, tuple2.getSecond(), ctx));
             }
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e, e, ctx), opt));
+            enc = ctx.mkAnd(enc, ctx.mkEq(this.getSMTVar(e, e, ctx), opt));
         }
         return enc;
     }

@@ -2,6 +2,8 @@ package com.dat3m.dartagnan.program.event.rmw.cond;
 
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.recursion.RecursiveAction;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -15,9 +17,8 @@ import com.dat3m.dartagnan.program.event.utils.RegWriter;
 public abstract class RMWReadCond extends RMWLoad implements RegWriter, RegReaderData {
 
     protected ExprInterface cmp;
-    private ImmutableSet<Register> dataRegs;
-
-    BoolExpr z3Cond;
+    private final ImmutableSet<Register> dataRegs;
+    protected BoolExpr z3Cond;
 
     RMWReadCond(Register reg, ExprInterface cmp, IExpr address, String atomic) {
         super(reg, address, atomic);
@@ -27,8 +28,8 @@ public abstract class RMWReadCond extends RMWLoad implements RegWriter, RegReade
     }
 
     @Override
-    public void initialise(Context ctx) {
-        super.initialise(ctx);
+    public void initialise(VerificationTask task, Context ctx) {
+        super.initialise(task, ctx);
         z3Cond = ctx.mkEq(memValueExpr, cmp.toZ3Int(this, ctx));
     }
 
@@ -49,8 +50,9 @@ public abstract class RMWReadCond extends RMWLoad implements RegWriter, RegReade
     // Unrolling
     // -----------------------------------------------------------------------------------------------------------------
 
+
     @Override
-    public void unroll(int bound, Event predecessor) {
+    public RecursiveAction unrollRecursive(int bound, Event predecessor, int depth) {
         throw new RuntimeException("RMWReadCond cannot be unrolled: event must be generated during compilation");
     }
 }

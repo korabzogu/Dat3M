@@ -1,5 +1,9 @@
 package com.dat3m.dartagnan.expression;
 
+import java.math.BigInteger;
+
+import com.dat3m.dartagnan.expression.processing.ExpressionVisitor;
+import com.dat3m.dartagnan.program.memory.Location;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -18,13 +22,23 @@ public interface ExprInterface {
 
     Expr getLastValueExpr(Context ctx);
 
-    int getIntValue(Event e, Model model, Context ctx);
+    BigInteger getIntValue(Event e, Model model, Context ctx);
 
     boolean getBoolValue(Event e, Model model, Context ctx);
 
     ImmutableSet<Register> getRegs();
+
+    default ImmutableSet<Location> getLocs() {
+    	return ImmutableSet.of();
+    }
     
     int getPrecision();
+    
+    IExpr getBase();
+
+    <T> T visit(ExpressionVisitor<T> visitor);
+
+    //default ExprInterface simplify() { return visit(ExprSimplifier.SIMPLIFIER); }
 
     String AsmToC();
 

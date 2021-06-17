@@ -6,6 +6,7 @@ import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Load;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.recursion.RecursiveAction;
 
 public class RMWLoad extends Load implements RegWriter {
 
@@ -18,7 +19,7 @@ public class RMWLoad extends Load implements RegWriter {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Override
-    public void unroll(int bound, Event predecessor) {
+    public RecursiveAction unrollRecursive(int bound, Event predecessor, int depth) {
         throw new RuntimeException("RMWLoad cannot be unrolled: event must be generated during compilation");
     }
 

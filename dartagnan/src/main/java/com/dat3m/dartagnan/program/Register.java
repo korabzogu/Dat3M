@@ -1,9 +1,13 @@
 package com.dat3m.dartagnan.program;
 
+import com.dat3m.dartagnan.expression.processing.ExpressionVisitor;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Model;
+
+import java.math.BigInteger;
+
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.expression.IExpr;
@@ -14,6 +18,7 @@ public class Register extends IExpr implements ExprInterface {
 	private static int dummyCount = 0;
 
 	private final String name;
+	private String cVar;
     private final int threadId;
 
     private final int precision;
@@ -30,6 +35,15 @@ public class Register extends IExpr implements ExprInterface {
 	public String getName() {
 		return name;
 	}
+
+	public String getCVar() {
+		return cVar;
+	}
+
+	public void setCVar(String name) {
+		this.cVar = name;
+	}
+
 	public int getThreadId(){
 		return threadId;
 	}
@@ -78,8 +92,13 @@ public class Register extends IExpr implements ExprInterface {
 	}
 
 	@Override
-	public int getIntValue(Event e, Model model, Context ctx){
-		return Integer.parseInt(model.getConstInterp(toZ3Int(e, ctx)).toString());
+	public BigInteger getIntValue(Event e, Model model, Context ctx){
+		return new BigInteger(model.getConstInterp(toZ3Int(e, ctx)).toString());
+	}
+
+	@Override
+	public <T> T visit(ExpressionVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 
 	@Override

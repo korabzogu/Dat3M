@@ -26,43 +26,44 @@ public class AtomicProcedures {
 			"atomic_load",
 			"atomic_fetch",
 			"atomic_exchange",
+			"atomic_compare_exchange",
 			"atomic_thread_fence");
 	
 	public static void handleAtomicFunction(VisitorBoogie visitor, Call_cmdContext ctx) {
 		String name = ctx.call_params().Define() == null ? ctx.call_params().Ident(0).getText() : ctx.call_params().Ident(1).getText();
-		if(name.contains("atomic_init")) {
+		// In the way we compile the code, smack generated empty functions for atomic operations with 
+		// prefixes like ".i32" thus we need to check "startswith" and we cannot pattern match by name
+		if(name.startsWith("atomic_init")) {
 			atomicInit(visitor, ctx);
 			return;
 		}
-		if(name.contains("atomic_store")) {
+		if(name.startsWith("atomic_store")) {
 			atomicStore(visitor, ctx);
 			return;
 		}
-		if(name.contains("atomic_load")) {
+		if(name.startsWith("atomic_load")) {
 			atomicLoad(visitor, ctx);
 			return;
-		}			
-		if(name.contains("atomic_fetch")) {
+		}
+		if(name.startsWith("atomic_fetch")) {
 			atomicFetchOp(visitor, ctx);
 			return;
-		}			
-		if(name.contains("atomic_exchange")) {
+		}
+		if(name.startsWith("atomic_exchange") || name.startsWith("atomic_compare_exchange")) {
 			atomicXchg(visitor, ctx);
 			return;
-		}			
-		if(name.contains("atomic_thread_fence")) {
+		}
+		if(name.startsWith("atomic_thread_fence")) {
 			atomicThreadFence(visitor, ctx);
 			return;
-		}	
-        throw new UnsupportedOperationException(name + " procedure is not part of ATOMICPROCEDURES");
+		}
+		throw new UnsupportedOperationException(name + " procedure is not part of ATOMICPROCEDURES");		
 	}
 	
 	private static void atomicInit(VisitorBoogie visitor, Call_cmdContext ctx) {
 		IExpr add = (IExpr)ctx.call_params().exprs().expr().get(0).accept(visitor);
 		ExprInterface value = (ExprInterface)ctx.call_params().exprs().expr().get(1).accept(visitor);
-		Store child = new Store(add, value, null);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		visitor.programBuilder.addChild(visitor.threadCount, new Store(add, value, null, visitor.currentLine));
 	}
 
 	private static void atomicStore(VisitorBoogie visitor, Call_cmdContext ctx) {
@@ -70,11 +71,9 @@ public class AtomicProcedures {
 		ExprInterface value = (ExprInterface)ctx.call_params().exprs().expr().get(1).accept(visitor);
 		String mo = null;
 		if(ctx.call_params().exprs().expr().size() > 2) {
-			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(2).accept(visitor)).getValue());			
+			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(2).accept(visitor)).getIntValue().intValue());
 		}
-		AtomicStore child = new AtomicStore(add, value, mo);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		visitor.programBuilder.addChild(visitor.threadCount, new AtomicStore(add, value, mo));
 	}
 
 	private static void atomicLoad(VisitorBoogie visitor, Call_cmdContext ctx) {
@@ -82,11 +81,9 @@ public class AtomicProcedures {
 		IExpr add = (IExpr)ctx.call_params().exprs().expr().get(0).accept(visitor);
 		String mo = null;
 		if(ctx.call_params().exprs().expr().size() > 1) {
-			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(1).accept(visitor)).getValue());			
+			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(1).accept(visitor)).getIntValue().intValue());
 		}
-		AtomicLoad child = new AtomicLoad(reg, add, mo);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		visitor.programBuilder.addChild(visitor.threadCount, new AtomicLoad(reg, add, mo));
 	}
 
 	private static void atomicFetchOp(VisitorBoogie visitor, Call_cmdContext ctx) {
@@ -109,11 +106,9 @@ public class AtomicProcedures {
 			throw new RuntimeException("AtomicFetchOp operation cannot be handled");
 		}
 		if(ctx.call_params().exprs().expr().size() > 2) {
-			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(2).accept(visitor)).getValue());			
+			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(2).accept(visitor)).getIntValue().intValue());
 		}
-		AtomicFetchOp child = new AtomicFetchOp(reg, add, value, op, mo);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		visitor.programBuilder.addChild(visitor.threadCount, new AtomicFetchOp(reg, add, value, op, mo));
 	}
 
 	private static void atomicXchg(VisitorBoogie visitor, Call_cmdContext ctx) {
@@ -122,17 +117,13 @@ public class AtomicProcedures {
 		ExprInterface value = (ExprInterface)ctx.call_params().exprs().expr().get(1).accept(visitor);
 		String mo = null;
 		if(ctx.call_params().exprs().expr().size() > 2) {
-			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(2).accept(visitor)).getValue());			
+			mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(2).accept(visitor)).getIntValue().intValue());
 		}
-		AtomicXchg child = new AtomicXchg(reg, add, value, mo);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		visitor.programBuilder.addChild(visitor.threadCount, new AtomicXchg(reg, add, value, mo));
 	}
 
 	private static void atomicThreadFence(VisitorBoogie visitor, Call_cmdContext ctx) {
-		String mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(0).accept(visitor)).getValue());
-		AtomicThreadFence child = new AtomicThreadFence(mo);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		String mo = intToMo(((IConst)ctx.call_params().exprs().expr().get(0).accept(visitor)).getIntValue().intValue());
+		visitor.programBuilder.addChild(visitor.threadCount, new AtomicThreadFence(mo));
 	}
 }

@@ -148,14 +148,13 @@ public class CFileWriter {
                 fw.write("int " + l.getName()
                         + " = atomic_load_explicit("+ l.getAddress()+", memory_order_relaxed);\n");
             }
-            String neg = "";
-            switch(p.getAss().getType()) {
-                case AbstractAssert.ASSERT_TYPE_EXISTS:
-                case AbstractAssert.ASSERT_TYPE_NOT_EXISTS:
-                    neg = "!";
-                    break;
+
+            String assertString = p.getAss().AsmToC();
+            if (p.getAss().getType() == AbstractAssert.ASSERT_TYPE_FORALL) {
+                // invert assertion
+                assertString = "!" + assertString;
             }
-            fw.write("assert(" + neg + p.getAss().AsmToC() + ")" + ";\n");
+            fw.write("assert(" + assertString + ")" + ";\n");
 
             // END MAIN
             fw.write("return 0;\n");

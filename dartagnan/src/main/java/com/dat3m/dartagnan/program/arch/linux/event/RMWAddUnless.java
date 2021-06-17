@@ -3,6 +3,7 @@ package com.dat3m.dartagnan.program.arch.linux.event;
 import com.dat3m.dartagnan.program.arch.linux.utils.Mo;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.rmw.cond.FenceCond;
+import com.dat3m.dartagnan.utils.recursion.RecursiveFunction;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.google.common.collect.ImmutableSet;
 import com.dat3m.dartagnan.expression.Atom;
@@ -54,7 +55,7 @@ public class RMWAddUnless extends RMWAbstract implements RegWriter, RegReaderDat
     // -----------------------------------------------------------------------------------------------------------------
 
     @Override
-    public int compile(Arch target, int nextId, Event predecessor) {
+    protected RecursiveFunction<Integer> compileRecursive(Arch target, int nextId, Event predecessor, int depth) {
         if(target == Arch.NONE) {
             Register dummy = new Register(null, resultRegister.getThreadId(), resultRegister.getPrecision());
             RMWReadCondUnless load = new RMWReadCondUnless(dummy, cmp, address, Mo.RELAXED);
@@ -65,9 +66,9 @@ public class RMWAddUnless extends RMWAbstract implements RegWriter, RegReaderDat
             events.addFirst(new FenceCond(load, "Mb"));
             events.addLast(new FenceCond(load, "Mb"));
 
-            return compileSequence(target, nextId, predecessor, events);
+            return compileSequenceRecursive(target, nextId, predecessor, events, depth + 1);
         }
-        return super.compile(target, nextId, predecessor);
+        return super.compileRecursive(target, nextId, predecessor, depth + 1);
     }
 
     @Override

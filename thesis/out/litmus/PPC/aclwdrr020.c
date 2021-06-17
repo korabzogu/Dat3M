@@ -114,7 +114,7 @@ pthread_join(thread_2, NULL);
 pthread_join(thread_3, NULL);
 int x = atomic_load_explicit(&mem1, memory_order_relaxed);
 int y = atomic_load_explicit(&mem0, memory_order_relaxed);
-assert(!(((((x == 2) && (r3_0 == 0)) && (r3_1 == 1)) && (r1_3 == 2)) && (r3_3 == 0)));
+assert((((((x == 2) && (r3_0 == 0)) && (r3_1 == 1)) && (r1_3 == 2)) && (r3_3 == 0)));
 return 0;
 }
 

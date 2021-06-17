@@ -1,6 +1,7 @@
 package com.dat3m.dartagnan.program.arch.tso.event;
 
 import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.utils.recursion.RecursiveFunction;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.google.common.collect.ImmutableSet;
 import com.dat3m.dartagnan.program.Register;
@@ -62,7 +63,7 @@ public class Xchg extends MemEvent implements RegWriter, RegReaderData {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Override
-    public int compile(Arch target, int nextId, Event predecessor) {
+    protected RecursiveFunction<Integer> compileRecursive(Arch target, int nextId, Event predecessor, int depth) {
         if(target == Arch.TSO) {
             Register dummyReg = new Register(null, resultRegister.getThreadId(), resultRegister.getPrecision());
             RMWLoad load = new RMWLoad(dummyReg, address, null);
@@ -74,7 +75,7 @@ public class Xchg extends MemEvent implements RegWriter, RegReaderData {
             Local local = new Local(resultRegister, dummyReg);
 
             LinkedList<Event> events = new LinkedList<>(Arrays.asList(load, store, local));
-            return compileSequence(target, nextId, predecessor, events);
+            return compileSequenceRecursive(target, nextId, predecessor, events, depth + 1);
         }
         throw new RuntimeException("Compilation of xchg is not implemented for " + target);
     }

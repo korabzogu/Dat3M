@@ -1,7 +1,13 @@
 package com.dat3m.dartagnan.program;
 
+import com.dat3m.dartagnan.program.event.CondJump;
 import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.program.event.If;
+import com.dat3m.dartagnan.program.utils.preprocessing.BranchReordering;
+import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.program.utils.ThreadCache;
+import com.dat3m.dartagnan.program.utils.preprocessing.DeadCodeElimination;
+import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -15,7 +21,7 @@ public class Thread {
     private final Event entry;
     private Event exit;
 
-    private Map<String, Register> registers;
+    private final Map<String, Register> registers;
     private ThreadCache cache;
 
     public Thread(String name, int id, Event entry){
@@ -25,6 +31,7 @@ public class Thread {
         if(entry == null){
             throw new IllegalArgumentException("Thread entry event must be not null");
         }
+        entry.setThread(this);
         this.name = name;
         this.id = id;
         this.entry = entry;
@@ -46,10 +53,13 @@ public class Thread {
 
     public ThreadCache getCache(){
         if(cache == null){
-            List<Event> events = new ArrayList<>(entry.getSuccessors());
-            cache = new ThreadCache(events);
+            cache = new ThreadCache(entry.getSuccessors());
         }
         return cache;
+    }
+
+    public List<Event> getEvents() {
+        return getCache().getEvents(FilterBasic.get(EType.ANY));
     }
 
     public void clearCache(){
@@ -89,15 +99,17 @@ public Register addRegister(String name, int precision){
 
     public void append(Event event){
         exit.setSuccessor(event);
+        event.setThread(this);
         updateExit(event);
         cache = null;
     }
 
-    private void updateExit(Event event){
+    public void updateExit(Event event){
         exit = event;
         Event next = exit.getSuccessor();
         while(next != null){
             exit = next;
+            exit.setThread(this);
             next = next.getSuccessor();
         }
     }
@@ -116,6 +128,11 @@ public Register addRegister(String name, int precision){
             return false;
 
         return id == ((Thread) obj).id;
+    }
+
+    public void simplify() {
+        entry.simplify(null);
+        cache = null;
     }
 
     // Unrolling
@@ -143,11 +160,52 @@ public Register addRegister(String name, int precision){
         return nextId;
     }
 
-
     // Encoding
     // -----------------------------------------------------------------------------------------------------------------
 
     public BoolExpr encodeCF(Context ctx){
-        return entry.encodeCF(ctx, ctx.mkTrue());
+    	BoolExpr enc = ctx.mkTrue();
+    	Stack<If> ifStack = new Stack<>();
+    	BoolExpr guard = ctx.mkTrue();
+    	for(Event e : entry.getSuccessors()) {
+    		if(!ifStack.isEmpty()) {
+        		If lastIf = ifStack.peek();
+        		if(e.equals(lastIf.getMainBranchEvents().get(0))) {
+        			guard = ctx.mkAnd(lastIf.cf(), lastIf.getGuard().toZ3Bool(lastIf, ctx));
+        		}
+        		if(e.equals(lastIf.getElseBranchEvents().get(0))) {
+        			guard = ctx.mkAnd(lastIf.cf(), ctx.mkNot(lastIf.getGuard().toZ3Bool(lastIf, ctx)));
+        		}
+        		if(e.equals(lastIf.getSuccessor())) {
+        			guard = ctx.mkOr(lastIf.getExitMainBranch().getCfCond(), lastIf.getExitElseBranch().getCfCond());
+        			ifStack.pop();
+        		}    			
+    		}
+    		enc = ctx.mkAnd(enc, e.encodeCF(ctx, guard));
+    		guard = e.cf();
+    		if(e instanceof CondJump) {
+    			guard = ctx.mkAnd(guard, ctx.mkNot(((CondJump)e).getGuard().toZ3Bool(e, ctx)));
+    		}
+    		if(e instanceof If) {
+    			ifStack.add((If)e);
+    		}
+    	}
+        return enc;
     }
+
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // -------------------------------- Preprocessing -----------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+
+    public int eliminateDeadCode(int startId) {
+        new DeadCodeElimination(this).apply(startId);
+        clearCache();
+        return getExit().getOId() + 1;
+    }
+    
+    public void reorderBranches() {
+        new BranchReordering(this).apply();
+    }
+
 }

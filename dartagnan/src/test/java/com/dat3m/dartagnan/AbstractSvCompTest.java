@@ -4,6 +4,7 @@ import com.dat3m.dartagnan.parsers.program.ProgramParser;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.utils.Result;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.microsoft.z3.Context;
@@ -19,6 +20,7 @@ import java.io.IOException;
 
 import static com.dat3m.dartagnan.analysis.Base.runAnalysis;
 import static com.dat3m.dartagnan.analysis.Base.runAnalysisIncrementalSolver;
+import static com.dat3m.dartagnan.analysis.Base.runAnalysisAssumeSolver;
 import static com.dat3m.dartagnan.utils.Result.FAIL;
 import static com.dat3m.dartagnan.utils.Result.PASS;
 import static org.junit.Assert.*;
@@ -26,9 +28,11 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public abstract class AbstractSvCompTest {
 
-    private String path;
-    private Wmm wmm;
-    private Settings settings;
+	public static final int TIMEOUT = 180000;
+
+    private final String path;
+    private final Wmm wmm;
+    private final Settings settings;
     private Result expected;
 
     public AbstractSvCompTest(String path, Wmm wmm, Settings settings) {
@@ -37,38 +41,70 @@ public abstract class AbstractSvCompTest {
         this.settings = settings;
     }
 
-    @Test(timeout = 180000)
+    @Test(timeout = TIMEOUT)
     public void test() {
+        Context ctx = null;
         try {
         	String property = path.substring(0, path.lastIndexOf("-")) + ".yml";
-        	expected = readExptected(property);
+        	expected = readExpected(property);
             Program program = new ProgramParser().parse(new File(path));
-            Context ctx = new Context();
+            ctx = new Context();
             Solver solver = ctx.mkSolver();
-            assertTrue(runAnalysis(solver, ctx, program, wmm, Arch.NONE, settings).equals(expected));
-            ctx.close();
+            VerificationTask task = new VerificationTask(program, wmm, Arch.NONE, settings);
+            assertEquals(expected, runAnalysis(solver, ctx, task));
         } catch (IOException e){
             fail("Missing resource file");
+        } finally {
+            if(ctx != null) {
+                ctx.close();
+            }
         }
     }
 
-    @Test(timeout = 180000)
+    @Test(timeout = TIMEOUT)
     public void testIncremental() {
+        Context ctx = null;
         try {
         	String property = path.substring(0, path.lastIndexOf("-")) + ".yml";
-        	expected = readExptected(property);
+        	expected = readExpected(property);
             Program program = new ProgramParser().parse(new File(path));
-            Context ctx = new Context();
+            ctx = new Context();
             Solver solver = ctx.mkSolver();
-            assertTrue(runAnalysisIncrementalSolver(solver, ctx, program, wmm, Arch.NONE, settings).equals(expected));
-            ctx.close();
+            VerificationTask task = new VerificationTask(program, wmm, Arch.NONE, settings);
+            assertEquals(expected, runAnalysisIncrementalSolver(solver, ctx, task));
         } catch (IOException e){
             fail("Missing resource file");
+        }  finally {
+            if(ctx != null) {
+                ctx.close();
+            }
         }
     }
 
-	private Result readExptected(String property) {
-		try (BufferedReader br = new BufferedReader(new FileReader(new File(property)))) {
+    @Test(timeout = TIMEOUT)
+    public void testAssume() {
+        Context ctx = null;
+        try {
+            String property = path.substring(0, path.lastIndexOf("-")) + ".yml";
+            expected = readExpected(property);
+            Program program = new ProgramParser().parse(new File(path));
+            ctx = new Context();
+            Solver solver = ctx.mkSolver();
+            VerificationTask task = new VerificationTask(program, wmm, Arch.NONE, settings);
+            assertEquals(expected, runAnalysisAssumeSolver(solver, ctx, task));
+            solver.reset();
+        } catch (IOException e){
+            fail("Missing resource file");
+        }  finally {
+            if(ctx != null) {
+                ctx.close();
+            }
+        }
+    }
+
+
+	private Result readExpected(String property) {
+		try (BufferedReader br = new BufferedReader(new FileReader(property))) {
 		    while (!(br.readLine()).contains("unreach-call.prp")) {
 		       continue;
 		    }

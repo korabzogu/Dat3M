@@ -10,6 +10,8 @@ import com.dat3m.dartagnan.wmm.utils.TupleSet;
 
 import java.util.List;
 
+//TODO(TH/HP): Can we restrict to visible events?
+// What is even the use, if none of the edges are visible?
 public class RelCtrlDirect extends StaticRelation {
 
     public RelCtrlDirect(){
@@ -21,7 +23,9 @@ public class RelCtrlDirect extends StaticRelation {
         if(maxTupleSet == null){
             maxTupleSet = new TupleSet();
 
-            for(Thread thread : program.getThreads()){
+            //NOTE: If's (under Linux) have different notion of ctrl dependency than conditional jumps!
+            // In particular, transforming If's to CondJump's is invalid under Linux
+            for(Thread thread : task.getProgram().getThreads()){
                 for(Event e1 : thread.getCache().getEvents(FilterBasic.get(EType.CMP))){
                     for(Event e2 : ((If) e1).getMainBranchEvents()){
                         maxTupleSet.add(new Tuple(e1, e2));
@@ -31,6 +35,7 @@ public class RelCtrlDirect extends StaticRelation {
                     }
                 }
 
+                //Relates jumps with all later events
                 List<Event> condJumps = thread.getCache().getEvents(FilterBasic.get(EType.JUMP));
                 if(!condJumps.isEmpty()){
                     for(Event e2 : thread.getCache().getEvents(FilterBasic.get(EType.ANY))){
@@ -42,6 +47,7 @@ public class RelCtrlDirect extends StaticRelation {
                     }
                 }
             }
+            removeMutuallyExclusiveTuples(maxTupleSet);
         }
         return maxTupleSet;
     }

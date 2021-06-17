@@ -4,6 +4,8 @@ import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.utils.RegReaderData;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.recursion.RecursiveAction;
+import com.dat3m.dartagnan.utils.recursion.RecursiveFunction;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
@@ -25,6 +27,7 @@ public class While extends Event implements RegReaderData {
 		this.expr = expr;
 		this.exitEvent = exitEvent;
 		this.dataRegs = expr.getRegs();
+		this.thread = exitEvent.getThread();
 		addFilters(EType.ANY, EType.CMP, EType.REG_READER);
 	}
 
@@ -50,11 +53,15 @@ public class While extends Event implements RegReaderData {
     // Unrolling
     // -----------------------------------------------------------------------------------------------------------------
 
+
 	@Override
-	public void unroll(int bound, Event predecessor) {
+	public RecursiveAction unrollRecursive(int bound, Event predecessor, int depth) {
+		// Note: For ease of implementation, the depth-parameter is not used (i.e. the call stack is always cleared)
+		// But it can be incorporated if needed!
 		if(successor != null){
 			int currentBound = bound;
 
+			RecursiveAction action = RecursiveAction.done();
 			while(currentBound > 0){
 				Skip exitMainBranch = exitEvent.getCopy();
 				Skip exitElseBranch = exitEvent.getCopy();
@@ -67,17 +74,18 @@ public class While extends Event implements RegReaderData {
 				exitMainBranch.setSuccessor(exitElseBranch);
 				predecessor = exitElseBranch;
 
-				ifEvent.successor.unroll(currentBound, ifEvent);
+				int finalCurrentBound = currentBound;
+				action = action.then(() -> ifEvent.successor.unrollRecursive(finalCurrentBound, ifEvent, 0));
 				currentBound--;
 			}
 
 			predecessor.setSuccessor(exitEvent.getSuccessor());
 			if(predecessor.getSuccessor() != null){
-				predecessor.getSuccessor().unroll(bound, predecessor);
+				Event finalPredecessor = predecessor;
+				action = action.then(() -> finalPredecessor.getSuccessor().unrollRecursive(bound, finalPredecessor, 0));
 			}
-			return;
+			return action;
 		}
-
 		throw new RuntimeException("Malformed While event");
 	}
 
@@ -94,10 +102,10 @@ public class While extends Event implements RegReaderData {
     // Compilation
     // -----------------------------------------------------------------------------------------------------------------
 
-    @Override
-    public int compile(Arch target, int nextId, Event predecessor) {
-        throw new RuntimeException("Event 'while' must be unrolled before compilation");
-    }
+	@Override
+	protected RecursiveFunction<Integer> compileRecursive(Arch target, int nextId, Event predecessor, int depth) {
+		throw new RuntimeException("Event 'while' must be unrolled before compilation");
+	}
 
 
 	// Encoding

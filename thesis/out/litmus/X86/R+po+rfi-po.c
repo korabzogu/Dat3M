@@ -56,7 +56,7 @@ pthread_join(thread_0, NULL);
 pthread_join(thread_1, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
 int y = atomic_load_explicit(&mem1, memory_order_relaxed);
-assert(!((((EAX_1 == 2) && (((EBX_1 == 0) && ((y == 1) || (y == 2))) || ((EBX_1 == 1) && ((y == 2) || (y == 1))))) || (((EAX_1 == 1) && (EBX_1 == 1)) && (y == 1)))));
+assert(!!((((EAX_1 == 2) && (((EBX_1 == 0) && ((y == 1) || (y == 2))) || ((EBX_1 == 1) && ((y == 2) || (y == 1))))) || (((EAX_1 == 1) && (EBX_1 == 1)) && (y == 1)))));
 return 0;
 }
 

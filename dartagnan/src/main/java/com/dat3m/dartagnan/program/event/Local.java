@@ -2,6 +2,7 @@ package com.dat3m.dartagnan.program.event;
 
 import com.dat3m.dartagnan.program.memory.Address;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -19,13 +20,18 @@ public class Local extends Event implements RegWriter, RegReaderData {
 	private final ImmutableSet<Register> dataRegs;
 	private Expr regResultExpr;
 	
-	public Local(Register register, ExprInterface expr) {
+	public Local(Register register, ExprInterface expr, int cLine) {
+		super(cLine);
 		this.register = register;
 		this.expr = expr;
 		this.dataRegs = expr.getRegs();
 		addFilters(EType.ANY, EType.LOCAL, EType.REG_WRITER, EType.REG_READER);
 	}
 
+	public Local(Register register, ExprInterface expr) {
+		this(register, expr, -1);
+	}
+	
 	protected Local(Local other){
 		super(other);
 		this.register = other.register;
@@ -35,8 +41,8 @@ public class Local extends Event implements RegWriter, RegReaderData {
 	}
 
 	@Override
-	public void initialise(Context ctx) {
-		super.initialise(ctx);
+	public void initialise(VerificationTask task, Context ctx) {
+		super.initialise(task, ctx);
 		regResultExpr = register.toZ3IntResult(this, ctx);
 	}
 

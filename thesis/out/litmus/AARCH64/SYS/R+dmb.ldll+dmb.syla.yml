@@ -2,7 +2,7 @@ format_version: '2.0'
 input_files: 'R+dmb.ldll+dmb.syla.c'
 
 properties:
-  - property_file: /home/gwinrond/Thesis/Dat3M/unreach-call.prp
+  - property_file: /home/gwinrond/Abgabe/Dat3M/unreach-call.prp
     expected_verdict: true
 
 language: C

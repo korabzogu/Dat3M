@@ -7,12 +7,12 @@ import com.dat3m.dartagnan.program.arch.aarch64.utils.EType;
 import com.dat3m.dartagnan.utils.ResourceHelper;
 import com.dat3m.dartagnan.utils.Result;
 import com.dat3m.dartagnan.utils.Settings;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.filter.FilterIntersection;
 import com.dat3m.dartagnan.wmm.relation.EdgeTestHelper;
 import com.dat3m.dartagnan.wmm.utils.Flag;
-import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
 import com.microsoft.z3.*;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class ExclusivePairsTest {
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> data() throws IOException {
-        Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, false);
+        Settings settings = new Settings(Alias.CFIS, 1, 60);
         Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/aarch64.cat"));
         String path = ResourceHelper.TEST_RESOURCE_PATH + "wmm/relation/basic/rmw/aarch64/";
 
@@ -56,12 +56,12 @@ public class ExclusivePairsTest {
         return data;
     }
 
-    private String path;
-    private Wmm wmm;
-    private Result expectedState;
-    private boolean expectedFlag;
-    private int[] expectedEdges;
-    private Settings settings;
+    private final String path;
+    private final Wmm wmm;
+    private final Result expectedState;
+    private final boolean expectedFlag;
+    private final int[] expectedEdges;
+    private final Settings settings;
 
     public ExclusivePairsTest(String path, Wmm wmm, Settings settings, Result expectedState, boolean expectedFlag, int[] expectedEdges) {
         this.path = path;
@@ -78,9 +78,10 @@ public class ExclusivePairsTest {
             Context ctx = new Context();
             Solver solver = ctx.mkSolver(ctx.mkTactic(Settings.TACTIC));
             Program program = new ProgramParser().parse(new File(path));
+            VerificationTask task = new VerificationTask(program, wmm, program.getArch(), settings);
 
             // Test final state
-            assertEquals(expectedState, runAnalysis(solver, ctx, program, wmm, program.getArch(), settings));
+            assertEquals(expectedState, runAnalysis(solver, ctx, task));
 
             // Test edges
             if(expectedEdges != null){
@@ -108,14 +109,15 @@ public class ExclusivePairsTest {
             Solver solver = ctx.mkSolver(ctx.mkTactic(Settings.TACTIC));
             
             Program program = new ProgramParser().parse(new File(path));
+            VerificationTask task = new VerificationTask(program, wmm, program.getArch(), settings);
 
             // Add program without assertions
             program.unroll(1, 0);
             program.compile(program.getArch(), 0);
-            solver.add(program.encodeCF(ctx));
-            solver.add(program.encodeFinalRegisterValues(ctx));
-            solver.add(wmm.encode(program, ctx, settings));
-            solver.add(wmm.consistent(program, ctx));
+            task.initialiseEncoding(ctx);
+            solver.add(task.encodeProgram(ctx));
+            solver.add(task.encodeWmmRelations(ctx));
+            solver.add(task.encodeWmmConsistency(ctx));
 
             // Check flag
             solver.add(ctx.mkEq(Flag.ARM_UNPREDICTABLE_BEHAVIOUR.repr(ctx), ctx.mkTrue()));

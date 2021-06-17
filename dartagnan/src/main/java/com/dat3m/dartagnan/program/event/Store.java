@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.program.arch.pts.utils.Mo;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.Context;
@@ -14,13 +15,17 @@ public class Store extends MemEvent implements RegReaderData {
     protected final ExprInterface value;
     private final ImmutableSet<Register> dataRegs;
 
-    public Store(IExpr address, ExprInterface value, String mo){
-    	super(address, mo);
+    public Store(IExpr address, ExprInterface value, String mo, int cLine){
+    	super(address, mo, cLine);
         this.value = value;
         dataRegs = value.getRegs();
         addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.WRITE, EType.REG_READER);
     }
 
+    public Store(IExpr address, ExprInterface value, String mo){
+    	this(address, value, mo, -1);
+    }
+    
     protected Store(Store other){
         super(other);
         this.value = other.value;
@@ -28,8 +33,8 @@ public class Store extends MemEvent implements RegReaderData {
     }
 
     @Override
-    public void initialise(Context ctx) {
-        super.initialise(ctx);
+    public void initialise(VerificationTask task, Context ctx) {
+        super.initialise(task, ctx);
         memValueExpr = value.toZ3Int(this, ctx);
     }
 

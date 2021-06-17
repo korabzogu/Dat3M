@@ -173,6 +173,7 @@ public class Tool {
         }
 
         // write yml file
+        /*
         try{
             String verdict;
 
@@ -196,5 +197,6 @@ public class Tool {
             e.printStackTrace();
             System.exit(-1);
         }
+        */
     }
 }

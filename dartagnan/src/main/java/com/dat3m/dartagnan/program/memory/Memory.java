@@ -14,9 +14,9 @@ import java.util.*;
 
 public class Memory {
 
-    private BiMap<Location, Address> map;
-    private Map<String, Location> locationIndex;
-    private Map<String, List<Address>> arrays;
+    private final BiMap<Location, Address> map;
+    private final Map<String, Location> locationIndex;
+    private final Map<String, List<Address>> arrays;
 
     private int nextIndex = 0;
 
@@ -41,7 +41,14 @@ public class Memory {
                 e1 = e2;
             }
         }
-        enc = ctx.mkAnd(enc, ctx.mkAnd(getAllAddresses().stream().map(a -> a.toZ3Int(ctx).isBV() ? ctx.mkGt(ctx.mkBV2Int((BitVecExpr) a.toZ3Int(ctx), false), ctx.mkInt(0)) : ctx.mkGt((IntExpr)a.toZ3Int(ctx), ctx.mkInt(0))).toArray(BoolExpr[]::new)));
+
+        // Following SMACK, only address with constant values can have negative values.
+        for(Address add : getAllAddresses()) {
+        	if(!add.hasConstantValue()) {
+        		enc = ctx.mkAnd(enc, add.toZ3Int(ctx).isBV() ? ctx.mkGt(ctx.mkBV2Int((BitVecExpr) add.toZ3Int(ctx), false), ctx.mkInt(0)) : ctx.mkGt((IntExpr)add.toZ3Int(ctx), ctx.mkInt(0)));
+        	}
+        }
+        
         return ctx.mkAnd(enc, ctx.mkDistinct(getAllAddresses().stream().map(a -> a.toZ3Int(ctx).isBV() ? ctx.mkBV2Int((BitVecExpr) a.toZ3Int(ctx), false) : a.toZ3Int(ctx)).toArray(Expr[]::new)));
     }
 
@@ -73,5 +80,20 @@ public class Memory {
             result.addAll(array);
         }
         return ImmutableSet.copyOf(result);
+    }
+
+    public boolean isArrayPointer(Address address) {
+    	return arrays.values().stream()
+        	.collect(ArrayList::new, List::addAll, List::addAll).contains(address);
+    }
+    
+    public List<Address> getArrayfromPointer(Address address) {
+    	for(List<Address> array : arrays.values()) {
+    		if(array.contains(address)) {
+    			return array;
+    		}
+    	}
+    	// This method shall be called after isArrayPointer to avoid returning null
+		return null;
     }
 }

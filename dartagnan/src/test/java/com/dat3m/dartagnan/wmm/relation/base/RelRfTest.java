@@ -7,9 +7,9 @@ import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.utils.ResourceHelper;
 import com.dat3m.dartagnan.utils.Settings;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
-import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.Utils;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
 import com.microsoft.z3.BoolExpr;
@@ -29,9 +29,11 @@ import static org.junit.Assert.*;
 
 public class RelRfTest {
 
+	static int TIMEOUT = 60;
+	
     @Test
     public void testUninitializedMemory() throws IOException {
-        Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, false);
+        Settings settings = new Settings(Alias.CFIS, 1, TIMEOUT);
         settings.setFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY, true);
 
         String programPath = ResourceHelper.TEST_RESOURCE_PATH + "wmm/relation/basic/rf/";
@@ -44,16 +46,19 @@ public class RelRfTest {
 
         Wmm wmm = new ParserCat().parse(new File(wmmPath));
 
+        VerificationTask task1 = new VerificationTask(p1, wmm, p1.getArch(), settings);
+        VerificationTask task2 = new VerificationTask(p2, wmm, p2.getArch(), settings);
+
         settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, false);
-        assertTrue(runAnalysis(solver, ctx, p1, wmm, p1.getArch(), settings).equals(FAIL));
+        assertEquals(runAnalysis(solver, ctx, task1), FAIL);
         solver.reset();
-        assertTrue(runAnalysis(solver, ctx, p2, wmm, p2.getArch(), settings).equals(FAIL));
+        assertEquals(runAnalysis(solver, ctx, task2), FAIL);
         solver.reset();
 
         settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, true);
-        assertTrue(runAnalysis(solver, ctx, p1, wmm, p1.getArch(), settings).equals(FAIL));
+        assertEquals(runAnalysis(solver, ctx, task1), FAIL);
         solver.reset();
-        assertTrue(runAnalysis(solver, ctx, p2, wmm, p2.getArch(), settings).equals(FAIL));
+        assertEquals(runAnalysis(solver, ctx, task2), FAIL);
         ctx.close();
     }
 
@@ -65,7 +70,7 @@ public class RelRfTest {
         String wmmPath = ResourceHelper.CAT_RESOURCE_PATH + "cat/linux-kernel.cat";
         Wmm wmm = new ParserCat().parse(new File(wmmPath));
 
-        Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, false);
+        Settings settings = new Settings(Alias.CFIS, 1, TIMEOUT);
 
         settings.setFlag(Settings.FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY, false);
         settings.setFlag(Settings.FLAG_USE_SEQ_ENCODING_REL_RF, false);
@@ -87,24 +92,22 @@ public class RelRfTest {
     private void doTestDuplicatedEdges(String programPath, Wmm wmm, Settings settings) throws IOException {
 
     	Program program = new ProgramParser().parse(new File(programPath));
+    	VerificationTask task = new VerificationTask(program, wmm, program.getArch(), settings);
         program.unroll(settings.getBound(), 0);
         program.compile(program.getArch(), 0);
 
-        Map<Integer, Event> events = new HashMap<Integer, Event>(){{
+        Map<Integer, Event> events = new HashMap<>(){{
             put(2, null); put(5, null); put(8, null);
         }};
         extractEvents(program, events);
 
         Context ctx = new Context();
         Solver solver = ctx.mkSolver(ctx.mkTactic(Settings.TACTIC));
-        
-		solver.add(program.getAss().encode(ctx));
-        if(program.getAssFilter() != null){
-            solver.add(program.getAssFilter().encode(ctx));
-        }
-        solver.add(program.encodeCF(ctx));
-        solver.add(program.encodeFinalRegisterValues(ctx));
-        solver.add(wmm.encode(program, ctx, settings));
+
+        task.initialiseEncoding(ctx);
+        solver.add(task.encodeAssertions(ctx));
+        solver.add(task.encodeProgram(ctx));
+        solver.add(task.encodeWmmRelations(ctx));
         // Don't add constraint of MM, they can also forbid illegal edges
 
         assertEquals(Status.SATISFIABLE, solver.check());

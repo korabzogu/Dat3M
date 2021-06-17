@@ -6,9 +6,9 @@ import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.utils.ResourceHelper;
 import com.dat3m.dartagnan.utils.Result;
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.utils.Arch;
-import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.z3.Context;
@@ -37,7 +37,7 @@ public class DartagnanBranchTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> data() throws IOException {
         ImmutableMap<String, Result> expected = readExpectedResults();
-        Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, false);
+        Settings settings = new Settings(Alias.CFIS, 1, 60);
 
         Wmm linuxWmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/linux-kernel.cat"));
         Wmm aarch64Wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/aarch64.cat"));
@@ -71,10 +71,10 @@ public class DartagnanBranchTest {
         return builder.build();
     }
 
-    private String path;
-    private Wmm wmm;
-    private Settings settings;
-    private Result expected;
+    private final String path;
+    private final Wmm wmm;
+    private final Settings settings;
+    private final Result expected;
 
     public DartagnanBranchTest(String path, Result expected, Wmm wmm, Settings settings) {
         this.path = path;
@@ -89,7 +89,8 @@ public class DartagnanBranchTest {
             Program program = new ProgramParser().parse(new File(path));
             Context ctx = new Context();
             Solver solver = ctx.mkSolver(ctx.mkTactic(Settings.TACTIC));
-            assertEquals(expected, runAnalysis(solver, ctx, program, wmm, Arch.NONE, settings));
+            VerificationTask task = new VerificationTask(program, wmm, Arch.NONE, settings);
+            assertEquals(expected, runAnalysis(solver, ctx, task));
             ctx.close();
         } catch (IOException e){
             fail("Missing resource file");

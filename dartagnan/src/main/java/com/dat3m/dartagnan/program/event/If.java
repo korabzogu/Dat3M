@@ -1,6 +1,9 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.program.Thread;
 import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.utils.recursion.RecursiveAction;
+import com.dat3m.dartagnan.utils.recursion.RecursiveFunction;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.google.common.collect.ImmutableSet;
 import com.dat3m.dartagnan.expression.ExprInterface;
@@ -16,8 +19,8 @@ public class If extends Event implements RegReaderData {
     private final ExprInterface expr;
     private Event successorMain;
     private Event successorElse;
-    private Event exitMainBranch;
-    private Event exitElseBranch;
+    private final Event exitMainBranch;
+    private final Event exitElseBranch;
 
     private final ImmutableSet<Register> dataRegs;
 
@@ -34,8 +37,13 @@ public class If extends Event implements RegReaderData {
         this.expr = expr;
         this.exitMainBranch = exitMainBranch;
         this.exitElseBranch = exitElseBranch;
+        this.thread = exitElseBranch.getThread();
         this.dataRegs = expr.getRegs();
         addFilters(EType.ANY, EType.CMP, EType.REG_READER);
+    }
+
+    public ExprInterface getGuard(){
+        return expr;
     }
 
     public Event getExitMainBranch() {
@@ -44,6 +52,14 @@ public class If extends Event implements RegReaderData {
 
     public Event getExitElseBranch() {
         return exitElseBranch;
+    }
+
+    public Event getSuccessorMainBranch() {
+    	return successorMain;
+    }
+
+    public Event getSuccessorElseBranch() {
+    	return successorElse;
     }
 
     public List<Event> getMainBranchEvents() {
@@ -61,22 +77,34 @@ public class If extends Event implements RegReaderData {
     }
 
     @Override
+    public void setThread(Thread thread) {
+        super.setThread(thread);
+        if (successorMain != null)
+            successorMain.setThread(thread);
+        if (successorElse != null)
+            successorElse.setThread(thread);
+        if (successor != null)
+            successor.setThread(thread);
+    }
+
+    @Override
     public ImmutableSet<Register> getDataRegs() {
         return dataRegs;
     }
 
     @Override
-    public LinkedList<Event> getSuccessors() {
+    public RecursiveAction getSuccessorsRecursive(List<Event> list, int depth){
         if (cId > -1) {
-            LinkedList<Event> result = successorMain.getSuccessors();
-            result.addAll(successorElse.getSuccessors());
-            if (successor != null) {
-                result.addAll(successor.getSuccessors());
-            }
-            result.addFirst(this);
-            return result;
+            list.add(this);
+            //Note: For ease of implementation, we clear the call stack no matter the depth
+            return RecursiveAction
+                    .call(() -> successorMain.getSuccessorsRecursive(list, 0))
+                    .then(() -> successorElse.getSuccessorsRecursive(list, 0))
+                    .then(() -> successor != null
+                            ? successor.getSuccessorsRecursive(list, 0)
+                            : RecursiveAction.done());
         }
-        return super.getSuccessors();
+        return super.getSuccessorsRecursive(list, depth);
     }
 
     @Override
@@ -108,20 +136,22 @@ public class If extends Event implements RegReaderData {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Override
-    public int compile(Arch target, int nextId, Event predecessor) {
+    protected RecursiveFunction<Integer> compileRecursive(Arch target, int nextId, Event predecessor, int depth) {
         cId = nextId++;
         if (successor == null) {
             throw new RuntimeException("Malformed If event");
         }
-        nextId = successor.compile(target, nextId, this);
-
-        successorMain = successor;
-        successorElse = exitMainBranch.successor;
-        successor = exitElseBranch.successor;
-        exitMainBranch.successor = null;
-        exitElseBranch.successor = null;
-
-        return nextId;
+        int finalNextId = nextId;
+        return RecursiveFunction
+                .call(() -> successor.compileRecursive(target, finalNextId, predecessor, 0))
+                .then( retVal ->  {
+                    successorMain = successor;
+                    successorElse = exitMainBranch.successor;
+                    successor = exitElseBranch.successor;
+                    exitMainBranch.successor = null;
+                    exitElseBranch.successor = null;
+                    return RecursiveFunction.done(retVal);
+                });
     }
 
 
@@ -132,15 +162,7 @@ public class If extends Event implements RegReaderData {
     public BoolExpr encodeCF(Context ctx, BoolExpr cond) {
         if (cfEnc == null) {
             cfCond = (cfCond == null) ? cond : ctx.mkOr(cfCond, cond);
-            BoolExpr ifCond = expr.toZ3Bool(this, ctx);
             cfEnc = ctx.mkAnd(ctx.mkEq(cfVar, cfCond), encodeExec(ctx));
-
-            cfEnc = ctx.mkAnd(cfEnc, successorMain.encodeCF(ctx, ctx.mkAnd(ifCond, cfVar)));
-            cfEnc = ctx.mkAnd(cfEnc, successorElse.encodeCF(ctx, ctx.mkAnd(ctx.mkNot(ifCond), cfVar)));
-
-            if (successor != null) {
-                cfEnc = ctx.mkAnd(cfEnc, successor.encodeCF(ctx, ctx.mkOr(exitMainBranch.cfCond, exitElseBranch.cfCond)));
-            }
         }
         return cfEnc;
     }

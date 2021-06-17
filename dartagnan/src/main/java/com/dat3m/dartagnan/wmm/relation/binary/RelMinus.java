@@ -1,10 +1,9 @@
 package com.dat3m.dartagnan.wmm.relation.binary;
 
-import com.dat3m.dartagnan.utils.Settings;
+import com.dat3m.dartagnan.verification.VerificationTask;
+import com.google.common.collect.Sets;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.dat3m.dartagnan.program.Program;
-import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.wmm.utils.Utils;
 import com.dat3m.dartagnan.wmm.relation.Relation;
 import com.dat3m.dartagnan.wmm.utils.Tuple;
@@ -31,74 +30,72 @@ public class RelMinus extends BinaryRelation {
     }
 
     @Override
-    public void initialise(Program program, Context ctx, Settings settings){
-        super.initialise(program, ctx, settings);
+    public void initialise(VerificationTask task, Context ctx){
+        super.initialise(task, ctx);
         if(r2.getRecursiveGroupId() > 0){
             throw new RuntimeException("Relation " + r2.getName() + " cannot be recursive since it occurs in a set minus.");
         }
     }
 
     @Override
+    public TupleSet getMinTupleSet(){
+        if(minTupleSet == null){
+            minTupleSet = new TupleSet(Sets.difference(r1.getMinTupleSet(), r2.getMaxTupleSet()));
+        }
+        return minTupleSet;
+    }
+
+    @Override
     public TupleSet getMaxTupleSet(){
         if(maxTupleSet == null){
-            maxTupleSet = new TupleSet();
-            maxTupleSet.addAll(r1.getMaxTupleSet());
+            maxTupleSet = new TupleSet(Sets.difference(r1.getMaxTupleSet(), r2.getMinTupleSet()));
             r2.getMaxTupleSet();
         }
         return maxTupleSet;
     }
 
     @Override
+    public TupleSet getMinTupleSetRecursive(){
+        if(recursiveGroupId > 0 && minTupleSet != null){
+            minTupleSet.addAll(Sets.difference(r1.getMinTupleSetRecursive(), r2.getMaxTupleSetRecursive()));
+            return minTupleSet;
+        }
+        return getMinTupleSet();
+    }
+
+    @Override
     public TupleSet getMaxTupleSetRecursive(){
         if(recursiveGroupId > 0 && maxTupleSet != null){
-            maxTupleSet.addAll(r1.getMaxTupleSetRecursive());
+            maxTupleSet.addAll(Sets.difference(r1.getMaxTupleSetRecursive(), r2.getMinTupleSetRecursive()));
             return maxTupleSet;
         }
         return getMaxTupleSet();
     }
 
     @Override
-    protected BoolExpr encodeApprox() {
+    protected BoolExpr encodeApprox(Context ctx) {
         BoolExpr enc = ctx.mkTrue();
-        for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
 
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = ctx.mkNot(Utils.edge(r2.getName(), e1, e2, ctx));
+        TupleSet min = getMinTupleSet();
+        for(Tuple tuple : encodeTupleSet){
+            if (min.contains(tuple)) {
+                enc = ctx.mkAnd(enc, ctx.mkEq(this.getSMTVar(tuple, ctx), getExecPair(tuple, ctx)));
+                continue;
+            }
+
+            BoolExpr opt1 = r1.getSMTVar(tuple, ctx);
+            BoolExpr opt2 = ctx.mkNot(r2.getSMTVar(tuple, ctx));
             if (Relation.PostFixApprox) {
-                enc = ctx.mkAnd(enc, ctx.mkImplies(ctx.mkAnd(opt1, opt2), Utils.edge(this.getName(), e1, e2, ctx)));
+                enc = ctx.mkAnd(enc, ctx.mkImplies(ctx.mkAnd(opt1, opt2), this.getSMTVar(tuple, ctx)));
             } else {
-                enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
+                enc = ctx.mkAnd(enc, ctx.mkEq(this.getSMTVar(tuple, ctx), ctx.mkAnd(opt1, opt2)));
             }
         }
         return enc;
     }
 
     @Override
-    protected BoolExpr encodeIDL() {
-        if(recursiveGroupId == 0){
-            return encodeApprox();
-        }
-
-        BoolExpr enc = ctx.mkTrue();
-
-        for(Tuple tuple : encodeTupleSet){
-            Event e1 = tuple.getFirst();
-            Event e2 = tuple.getSecond();
-
-            BoolExpr opt1 = Utils.edge(r1.getName(), e1, e2, ctx);
-            BoolExpr opt2 = ctx.mkNot(Utils.edge(r2.getName(), e1, e2, ctx));
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
-
-            opt1 = ctx.mkAnd(opt1, ctx.mkGt(Utils.intCount(this.getName(), e1, e2, ctx), Utils.intCount(r1.getName(), e1, e2, ctx)));
-            enc = ctx.mkAnd(enc, ctx.mkEq(Utils.edge(this.getName(), e1, e2, ctx), ctx.mkAnd(opt1, opt2)));
-        }
-        return enc;
-    }
-
-    @Override
-    public BoolExpr encodeIteration(int groupId, int iteration){
+    public BoolExpr encodeIteration(int groupId, int iteration, Context ctx){
         BoolExpr enc = ctx.mkTrue();
 
         if((groupId & recursiveGroupId) > 0 && iteration > lastEncodedIteration){
@@ -125,7 +122,7 @@ public class RelMinus extends BinaryRelation {
                 }
 
                 if(recurse){
-                    enc = ctx.mkAnd(enc, r1.encodeIteration(groupId, childIteration));
+                    enc = ctx.mkAnd(enc, r1.encodeIteration(groupId, childIteration, ctx));
                 }
             }
         }

@@ -6,7 +6,8 @@ public class FunRet extends Event {
 
 	String funName;
 	
-	public FunRet(String funName) {
+	public FunRet(String funName, int cLine) {
+		super(cLine);
 		this.funName = funName;
         addFilters(EType.ANY);
 	}
@@ -18,7 +19,7 @@ public class FunRet extends Event {
 
     @Override
     public String toString(){
-        return "=== Returning from " + funName + "===";
+        return "=== Returning from " + funName + " ===";
     }
 
     public String getFunctionName() {

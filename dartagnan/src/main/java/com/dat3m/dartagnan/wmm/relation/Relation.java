@@ -1,15 +1,19 @@
 package com.dat3m.dartagnan.wmm.relation;
 
-import com.dat3m.dartagnan.utils.Settings;
-import com.dat3m.dartagnan.wmm.utils.Mode;
+import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.utils.dependable.Dependent;
+import com.dat3m.dartagnan.utils.equivalence.BranchEquivalence;
+import com.dat3m.dartagnan.verification.VerificationTask;
+import com.dat3m.dartagnan.wmm.relation.base.stat.StaticRelation;
+import com.dat3m.dartagnan.wmm.relation.binary.BinaryRelation;
+import com.dat3m.dartagnan.wmm.relation.unary.UnaryRelation;
+import com.google.common.collect.Sets;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.wmm.utils.Tuple;
 import com.dat3m.dartagnan.wmm.utils.TupleSet;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.dat3m.dartagnan.wmm.utils.Utils.edge;
 
@@ -17,19 +21,18 @@ import static com.dat3m.dartagnan.wmm.utils.Utils.edge;
  *
  * @author Florian Furbach
  */
-public abstract class Relation {
+public abstract class Relation implements Dependent<Relation> {
 
     public static boolean PostFixApprox = false;
 
     protected String name;
     protected String term;
 
-    protected Settings settings;
-    protected Program program;
-    protected Context ctx;
+    protected VerificationTask task;
 
     protected boolean isEncoded;
 
+    protected TupleSet minTupleSet;
     protected TupleSet maxTupleSet;
     protected TupleSet encodeTupleSet;
 
@@ -42,6 +45,11 @@ public abstract class Relation {
 
     public Relation(String name) {
         this.name = name;
+    }
+
+    @Override
+    public List<Relation> getDependencies() {
+        return Collections.emptyList();
     }
 
     public int getRecursiveGroupId(){
@@ -57,16 +65,24 @@ public abstract class Relation {
         return recursiveGroupId;
     }
 
-    public void initialise(Program program, Context ctx, Settings settings){
-        this.program = program;
-        this.ctx = ctx;
-        this.settings = settings;
+    public void initialise(VerificationTask task, Context ctx){
+        this.task = task;
+        this.minTupleSet = null;
         this.maxTupleSet = null;
         this.isEncoded = false;
         encodeTupleSet = new TupleSet();
     }
 
+    /*
+    TODO: getMinTupleSet is no yet used extensively
+     */
+    public abstract TupleSet getMinTupleSet();
+
     public abstract TupleSet getMaxTupleSet();
+
+    public TupleSet getMinTupleSetRecursive(){
+        return getMinTupleSet();
+    }
 
     public TupleSet getMaxTupleSetRecursive(){
         return getMaxTupleSet();
@@ -77,14 +93,11 @@ public abstract class Relation {
     }
 
     public void addEncodeTupleSet(TupleSet tuples){
-        encodeTupleSet.addAll(tuples);
+        encodeTupleSet.addAll(Sets.intersection(tuples, maxTupleSet));
     }
 
     public String getName() {
-        if(name != null){
-            return name;
-        }
-        return term;
+        return name != null ? name : term;
     }
 
     public Relation setName(String name){
@@ -124,51 +137,87 @@ public abstract class Relation {
         return getName().equals(((Relation)obj).getName());
     }
 
-    public BoolExpr encode() {
+    public BoolExpr encode(Context ctx) {
         if(isEncoded){
             return ctx.mkTrue();
         }
         isEncoded = true;
-        return doEncode();
+        return doEncode(ctx);
     }
 
-    protected BoolExpr encodeLFP() {
-        return encodeApprox();
-    }
+    protected abstract BoolExpr encodeApprox(Context ctx);
 
-    protected BoolExpr encodeIDL() {
-        return encodeApprox();
-    }
-
-    protected abstract BoolExpr encodeApprox();
-
-    public BoolExpr encodeIteration(int recGroupId, int iteration){
+    public BoolExpr encodeIteration(int recGroupId, int iteration, Context ctx){
         return ctx.mkTrue();
     }
 
-    protected BoolExpr doEncode(){
-        BoolExpr enc = encodeNegations();
+    protected BoolExpr doEncode(Context ctx){
         if(!encodeTupleSet.isEmpty() || forceDoEncode){
-            if(settings.getMode() == Mode.KLEENE) {
-                return ctx.mkAnd(enc, encodeLFP());
-            } else if(settings.getMode() == Mode.IDL) {
-                return ctx.mkAnd(enc, encodeIDL());
-            }
-            return ctx.mkAnd(enc, encodeApprox());
+        	return encodeApprox(ctx);
         }
-        return enc;
+        return ctx.mkTrue();
     }
 
-    private BoolExpr encodeNegations(){
-        BoolExpr enc = ctx.mkTrue();
-        if(!encodeTupleSet.isEmpty()){
-            Set<Tuple> negations = new HashSet<>(encodeTupleSet);
-            negations.removeAll(maxTupleSet);
-            for(Tuple tuple : negations){
-                enc = ctx.mkAnd(enc, ctx.mkNot(edge(this.getName(), tuple.getFirst(), tuple.getSecond(), ctx)));
-            }
-            encodeTupleSet.removeAll(negations);
+    public BoolExpr getSMTVar(Tuple edge, Context ctx) {
+        return !getMaxTupleSet().contains(edge) ? ctx.mkFalse() :
+                edge(getName(), edge.getFirst(), edge.getSecond(), ctx);
+    }
+
+    public final BoolExpr getSMTVar(Event e1, Event e2, Context ctx) {
+        return getSMTVar(new Tuple(e1, e2), ctx);
+    }
+
+    protected BoolExpr getExecPair(Event e1, Event e2, Context ctx) {
+        if (e1.getCId() > e2.getCId()) {
+            Event temp = e1;
+            e1 = e2;
+            e2 = temp;
         }
-        return enc;
+        BranchEquivalence eq = task.getBranchEquivalence();
+        if (eq.isImplied(e1, e2)) {
+            return e1.exec();
+        } else if (eq.isImplied(e2 ,e1)) {
+            return e2.exec();
+        }
+        return ctx.mkAnd(e1.exec(), e2.exec());
+    }
+
+    protected final BoolExpr getExecPair(Tuple t, Context ctx) {
+        return getExecPair(t.getFirst(), t.getSecond(), ctx);
+    }
+
+    protected void removeMutuallyExclusiveTuples(Set<Tuple> tupleSet) {
+        BranchEquivalence eq = task.getBranchEquivalence();
+        tupleSet.removeIf(t -> eq.areMutuallyExclusive(t.getFirst(), t.getSecond()));
+    }
+
+    // ========================== Utility methods =========================
+    
+    public boolean isStaticRelation() {
+    	return this instanceof StaticRelation;
+    }
+    
+    public boolean isUnaryRelation() {
+    	return this instanceof UnaryRelation;
+    }
+    
+    public boolean isBinaryRelation() {
+    	return this instanceof BinaryRelation;
+    }
+    
+    public boolean isRecursiveRelation() {
+    	return this instanceof RecursiveRelation;
+    }
+
+    public Relation getInner() {
+        return (isUnaryRelation() || isRecursiveRelation()) ? getDependencies().get(0) : null;
+    }
+    
+    public Relation getFirst() {
+    	return isBinaryRelation() ? getDependencies().get(0) : null;
+    }
+    
+    public Relation getSecond() {
+    	return isBinaryRelation() ? getDependencies().get(1) : null;
     }
 }

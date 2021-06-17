@@ -11,8 +11,7 @@ public class FilterUnion extends FilterAbstract {
 
     public static FilterUnion get(FilterAbstract filter1, FilterAbstract filter2){
         String key = mkName(filter1, filter2);
-        instances.putIfAbsent(key, new FilterUnion(filter1, filter2));
-        return instances.get(key);
+        return instances.computeIfAbsent(key, k -> new FilterUnion(filter1, filter2));
     }
 
     private static String mkName(FilterAbstract filter1, FilterAbstract filter2){
@@ -20,8 +19,8 @@ public class FilterUnion extends FilterAbstract {
                 + " | " + (filter2 instanceof FilterBasic ? filter2.toString() : "( " + filter2.toString() + " )");
     }
 
-    private FilterAbstract filter1;
-    private FilterAbstract filter2;
+    private final FilterAbstract filter1;
+    private final FilterAbstract filter2;
 
     private FilterUnion(FilterAbstract filter1, FilterAbstract filter2){
         this.filter1 = filter1;

@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.expression;
 
+import com.dat3m.dartagnan.expression.processing.ExpressionVisitor;
 import com.microsoft.z3.BitVecExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -12,6 +13,8 @@ import static com.dat3m.dartagnan.expression.INonDetTypes.UINT;
 import static com.dat3m.dartagnan.expression.INonDetTypes.ULONG;
 import static com.dat3m.dartagnan.expression.INonDetTypes.USHORT;
 
+import java.math.BigInteger;
+
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.Event;
 import com.google.common.collect.ImmutableSet;
@@ -20,7 +23,7 @@ import com.google.common.primitives.UnsignedLong;
 
 public class INonDet extends IExpr implements ExprInterface {
 	
-	private INonDetTypes type;
+	private final INonDetTypes type;
 	private final int precision;
 	
 	public INonDet(INonDetTypes type, int precision) {
@@ -50,13 +53,18 @@ public class INonDet extends IExpr implements ExprInterface {
 	}
 
 	@Override
-	public int getIntValue(Event e, Model model, Context ctx) {
-		return Integer.parseInt(model.getConstInterp(toZ3Int(e, ctx)).toString());
+	public BigInteger getIntValue(Event e, Model model, Context ctx) {
+		return new BigInteger(model.getConstInterp(toZ3Int(e, ctx)).toString());
 	}
 
 	@Override
 	public ImmutableSet<Register> getRegs() {
 		return ImmutableSet.of();
+	}
+
+	@Override
+	public <T> T visit(ExpressionVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 	
 	@Override
@@ -84,22 +92,19 @@ public class INonDet extends IExpr implements ExprInterface {
 
 	public long getMin() {
         switch(type){
-        case INT:
-            return Integer.MIN_VALUE;
         case UINT:
-            return UnsignedInteger.ZERO.longValue();
-		case LONG:
-            return Long.MIN_VALUE;
 		case ULONG:
-            return UnsignedLong.ZERO.longValue();
-		case SHORT:
-            return Short.MIN_VALUE;
 		case USHORT:
-            return 0;
-		case CHAR:
-            return -128;
 		case UCHAR:
             return 0;
+        case INT:
+            return Integer.MIN_VALUE;
+		case LONG:
+            return Long.MIN_VALUE;
+		case SHORT:
+            return Short.MIN_VALUE;
+		case CHAR:
+            return -128;
         }
         throw new UnsupportedOperationException("getMin() not supported for " + this);
 	}

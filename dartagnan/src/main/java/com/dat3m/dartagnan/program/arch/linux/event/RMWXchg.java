@@ -11,6 +11,7 @@ import com.dat3m.dartagnan.program.event.rmw.RMWLoad;
 import com.dat3m.dartagnan.program.event.rmw.RMWStore;
 import com.dat3m.dartagnan.program.event.utils.RegReaderData;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
+import com.dat3m.dartagnan.utils.recursion.RecursiveFunction;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 
 import java.util.Arrays;
@@ -44,7 +45,7 @@ public class RMWXchg extends RMWAbstract implements RegWriter, RegReaderData {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Override
-    public int compile(Arch target, int nextId, Event predecessor) {
+    public RecursiveFunction<Integer> compileRecursive(Arch target, int nextId, Event predecessor, int depth) {
         if(target == Arch.NONE) {
             Register dummy = resultRegister;
             if(resultRegister == value){
@@ -62,9 +63,9 @@ public class RMWXchg extends RMWAbstract implements RegWriter, RegReaderData {
                 events.addFirst(new Fence("Mb"));
                 events.addLast(new Fence("Mb"));
             }
-            return compileSequence(target, nextId, predecessor, events);
+            return compileSequenceRecursive(target, nextId, predecessor, events, depth + 1);
         }
-        return super.compile(target, nextId, predecessor);
+        return super.compileRecursive(target, nextId, predecessor, depth + 1);
     }
 
     @Override

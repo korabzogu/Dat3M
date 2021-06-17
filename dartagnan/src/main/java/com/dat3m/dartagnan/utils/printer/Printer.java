@@ -17,8 +17,8 @@ public class Printer {
     private boolean showInitThreads = false;
     private IDType idType = IDType.AUTO;
 
-    private String paddingBase = "      ";
-    private String paddingStep = "    ";
+    private final String paddingBase = "      ";
+    private final String paddingStep = "    ";
     private int paddingSize;
 
     public String print(Program program){
@@ -71,7 +71,12 @@ public class Printer {
         Stack<Event> elseStack = new Stack<>();
         Stack<Event> endStack = new Stack<>();
 
-        result.append("\nthread_").append(thread.getName()).append("\n");
+        try {
+            Integer.parseInt(thread.getName());
+            result.append("\nthread_").append(thread.getName()).append("\n");
+        } catch (Exception e) {
+            result.append("\n").append(thread.getName()).append("\n");        	
+        }
         for(Event e : thread.getCache().getEvents(FilterBasic.get(EType.ANY))){
 
             appendEvent(e);

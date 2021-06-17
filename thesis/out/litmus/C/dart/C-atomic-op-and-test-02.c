@@ -37,7 +37,7 @@ pthread_t thread_0;
 pthread_create(&thread_0, NULL, &func_0, NULL);
 pthread_join(thread_0, NULL);
 int x = atomic_load_explicit(&mem0, memory_order_relaxed);
-assert(!(((r0_0 == 0) && (x == 1))));
+assert(!!(((r0_0 == 0) && (x == 1))));
 return 0;
 }
 

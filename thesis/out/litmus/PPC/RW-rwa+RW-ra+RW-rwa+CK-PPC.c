@@ -148,7 +148,7 @@ int a = atomic_load_explicit(&mem0, memory_order_relaxed);
 int b = atomic_load_explicit(&mem1, memory_order_relaxed);
 int c = atomic_load_explicit(&mem2, memory_order_relaxed);
 int d = atomic_load_explicit(&mem3, memory_order_relaxed);
-assert(!((((r10_1 == 1) && (r10_2 == 1)) && (r11_3 == 0)) && (r10_3 == 1)));
+assert(((((r10_1 == 1) && (r10_2 == 1)) && (r11_3 == 0)) && (r10_3 == 1)));
 return 0;
 }
 

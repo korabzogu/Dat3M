@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.program.event;
 
+import com.dat3m.dartagnan.verification.VerificationTask;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.microsoft.z3.Context;
@@ -17,7 +18,8 @@ public abstract class MemEvent extends Event {
     protected Expr memValueExpr;
     private ImmutableSet<Address> maxAddressSet;
 
-    public MemEvent(IExpr address, String mo){
+    public MemEvent(IExpr address, String mo, int cLine){
+    	super(cLine);
         this.address = address;
         this.mo = mo;
         if(mo != null){
@@ -25,6 +27,10 @@ public abstract class MemEvent extends Event {
         }
     }
 
+    public MemEvent(IExpr address, String mo){
+    	this(address, mo, -1);
+    }
+    
     protected MemEvent(MemEvent other){
         super(other);
         this.address = other.address;
@@ -35,8 +41,8 @@ public abstract class MemEvent extends Event {
     }
 
     @Override
-    public void initialise(Context ctx) {
-        super.initialise(ctx);
+    public void initialise(VerificationTask task, Context ctx) {
+        super.initialise(task, ctx);
         memAddressExpr = address.toZ3Int(this, ctx);
     }
 
@@ -78,7 +84,7 @@ public abstract class MemEvent extends Event {
     }
     
     public boolean canRace() {
-    	return mo == null || mo == "NA";
+    	return mo == null || mo.equals("NA");
     }
 
 }

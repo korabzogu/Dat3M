@@ -1,10 +1,14 @@
 package com.dat3m.dartagnan.program.memory;
 
+import com.dat3m.dartagnan.expression.processing.ExpressionVisitor;
 import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Model;
+
+import java.math.BigInteger;
+
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.program.Register;
@@ -13,11 +17,24 @@ import com.dat3m.dartagnan.program.event.Event;
 public class Address extends IConst implements ExprInterface {
 
     private final int index;
+    private BigInteger constantValue;
 
     Address(int index, int precision){
-        super(index, precision);
+        super(BigInteger.valueOf(index), precision);
         this.index = index;
     }
+
+    public boolean hasConstantValue() {
+     	return this.constantValue != null;
+     }
+
+    public BigInteger getConstantValue() {
+     	return this.constantValue;
+     }
+
+    public void setConstantValue(BigInteger value) {
+     	this.constantValue = value;
+     }
 
     @Override
     public ImmutableSet<Register> getRegs(){
@@ -66,13 +83,21 @@ public class Address extends IConst implements ExprInterface {
 
     @Override
     public Expr toZ3Int(Context ctx){
+    	if(constantValue != null) {
+    		return precision > 0 ? ctx.mkBV(constantValue.toString(), precision) : ctx.mkInt(constantValue.toString());
+    	}
 		return precision > 0 ? ctx.mkBVConst("memory_" + index, precision) : ctx.mkIntConst("memory_" + index);
     }
 
     @Override
-    public int getIntValue(Event e, Model model, Context ctx){
-        return Integer.parseInt(model.getConstInterp(toZ3Int(ctx)).toString());
-    }    
+    public BigInteger getIntValue(Event e, Model model, Context ctx){
+        return new BigInteger(model.getConstInterp(toZ3Int(ctx)).toString());
+    }
+
+    @Override
+    public <T> T visit(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
     @Override
     public String AsmToC() {
