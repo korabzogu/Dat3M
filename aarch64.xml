@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.18//EN" "https://www.sosy-lab.org/benchexec/benchmark-1.18.dtd">
+<benchmark tool="dartagnan" timelimit="1 min" hardtimelimit="1 min" memlimit="5 GB" cpuCores="1">
+
+<resultfiles>**.graphml</resultfiles>
+      
+<rundefinition name="SV-COMP-benchmarks-thesis">
+  <tasks name="X86">
+    <includesfile>thesis/out/litmus/aarch64.set</includesfile>
+    <propertyfile>unreach-call.prp</propertyfile>
+    <option name="cat/aarch64.cat"></option>
+  </tasks> 
+
+  </rundefinition>
+</benchmark>

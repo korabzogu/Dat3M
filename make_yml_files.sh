@@ -29,7 +29,7 @@ do
 			fi
 		fi
 
-		echo -e "format_version: '2.0'\ninput_files: '$cbase'\n\nproperties:\n  - property_file: /home/gwinrond/Abgabe/Dat3M/unreach-call.prp\n    expected_verdict: $verdict\n\nlanguage: C\ndata_model: ILP32" > $yml
+		echo -e "format_version: '2.0'\ninput_files: '$cbase'\n\nproperties:\n  - property_file: $(pwd)/unreach-call.prp\n    expected_verdict: $verdict\n\nlanguage: C\ndata_model: ILP32" > $yml
 	else
 		echo "$cfile does not exist"
 	fi 
