@@ -150,11 +150,11 @@ public class CFileWriter {
             }
 
             String assertString = p.getAss().AsmToC();
-            if (p.getAss().getType() == AbstractAssert.ASSERT_TYPE_FORALL) {
+            if (p.getAss().getType() == AbstractAssert.ASSERT_TYPE_NOT_EXISTS) {
                 // invert assertion
                 assertString = "!" + assertString;
             }
-            fw.write("assert(" + assertString + ")" + ";\n");
+            fw.write("assert(!" + assertString + ")" + ";\n");
 
             // END MAIN
             fw.write("return 0;\n");

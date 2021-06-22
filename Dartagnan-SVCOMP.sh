@@ -19,6 +19,6 @@ else
     #else
     #    FLAGS+=" -cat cat/svcomp.cat"
     #fi
-    echo -cat $1 -property $2 -i $3 -t $4
-    java -jar svcomp/target/svcomp-$VERSION-jar-with-dependencies.jar -cat $1 -property $2 -i $3 -t arm
+    echo java -jar svcomp/target/svcomp-$VERSION-jar-with-dependencies.jar -cat $1 -t $2 -property $3 -i $4
+    java -jar svcomp/target/svcomp-$VERSION-jar-with-dependencies.jar -o O0 -cat $1 -t $2 -property $3 -i $4
 fi

@@ -6,10 +6,10 @@
       
 <rundefinition name="SV-COMP-benchmarks-thesis">
   <tasks name="X86">
-    <option>cat/tso.cat</option>
-    <option>tso</option>
+    <option>cat/power.cat</option>
+    <option>power</option>
     <propertyfile>unreach-call.prp</propertyfile>
-    <includesfile>thesis/out/litmus/x86.set</includesfile>
+    <includesfile>thesis/out/litmus/ppc.set</includesfile>
   </tasks> 
 
   </rundefinition>
